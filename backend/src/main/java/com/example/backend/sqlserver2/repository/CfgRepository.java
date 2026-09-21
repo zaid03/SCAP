@@ -14,4 +14,10 @@ public interface CfgRepository extends JpaRepository<Cfg, CfgId> {
     
     //method to ejercicio in Cfg table by entidad and CFGEST
     List<Cfg> findEjeByENTAndCFGEST(Integer ENT, Integer CFGEST);
+
+    //to fetch all ejes
+    List<Cfg> findByENT(@Param("ENT") Integer ENT);
+    
+    //to search in eje needed for adding facturas
+    List<Cfg> findByENTAndEJE(@Param("ENT") Integer ENT, @Param("EJE") String EJE);
 }
