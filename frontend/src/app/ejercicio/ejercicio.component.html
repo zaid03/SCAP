@@ -1,0 +1,86 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de ejercicios</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="Ejercicio" 
+                            (input)="setInputToLimit($event)"
+                            [(ngModel)]="searchTerm"
+                        >
+                    </div>
+                    <div class="btns widthy">
+                        <button class="purple-btn" (click)="search()">Buscar</button>
+                        <button class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="pdfDownload()">Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+        <div class="main-list">
+            <h1 class="successBtn">{{ejercicioSuccess}}</h1>
+            <h1 class="errorBtn">{{ejercicioError}}</h1>
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('eje')">
+                            Ejercicio
+                            <span class="sort-indicator" *ngIf="sortField === 'eje'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cfgest')">
+                            Estado
+                            <span class="sort-indicator" *ngIf="sortField === 'cfgest'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedEjercicios">
+                        <td>{{p.eje}}</td>
+                        <td>{{getstatus(p.cfgest)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,188 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de personas por servicios</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <label>Servicio</label>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="servicios" 
+                            [(ngModel)]="servicio"
+                            (ngModelChange)="servicio = $event"
+                            (input)="serviceUpper($event)"
+                        >
+                        <label>Persona</label>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="persona" 
+                            [(ngModel)]="persona"
+                        >
+                        <label>Centro gestor</label>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="centro gestor"
+                            [(ngModel)]="centroGestor"
+                            (ngModelChange)="centroGestor = $event"
+                            (input)="handleSearchInput($event)"
+                        >
+                        <label for="">Perfil de servicio</label>
+                        <select [(ngModel)]="perfilServicio">
+                            <option value="almacen">Almacén / Farmacia</option>
+                            <option value="comprador">Comprador</option>
+                            <option value="contabilidad">Contabilidad</option>
+                            <option value="peticionario">Centro peticionario</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    <div class="btns Widthy">
+                        <button class="purple-btn" (click)="search()">Buscar</button>
+                        <button class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="toPrint()">Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+        <div class="main-list">
+            <h1 class="successBtn">{{ personasServicesSuccess }}</h1>
+            <h1 class="errorBtn">{{ personasServicesError }}</h1>
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('percod')">
+                            Cód. Persona
+                            <span class="sort-indicator" *ngIf="sortField === 'percod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('pernom')">
+                            Nombre
+                            <span class="sort-indicator" *ngIf="sortField === 'pernom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depcod')">
+                            Cód. Servicio
+                            <span class="sort-indicator" *ngIf="sortField === 'depcod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depdes')">
+                            Servicio
+                            <span class="sort-indicator" *ngIf="sortField === 'depdes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depalm')">
+                            Almacén / Farmacia
+                            <span class="sort-indicator" *ngIf="sortField === 'depalm'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depcom')">
+                            Comprador
+                            <span class="sort-indicator" *ngIf="sortField === 'depcom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depint')">
+                            Contable
+                            <span class="sort-indicator" *ngIf="sortField === 'depint'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgecod')">
+                            Cód. C.G.
+                            <span class="sort-indicator" *ngIf="sortField === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgedes')">
+                            Centro Gestor
+                            <span class="sort-indicator" *ngIf="sortField === 'cgedes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedServices">
+                        <td>{{p.percod}}</td>
+                        <td>{{p.per?.pernom}}</td>
+                        <td>{{p.depcod}}</td>
+                        <td>{{p.dep?.depdes}}</td>
+                        <td>
+                            <input 
+                                type="checkbox"
+                                [checked]="p.dep?.depalm === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >  
+                        </td>
+                        <td>
+                            <input 
+                                type="checkbox"
+                                [checked]="p.dep?.depcom === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >
+                        </td>
+                        <td>
+                            <input
+                                type="checkbox"
+                                [checked]="p.dep?.depint === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >   
+                        </td>
+                        <td>{{p.dep?.cge?.cgecod}}</td>
+                        <td>{{p.dep?.cge?.cgedes}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls" *ngIf="isNotSearch">
+                <button (click)="prevPage()">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [value]="pageLoad"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{pageNum}}</span>
+                <button (click)="nextPage()">Siguiente</button>
+            </div>
+            <div class="pagination-controls" *ngIf="inSearch">
+                <button (click)="prevPageSearch()" [disabled]="pageSearch === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="pageSearch + 1"
+                (change)="goToPageSearch($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPageSearch()" [disabled]="pageSearch + 1 >= totalPages">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>

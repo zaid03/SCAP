@@ -1,0 +1,212 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Mantenimiento de tipos de unidades</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="tipo de unidad" 
+                            [(ngModel)]="searchTerm"
+                        >
+                    </div>
+                    <div class="btns">
+                        <button class="purple-btn" (click)="search()">Buscar</button>
+                        <button class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="pdfDownload()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="openAddUnidad()">Añadir</button>
+                
+                </div>
+            </div>
+        </div>
+        <div class="main-list">
+            <h1 class="successBtn">{{unidadesSuccess}}</h1>
+            <h1 class="errorBtn">{{unidadesError}}</h1>
+             <div *ngIf="isLoadingUnidades" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('auncod')">
+                            Código
+                            <span class="sort-indicator" *ngIf="sortField === 'auncod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('aundes')">
+                            Descripción
+                            <span class="sort-indicator" *ngIf="sortField === 'aundes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedUnidades">
+                        <td
+                            (click)="openDetail(p)"
+                            style="cursor: pointer;"
+                        >{{p.auncod}}</td>
+                        <td>{{p.aundes}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="unidadDetail" (click)="closeDetailsSure()"></div>
+            <div class="display">
+                <div class="modal" *ngIf="unidadDetail">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles de tipo de unidad</h3>
+                        </div>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+		                    [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="closeDetails()"
+                        >✖</button>
+                    </div>
+                    <h1 class="errorBtn">{{unidadDetailError}}</h1>
+                    <h1 class="successBtn">{{unidadDetailSuccess}}</h1>
+                    <div *ngIf="isUpdatingUnidad" class="loading-message">
+                        <div class="spinner"></div>
+                        <span>actualizando</span>
+                    </div>
+                    <div class="detail-container">
+                        <div class="chunk">
+                            <div class="left center">
+                                <p class="p-style">código</p>
+                            </div>
+                            <div class="right">
+                                <div class="on-two">
+                                    <h1 class="h1-style">{{selectedUnidad.auncod || '#'}}</h1>
+                                    <p class="p-style">Descripción*</p>
+                                    <textarea 
+                                        class="textArea-style tallText" 
+                                        [(ngModel)]="tempUnidad.aundes"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                    ></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="btns">
+                        <button 
+                            class="red-btn" 
+                            *ngIf="isUpdate" 
+                            (click)="cancelar()"
+                        >Cancelar</button>
+                        <button 
+                            class="purple-btn"
+                            [disabled]="isUpdate" 
+                            *ngIf="!isUpdate" 
+                            (click)="modificar()"
+                        >Modificar</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="!isUpdate" 
+	                        *ngIf="isUpdate" 
+                            (click)="isUpdateAllowed()"
+                        >Guardar</button>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+	                        [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="openDelete()"
+                        >Borrar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showDeleteConfirm" (click)="closeDelete()"></div>
+<div class="delete-confirm-modal" *ngIf="showDeleteConfirm">
+    <h3>¿Seguro que quieres eliminar este tipo de unidad?</h3>
+    <div *ngIf="selectedUnidad">
+        <div *ngIf="isDeletingUnidad" class="loading-message">
+            <div class="spinner"></div>
+            <span>borrando</span>
+        </div>
+    </div>
+    <div class="items-to-delete">
+        <p class="p-style">{{selectedUnidad.aundes}}</p>
+    </div>
+    <h1 class="errorBtn">{{deleteMessageError}}</h1>
+    <button class="red-btn" (click)="confirmDelete()">-</button>
+    <button class="purple-btn margin" (click)="closeDelete()">✖</button>
+</div>  
+
+<div class="modal-backdrop" *ngIf="addUnidadGrid" (click)="closeAddUnidad()"></div>
+<div class="display">
+    <div class="modal" *ngIf="addUnidadGrid">
+        <div class="btns">
+            <div class="title title-fix">
+                <p class="p-style">Añadir tipo de unidad</p>
+            </div>
+            <button class="purple-btn" (click)="confirmAdd(codigo.value, desc.value)">+ Cargar</button>
+            <button class="red-btn" (click)="closeAddUnidad()">✖</button>
+        </div>
+        <h1 class="errorBtn">{{addUnidadError}}</h1>
+        <div *ngIf="isAddingUnidad" class="loading-message">
+            <div class="spinner"></div>
+            <span>añadiendo</span>
+        </div>
+        <div class="detail-container">
+            <div class="chunk">
+                <div class="left center">
+                    <p class="p-style">código</p>
+                </div>
+                <div class="right">
+                    <div class="on-two">
+                        <textarea 
+                            class="textArea-style smallText" 
+                            (input)="setInputToUpper($event)"
+                            #codigo
+                        ></textarea>
+                        <p class="p-style">Descripción*</p>
+                        <textarea 
+                            class="textArea-style tallText" 
+                            #desc
+                        ></textarea>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

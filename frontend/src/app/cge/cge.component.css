@@ -1,0 +1,36 @@
+/* search */
+.search-container {gap: 20px;}
+/* search */
+.main-list { width: 90%; }
+/* main table */
+.main-table thead th:nth-child(2) { width: 30%; }
+/* main table */
+/* detail grid */
+.detail-container { display: flex; gap: 5px;}
+.chunk{ width: 50%; display: flex; padding: 2px; gap: 10px;}
+.left { width: 20%; display: flex; flex-direction: column; gap: 20px;}
+.right { width: 80%; display: flex; flex-direction: column; gap: 15px;} 
+.on-two { display: flex; gap: 10px; align-items: center; } 
+.mediumText { width: 120px; max-width: 200px;}
+.smallText { width: 60px; max-width: 120px;}
+.tallText { width: 220px; max-width: 300px;}
+.margin { margin-top: 5px;}
+.on-two input[type="radio"],
+.cell-content input[type="radio"] { margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none; }
+.on-two input[type="radio"]:focus,
+.cell-content input[type="radio"]:focus { outline: none; }
+.long-text { width: 50%; display: flex; flex-direction: column; gap: 10px; }
+.long-text textarea { width: 80%; max-width: 95%; height: 80px;}
+.marginBtns {margin-top: 10px;}
+/* detail grid */
+/* add grid */
+.add-confirm-modal { top: 15%; width: 45%;}
+.width {width: 30%; text-align: left;}
+.more { gap: 20px; width: 70%;}
+.cell-content {display: flex; gap: 10px;}
+.title{width: 80%;}
+.cgeDetail {text-align: left;}
+/* add grid */
+@media (max-width: 1299px), (min-width: 1350px) {
+    .delete-confirm-modal {top: 40%;}
+}

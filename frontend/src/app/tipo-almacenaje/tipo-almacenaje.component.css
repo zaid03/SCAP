@@ -1,0 +1,30 @@
+/* search */
+.title-area {width: 28%;}
+.margin-title {width: 100%; text-align: right;}
+.search-holder {width: 71%; }
+.search-container {width: 50%; justify-content: flex-start;}
+.search-form {width: 45%;}
+.search-container .btns {width: 25%;}
+/* search */
+/* main table */
+.main-list {width: 50%;}
+.main-list thead th:first-child { width: 25%; }
+/* main table */
+/* detail grid */
+.modal{ width: 65%;}
+.detail-container { display: flex;flex-direction: column; gap: 5px; padding: 1%;}
+.chunk{ display: flex; padding: 2px; gap: 10px;}
+.left { width: 5%; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.right { width: 95%; display: flex; flex-direction: column; gap: 10px;}
+.on-two { display: flex; gap: 10px; align-items: center;} 
+.tallText { width: 450px; max-width: 625px;}
+.smallText { width: 50px; max-width: 80px;}
+.delete-confirm-modal {top: 220px;}
+.margin { margin-left: 10px;}
+/* detail grid */
+/* add grid */
+.coste-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 16px; box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18), 0 1.5px 6px rgba(44,62,80,0.08); padding: 25px 30px; min-width: 500px; width: 40%; min-height: 100px; z-index: 3000; display: flex; flex-direction: column; align-items: center; }
+.add-container {width: 100%; display: flex; gap: 10px; align-items: center;}
+.coste-modal .title{width: 70%;}
+.areaWidth {width: 80%; max-width: 85%;}
+/* add grid */

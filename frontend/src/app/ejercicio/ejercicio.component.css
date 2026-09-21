@@ -1,0 +1,25 @@
+/* search */
+.search-container { width: 30%;}
+.search-form { width: 75%;}
+.title-area {justify-content: flex-end;}
+.widthy {width: 35%;}
+/* search */
+/* main table */
+.main-list {width: 50%;}
+.main-list thead th:first-child { width: 25%; }
+/* main table */
+/* media querries */
+@media screen and (min-width: 1450px) and (max-width: 1600px) {
+    .search-form {width: 60%;}
+}
+@media screen and (min-width: 1801px) and (max-width: 1900px) {
+    .search-form {width: 45%;}
+}
+@media screen and (min-width: 1901px) and (max-width: 2099px) {
+    .search-form {width: 40%;}
+}
+@media screen and (min-width: 2100px) {
+    .search-form {width: 35%;}
+    .Widthy {width: 8%;}
+}
+/* media querries */

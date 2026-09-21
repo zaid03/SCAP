@@ -1,0 +1,53 @@
+/* search container and inputs */
+.margin-title {text-align: right; width: 100%;}
+.title-menu {width: 99%;}
+.title-area {width: 23%;}
+.search-container { gap: 20px; }
+.search-form { gap: 20px; }
+.more-search-options { display: flex; align-items: center; gap: 10px; }
+.more-search-options select,
+.more-search-options input[type="date"],
+.right-search input[type="text"],
+.right-search input[type="date"],
+.search-chunk input[type="date"],
+.cont-date input[type="date"] { padding: 4px 6px; border-radius: 20px; border: 1px solid #bbb; color: #25176b; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; outline: none; box-shadow: 0 1px 4px rgba(56,36,155,0.04); }
+.more-search-options select:focus,
+.more-search-options input[type="date"]:focus { outline: none; }
+.successBtn { margin-top: 5px; }
+/* search container and inputs */
+/* table style */
+.ft tbody td:nth-child(6),
+.detail-grid .alb tbody td:nth-child(4),
+.app tbody td:nth-child(3),
+.desc tbody td:nth-child(5),
+.desc tbody td:nth-child(7) { text-align: right; }
+.Taab {margin-top: 10px;}
+/* table style */
+/* main-detail grid */
+.detail-container { display: flex; flex-wrap: wrap; justify-content: center; padding: 5px; gap: 10px;}
+.details-table td:nth-child(1) {min-width: 9%;}
+.details-table td:nth-child(2),
+.details-table td:nth-child(8) {min-width: 8%;}
+.details-table td:nth-child(3),
+.details-table td:nth-child(4) {min-width: 12%;}
+.details-table td:nth-child(5),
+.details-table td:nth-child(6) {min-width: 11%;}
+.details-table td:nth-child(7) {min-width: 10%;}
+.averageThird {width: 220px; max-width: 260px;}
+.cell-content {display: flex; gap: 5px;}
+/* main-detail grid */
+/* sub detail grids */
+.detail-grid { display: flex; flex-direction: column; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb; }
+.alb { width: 100%; }
+.alignment {justify-content: center;}
+.albaranes-btns {display: flex; justify-content: center; align-items: center; justify-content: center;}
+/* sub detail grids */
+/* contabilizar-container */
+.contabilizar-container {width: 100%; display: flex; justify-content: center; gap: 10px;}
+.cont-date {display: flex;  align-items: center; gap: 10px;}
+.cont-btn {display: flex; flex-direction: column; justify-content: center;}
+/* contabilizar-container */
+/* other grids */
+.saved-details {width: 100%; align-items: center;}
+.btn-fix {justify-content: center;}
+/* other grids */

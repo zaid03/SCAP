@@ -1,0 +1,64 @@
+/* search */
+.title-area {justify-content: flex-end;}
+.search-container {width: 30%;}
+/* search */
+/* centro gestor info */
+.centro-info {display: flex; width: 100%; margin-top: 5px; justify-content: center; gap: 10px;}
+.centro-content {display: flex; flex-direction: column; justify-content: center;}
+.rad-content {display: flex; align-items: flex-start; gap: 10px;}
+.rad {display: flex; gap: 10px; align-items: center;}
+.centro-content h1 {font-size: 20px !important;}
+.widthSmall {width: 10%;}
+.bigWidth {width: 30%;}
+.rad input[type="radio"] {margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+/* centro gestor info */
+/* main-table */
+.bolsa-table td:nth-child(12),
+.bolsa-table td:nth-child(11),
+.bolsa-table td:nth-child(10),
+.bolsa-table td:nth-child(9),
+.bolsa-table td:nth-child(8),
+.bolsa-table td:nth-child(7),
+.bolsa-table td:nth-child(6),
+.bolsa-table td:nth-child(5) { text-align: right; }
+.tableMessage {width: 10% !important;}
+.dots::after {content: ''; animation: dots 1.5s steps(4, end) infinite;}
+@keyframes dots {
+  0%   { content: ''; }
+  25%  { content: '.'; }
+  50%  { content: '..'; }
+  75%  { content: '...'; }
+  100% { content: ''; }
+}
+/* main-table */
+/* main grid detail */
+.above {display: flex; gap: 20px; align-items: center; padding-left: 1%;}
+.detail-container {width: 99%; padding: 1px; display: flex; justify-content: center; gap: 10px; flex-wrap: wrap;}
+.left,
+.right {width: 49%;}
+.zero-table {height: 50px;}
+.first-table {height: 91px;}
+.second-table {height: 80px;}
+.third-table {height: 95px;}
+.sign {font-weight: bold; font-size: 22px;}
+.border td {border-top: 1px solid gray;}
+.border-second td {border-bottom: 1px solid gray; padding: 5px;}
+.borderLeft {border-left: 1px solid gray;}
+.borderRight{border-right: 1px solid gray;}
+.borderTop {border-top: 1px solid gray;}
+.borderBottom {border-bottom: 1px solid gray;}
+.alignment {text-align: right;}
+.mix {max-width: 80%;}
+.padding {padding: 5px;}
+.contabilidad {text-align: center; height: 10%;}
+.contabilidad p {font-size: 22px !important;}
+.moreSpace {width: 8%;}
+.signFix {height: 100%; display: flex; align-items: flex-end; justify-content: center;}
+.top {margin-top: 2%;}
+.width {width: 60%;}
+.space {margin-top: 41px;}
+.widthColumn {width: 18%;}
+/* main grid detail */
+@media (max-width: 1500px) {
+  .widthColumn {width: 24%;}
+}

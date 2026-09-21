@@ -1,0 +1,43 @@
+/* search */
+.search-container { width: 95%;}
+.Widthy { width: 12%;}
+.search-form select { padding: 4px 6px; border-radius: 20px; border: 1px solid #bbb; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; outline: none; box-shadow: 0 1px 4px rgba(56,36,155,0.04); }
+.search-form option { outline: none; font-weight: bold;}
+.title-area {width: 22%;}
+.margin-title {font-size: 18px; width: 100%; display: flex; justify-content: flex-end;}
+.search-holder{width: 77%;}
+.search-container{width: 100%;}
+.search-form{width: 82%; gap: 10px;}
+.search-form input[type="text"] {width: 120px;}
+/* search */
+/* main table */
+.main-table th:nth-child(5),
+.main-table th:nth-child(6),
+.main-table th:nth-child(7) {width: 80px;}
+.main-table td:nth-child(5),
+.main-table td:nth-child(6),
+.main-table td:nth-child(7) {text-align: center;}
+.main-table tbody td input[type="checkbox"] { margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none; }
+/* main table */
+/* media querries */
+@media screen and (min-width: 1450px) and (max-width: 1600px) {
+    .search-form {width: 76%;}
+    .Widthy {width: 10%; }
+}
+@media screen and (min-width: 1601px) and (max-width: 1800px) {
+    .search-form {width: 68%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 1801px) and (max-width: 1900px) {
+    .search-form {width: 62%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 1901px) and (max-width: 2099px) {
+    .search-form {width: 58%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 2100px) {
+    .search-form {width: 52%;}
+    .Widthy {width: 8%;}
+}
+/* media querries */

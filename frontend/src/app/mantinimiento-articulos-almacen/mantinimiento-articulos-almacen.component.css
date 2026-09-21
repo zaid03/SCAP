@@ -1,0 +1,32 @@
+/* search container and inputs */
+.title-area {width: 25%; justify-content: flex-end; align-items: flex-start;}
+.search-container {width: 100%;}
+.search-form {width: 86%; display: flex; flex-direction: column;}
+.search-container .btns {width: 11%;}
+.group-menu {width: 1%;}
+.search-options label {display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }
+.search-options input:focus {outline: none;}
+.search-options input[type="radio"] {margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+.test {display: flex; align-items: center; justify-content: center; gap: 5px;}
+.test2 {display: flex; align-items: center; justify-content: center; gap: 5px;}
+/* search container and inputs */
+/* table styles */
+tr.bloqueado {background-color: #aaa;}
+/* table styles */
+/* detail style */
+.details-table {text-align: left;}
+.smallTextArea {min-width: 10px !important; width: 45px; max-width: 55px;}
+.averageTextArea {min-width: 80px !important; width: 140px; max-width: 200px;}
+.tallTextArea {min-width: 80px !important; width: 180px; max-width: 200px;}
+.numerTextArea {min-width: 80px !important; width: 100px; max-width: 120px;}
+.misc {display: flex; justify-content: center; gap: 10px;}
+.inputs {display: flex; align-items: center; gap: 10px;}
+.checkbox {margin: 0; accent-color: #25176b; width: 14px !important; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+/* detail style */
+@media (max-width: 1500px) {
+  .title-area {width: 27%; justify-content: flex-end; align-items: flex-start;}
+  .search-holder {width: 72%;}
+  .search-container {width: 100%;}
+  .search-container .btns {width: 10%;}
+  .search-form {width: 89%; display: flex; flex-direction: column;}
+}

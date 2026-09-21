@@ -1,0 +1,169 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de saldo de contratos</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <span>C.Gestor</span>
+                        <input 
+                            type="text"   
+                            class="search-bar smallWidth" 
+                            name="centro_gestor"
+                            placeholder="Centro gestor"
+                            [(ngModel)]="cge"
+                        />
+                        <span>Contrato</span>
+                        <input 
+                            type="text" 
+                            class="search-bar smallWidth" 
+                            name="contrato"
+                            placeholder="Contrato"
+                            [(ngModel)]="contrato"
+                        >
+                        <span>Proveedor</span>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            name="proveedor" 
+                            placeholder="Proveedor"
+                            [(ngModel)]="proveedor"
+                        />                 
+                    </div>
+                    <div class="btns">
+                        <button type="button" class="purple-btn" (click)="search()">Buscar</button>
+                        <button type="button" class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="pdfDownload()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a EXCEL</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="errorBtn">{{ContratosError}}</h1>
+        <h1 class="successBtn">{{ContratosSuccess}}</h1>
+        <div class="main-list">
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table con-tb">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('concod')">
+                            Contrato
+                            <span class="sort-indicator" *ngIf="sortField === 'concod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cot.conn.conlot')">
+                            Económica 
+                            <span class="sort-indicator" *ngIf="sortField === 'cot.conn.conlot'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cot.conn.condes')">
+                            Descripción 
+                            <span class="sort-indicator" *ngIf="sortField === 'cot.conn.condes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cot.tercod')">
+                            Cód. Proveedor 
+                            <span class="sort-indicator" *ngIf="sortField === 'cot.tercod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cot.ter.ternom')">
+                            Proveedor 
+                            <span class="sort-indicator" *ngIf="sortField === 'cot.ter.ternom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cot.ter.ternif')">
+                            NIF 
+                            <span class="sort-indicator" *ngIf="sortField === 'cot.ter.ternif'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgecod')">
+                            Cód. C. Gestor
+                            <span class="sort-indicator" *ngIf="sortField === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cge.cgedes')">
+                            Centro Gestor 
+                            <span class="sort-indicator" *ngIf="sortField === 'cge.cgedes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cogopd')">
+                            AD principal	 
+                            <span class="sort-indicator" *ngIf="sortField === 'cogopd'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cogop2')">
+                            AD secundaria 
+                            <span class="sort-indicator" *ngIf="sortField === 'cogop2'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('calculateSaldoTotal')">
+                            Saldo total AD 
+                            <span class="sort-indicator" *ngIf="sortField === 'calculateSaldoTotal'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cogiap')">
+                            Pedidos Pte. Contabilizar 
+                            <span class="sort-indicator" *ngIf="sortField === 'cogiap'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('calculateSaldo')">
+                            Saldo 
+                            <span class="sort-indicator" *ngIf="sortField === 'calculateSaldo'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedContratos">
+                        <td>{{p?.concod}}</td>
+                        <td>{{p?.cot?.conn?.conlot}}</td>
+                        <td>{{p?.cot?.conn?.condes}}</td>
+                        <td>{{p?.cot?.tercod}}</td>
+                        <td>{{p?.cot?.ter?.ternom}}</td>
+                        <td>{{p?.cot?.ter?.ternif}}</td>
+                        <td>{{p?.cgecod}}</td>
+                        <td>{{p?.cge?.cgedes}}</td>
+                        <td>{{p?.cogopd}}</td>
+                        <td>{{p?.cogop2}}</td>
+                        <td>{{calculateSaldoTotal(p?.cogimp, p?.cogim2) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                        <td>{{p?.cogiap | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                        <td>{{calculateSaldo(p?.cogimp, p?.cogim2, p?.cogiap) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>

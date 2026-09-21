@@ -1,0 +1,8 @@
+/* search container and inputs */
+.title-area {width: 26%; justify-content: flex-end; align-items: flex-start;}
+.search-holder {width: 73%;}
+.search-container {width: 100%;}
+.search-form {width: 55%; display: flex; flex-direction: column;}
+.search-container .btns {width: 11%;}
+.almacen-search {display: flex; align-items: center; gap: 10px;}
+/* search container and inputs */

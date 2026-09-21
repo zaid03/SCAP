@@ -1,0 +1,35 @@
+/* search container and inputs */
+.title-area {width: 25%; justify-content: flex-end; align-items: flex-start;}
+.search-container {width: 100%;}
+.search-form {width: 86%; display: flex; flex-direction: column;}
+.search-container .btns {width: 11%;}
+.group-menu {width: 1%;}
+.search-options label {display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }
+.search-options input:focus {outline: none;}
+.search-options input[type="radio"] {margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+.select-search {display: flex; align-items: center; justify-content: center; gap: 5px;}
+.rest-search {display: flex; align-items: center; justify-content: center; gap: 5px;}
+/* search container and inputs */
+/* table styles */
+tr.bloqueado {background-color: #aaa;}
+/* table styles */
+/* detail style */
+.smallTextArea {min-width: 10px; width: 50px; max-width: 80px;}
+.tallText {min-width: 80px; width: 200px; max-width: 250px;}
+.averageTextArea {min-width: 100px; width: 120px; max-width: 180px;}
+.checkbox {margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+.fix {width: 265px; max-width: 340px;}
+.bloq {display: flex; justify-content: center; align-items: center; gap: 10px;}
+/* detail style */
+@media (min-width: 1700px) {.search-form {flex-direction: row;} 
+.title-area {align-items: center;}}
+@media (min-width: 1700px) {
+    .title-area {width: 19%;}
+    .search-container {width: 100%;}
+    .search-form {width: 82%; gap: 10px;}
+}
+@media (min-width: 1950px) {
+    .title-area {width: 19%;}
+    .search-container {width: 100%;}
+    .search-form {width: 70%; gap: 10px;}
+}

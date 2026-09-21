@@ -1,0 +1,489 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de artículos por almacen</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <div class="select-search">
+                            <span>Buscar</span>
+                            <select  
+                                class="search-bar"
+                                [(ngModel)]="selectedAlmacenNombre"
+                            >
+                                <option 
+                                    *ngFor="let a of almacenesSearch"
+                                    [value]="a.depcod"
+                                >{{a.depdes}}</option>
+                            </select>
+                        </div>
+                        <div class="rest-search">
+                            <span>Buscar</span>
+                            <input 
+                                type="text"   
+                                class="search-bar" 
+                                [(ngModel)]="mainSearch"
+                                placeholder="Buscar"
+                            />
+                            <span>Familia</span>
+                            <input 
+                                type="text" 
+                                class="search-bar smallWidth" 
+                                name="familia"
+                                placeholder="familia"
+                                [(ngModel)]="familia"
+                            >
+                            <span>Subfamilia</span>
+                            <input 
+                                type="text" 
+                                name="subfamilia" 
+                                placeholder="subfamilia"
+                                class="search-bar smallWidth"
+                                [(ngModel)]="subfamilia"
+                            />
+                            <div class="search-options">
+                                <label>
+                                    <input 
+                                        type="radio" 
+                                        name="optiones" 
+                                        [(ngModel)]="bloqueado"
+                                        value="Todos"
+                                    /> Todos
+                                    <input 
+                                        type="radio" 
+                                        name="optiones" 
+                                        [(ngModel)]="bloqueado"
+                                        value="No bloqueados"
+                                    /> No Bloqueados
+                                    <input 
+                                        type="radio" 
+                                        name="optiones" 
+                                        [(ngModel)]="bloqueado"
+                                        value="Bloqueados"
+                                    /> Bloqueados
+                                </label>
+                            </div> 
+                        </div>                   
+                    </div>
+                    <div class="btns">
+                        <button type="button" class="purple-btn" (click)="search()">Buscar</button>
+                        <button type="button" class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="DownloadPDF()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="downloadExcel()">Exportar a EXCEL</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="errorBtn">{{almacenError}}</h1>
+        <h1 class="successBtn">{{almacenSuccess}}</h1>
+        <div class="main-list">
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('art_Afa_AFACOD')">
+                            Familia
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_Afa_AFACOD'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_Asu_ASUCOD')">
+                            Subfamilia
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_Asu_ASUCOD'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_ARTCOD')">
+                            Código
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_ARTCOD'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_ARTDES')">
+                            Descripción
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_ARTDES'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_ARTUNI')">
+                            Estocaje
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_ARTUNI'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_ARTREF')">
+                            Referencia universal
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_ARTREF'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('art_ARTBLO')">
+                            Bloqueo
+                            <span class="sort-indicator" *ngIf="sortColumn === 'art_ARTBLO'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedAlmacen"
+                        [class.bloqueado]="p.art_ARTBLO === 1"
+                    >
+                        <td
+                            style="cursor: pointer;"
+                            (click)="showDetails(p)"
+                        >{{p.art_Afa_AFACOD}}</td>
+                        <td>{{p.art_Asu_ASUCOD}}</td>
+                        <td>{{p.art_ARTCOD}}</td>
+                        <td>{{p.art_ARTDES}}</td>
+                        <td>{{p.art_ARTUNI}}</td>
+                        <td>{{p.art_ARTREF}}</td>
+                        <td>{{isBloqueado(p.art_ARTBLO)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPagesMain"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPagesMain }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPagesMain">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedAlmacen" (click)="closeDetailsSure()">
+                <div class="display">
+                    <div class="modal" *ngIf="selectedAlmacen" (click)="$event.stopPropagation()">
+                        <div class="btns">
+                            <div class="title-detail">
+                                <h3>Detalles de Almacen</h3>
+                            </div>
+                            <button 
+                                class="red-btn"
+                                [disabled]="isUpdate" 
+                                [ngClass]="{ 'disabled-btn': isUpdate }"  
+                                (click)="closeDetails()"
+                            >✖</button>
+                        </div>
+                        <h1 class="errorBtn">{{almacenDetailError}}</h1>
+                        <h1 class="successBtn">{{almacenDetailSuccess}}</h1>
+                        <div *ngIf="isUpdating" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>actualizando</span>
+                        </div>  
+                        <div class="detail-container">
+                            <table class="details-table">
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Familia</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_Afa_AFACOD"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style smallTextArea" 
+                                            ></textarea>
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_Afa_AFADES"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style tallText" 
+                                            ></textarea>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Existencias</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.meauni"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Estocaje virtual</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [ngModel]="calculateKEstVir(tempAlmacen.meauni, tempAlmacen.measol, tempAlmacen.mearec)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Subfamilia</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_Asu_ASUCOD"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style smallTextArea" 
+                                            ></textarea>
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_Asu_ASUDES"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style tallText" 
+                                            ></textarea>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Pte. Servir</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.measol"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Estocaje mínimo</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.meamin"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Código</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_ARTCOD"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style smallTextArea" 
+                                            ></textarea>
+                                            <textarea
+                                                [(ngModel)]="tempAlmacen.art_ARTDES"
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                class="textArea-style tallText" 
+                                            ></textarea>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Pte. Entrada</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.mearec"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Estocaje óptimo</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.meaopt"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Referencia virtual</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.art_ARTREF"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style fix" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Unidades de consumo</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.art_ARTUCO"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Tipo unidades</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.art_Aun_AUNDES"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style slight">Unidades en embalaje</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.art_ARTUEM"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style fix" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Pedido mínimo</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.art_ARTPMI"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style slightSecond">Solicitar</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [ngModel]="calculateKUniSol(tempAlmacen.meauni, tempAlmacen.measol, tempAlmacen.mearec, tempAlmacen.meamin, tempAlmacen.meaopt)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td colspan="2">
+                                        <div class="bloq">
+                                            <input 
+                                                class="checkbox" 
+                                                type="checkbox" 
+                                                [disabled]="!isUpdate"
+                                                (input)="allowToUpdate = true"
+                                                [checked]="tempAlmacen.art_ARTBLO === 1"
+                                            /> <span class="p-style">Bloqueado</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Valor existencia</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [ngModel]="calculateKvalExi(tempAlmacen.meauni, tempAlmacen.meapmp)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Precio Medio ponoderado</p>
+                                    </td>
+                                    <td>
+                                        <textarea
+                                            [(ngModel)]="tempAlmacen.meapmp"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style averageTextArea" 
+                                        ></textarea>
+                                    </td>
+                                </tr>
+                            </table>
+                        </div>
+                        <div class="more-detail-container">
+                            <div class="tabs" role="tablist" aria-label="Detalle tabs">
+                                <button
+                                    class="tab-btn"
+                                    role="tab"
+                                    [attr.aria-selected]="activeDetailTab === 'proveedores'"
+                                    [class.active-tab]="activeDetailTab === 'proveedores'"
+                                    (click)="showProveedores()"
+                                >
+                                    Proveedores
+                                </button>
+                            </div>
+                        </div>
+                        <div class="custom-grid-modal" *ngIf="showProveedoresGrid">
+                            <h1 class="errorBtn">{{proveedoresError}}</h1>
+                            <div *ngIf="isLoadingProveedores" class="loading-message">
+                                <div class="spinner"></div>
+                                <span>Cargando</span>
+                            </div>
+                            <table class="main-table">
+                                <thead>
+                                    <tr>
+                                        <th>Cod.Prov</th>
+                                        <th>Proveedor</th>
+                                        <th>Referencia Prov.</th>
+                                        <th>Unid.Embalaje</th>
+                                        <th>Observaciones</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr *ngFor="let p of paginatedProveedores">
+                                        <td>{{p.tercod}}</td>
+                                        <td>{{p.ter_TERNOM}}</td>
+                                        <td>{{p.apref}}</td>
+                                        <td>{{p.apruem}}</td>
+                                        <td>{{p.aprobs}}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                            <div class="pagination-controls">
+                                <button (click)="prevPageProv()" [disabled]="pageProv === 0">Anterior</button>
+                                <span>Página</span>
+                                <input
+                                    type="number"
+                                    min="1"
+                                    [max]="totalPagesProveedores"
+                                    [value]="pageProv + 1"
+                                    (change)="goToPageProv($event)"
+                                    class="pagination-input"
+                                    class="pagination-input"
+                                />
+                                <span>de {{ totalPagesProveedores }}</span>
+                                <button (click)="nextPageProv(  )" [disabled]="pageProv + 1 >= totalPagesProveedores">Siguiente</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

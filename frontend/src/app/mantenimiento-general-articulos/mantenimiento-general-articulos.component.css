@@ -1,0 +1,63 @@
+/* search container and inputs */
+.title-area {width: 24%; justify-content: flex-end;}
+.search-holder {width: 75%;}
+.search-container {width: 100%;}
+.search-form {width: 89%; gap: 10px;}
+.search-container .btns {width: 11%;}
+.group-menu {width: 2%;}
+.search-options label {display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }
+.search-options input:focus {outline: none;}
+.search-options input[type="radio"] {margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+/* search container and inputs */
+/* table styles */
+tr.bloqueado {background-color: #aaa;}
+/* table styles */
+/* detail style */
+.smallTextArea {width: 80px; max-width: 85px;}
+.tallText {width: 250px;}
+.detail-container {display: flex;}
+.smallTextArea {min-width: 10px; width: 50px; max-width: 80px;}
+.tallText {min-width: 80px; width: 200px; max-width: 250px;}
+.averageTextArea {min-width: 100px; width: 120px; max-width: 180px;}
+.selectSpecial {height: 30px; width: 277px;}
+.fix {width: 265px; max-width: 340px;}
+/* detail style */
+/* delete grid */
+.margin-btn {margin-right: 10px;}
+/* delete grid */
+/* add grid */
+.addArt {width: 90%; top: 15%;}
+.addArt .btns .title {width: 90%;}
+.selectAdd {height: 30px; width: 190px; font-size: 15px;}
+.textAdd {width: 180px; max-width: 200px;}
+.specialGap {gap: 14px;}
+.specialGapSecond {gap: 13px;}
+.addArt .details-table {text-align: left;}
+.bloq {display: flex; justify-content: center; align-items: center; gap: 10px;}
+.addArt input[type="checkbox"],
+.detail-container input[type="checkbox"] { margin: 0; accent-color: #25176b; width: 16px; height: 25px; vertical-align: middle; outline: none; box-shadow: none;}
+/* add grid */
+/* proveedores grid in add */
+.proveedor-grid-modal{ position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 94%; max-height: 80vh; overflow: auto; background: #ffffff; border-radius: 12px; padding: 18px; box-shadow: 0 12px 36px rgba(0,0,0,0.18); z-index: 5001; display: flex; flex-direction: column; gap: 12px;}
+.container-pag-wrap {display: flex; flex-direction: column; align-items: center;}
+.provs-add {justify-content: center;}
+.provs-add-search {width: 99%;}
+.provs-add-btns {gap: 10px; display: flex;}
+.provs-table thead th:nth-child(2) {width: 170px !important;}
+.provs-table thead th:nth-child(4),
+.provs-table thead th:nth-child(6),
+.provs-table thead th:nth-child(8) {width: 150px !important;}
+.provs-table thead th:last-child,
+.provs-table thead th:nth-child(9) {width: 50px !important;}
+.grey-row {background-color: #f2f2f2;}
+.selected-row {background-color: #cce6ff !important;}
+.size {font-size: 15px;}
+.sizeTitle {font-size: 20px !important;}
+.btnsGrid .title {text-align: center; width: 50%;}
+.btnsGrid .info {width: 25%; display: flex; gap: 10px; justify-content: right;}
+/* proveedores grid in add */
+@media screen and (min-width: 1600px) {
+    .title-area {width: 18%;}
+    .search-holder {width: 80%;}
+    .search-form {width: 60%;}
+}

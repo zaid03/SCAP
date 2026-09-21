@@ -1,0 +1,47 @@
+/* search */
+.title-area { width: 18%; justify-content: flex-end;}
+.search-container {gap: 10px; }
+/* search */
+/* all tables */
+.ftl { width: 50%; }
+.fT thead th:first-child,
+.sft thead th:first-child { width: 15%; }
+.sft thead th:nth-child(3),
+.sft thead th:nth-child(4),
+.sft thead th:nth-child(5) { width: 12%; }
+.sft tbody td:last-child {text-align: center;}
+/* all tables */
+/* detail grid */
+.detail-container { display: flex;flex-direction: column; gap: 5px; padding: 1%;}
+.chunk{ display: flex; padding: 2px; gap: 10px;}
+.left { width: 5%; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.right { width: 95%; display: flex; flex-direction: column; gap: 10px;}
+.on-two { display: flex; gap: 10px; align-items: center;}
+.tallText { width: 450px; max-width: 625px;}
+/* detail grid */
+.margin-btn { margin-right: 5px;}
+.sft tbody option,
+.right-add select option { font-weight: bold; font-size: inherit; }
+.butt {display: flex; justify-content: center;}
+.mta-list {height: 30px;}
+/* detail grid */
+/* modals */
+.add-sub-modal { width: 45%; display: flex; flex-direction: column; top: 35%;}
+.add-content { display: flex;}
+.left-add { width: 30%; text-align: left; display: flex; flex-direction: column; gap: 20px;}
+.right-add { display: flex; flex-direction: column; gap: 15px;}
+.right-add select { margin-top: 5px;}
+.title { width: 80%;}
+.add-confirm-modal{ width: 40%; }
+.addTallText { width: 220px; max-width: 450px;}
+.addSmallText { width: 80px; max-width: 200px;}
+.details-table {text-align: left;}
+.align {top: 20%;}
+/* modals */
+@media (max-width: 1299px), (min-width: 1350px) {
+  .delete-confirm-modal {top: 40%;}
+}
+@media (min-width: 1600px) {
+  .align {top: 25%;}
+  .fix {top: 20%;}
+}

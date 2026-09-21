@@ -1,0 +1,28 @@
+/* search container and inputs */
+.title-area {width: 22%; justify-content: flex-end;}
+.search-container {width: 100%;}
+.search-form {width: 86%; gap: 10px;}
+.search-container .btns {width: 11%;}
+.group-menu {width: 2%;}
+.search-options label {display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }
+.search-options input:focus {outline: none;}
+.search-options input[type="radio"] {margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+/* search container and inputs */
+/* table styles */
+tr.bloqueado {background-color: #aaa;}
+/* table styles */
+/* detail style */
+.smallTextArea {min-width: 10px; width: 50px; max-width: 80px;}
+.tallText {min-width: 80px; width: 200px; max-width: 250px;}
+.averageTextArea {min-width: 100px; width: 120px; max-width: 180px;}
+.checkbox {margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+.selectSpecial {height: 30px; width: 277px;}
+.fix {width: 265px; max-width: 340px;}
+.bloq {display: flex; justify-content: center; align-items: center; gap: 10px;}
+/* detail style */
+@media (min-width: 1700px) {
+    .search-form {width: 68%;}
+}
+@media (min-width: 1950px) {
+    .search-form {width: 58%;}
+}

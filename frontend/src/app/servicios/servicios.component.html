@@ -1,0 +1,729 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true">
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Servicios</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <label>Servicio</label>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="servicios" 
+                            [(ngModel)]="searchServicio"
+                        >
+                        <label>Centro gestor</label>
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            placeholder="centro gestor"
+                            (input)="setInputToUpper($event)"
+                            [(ngModel)]="searchCentroGestor" 
+                        >
+                        <label for="">Perfil de servicio</label>
+                        <select [(ngModel)]="searchPerfil">
+                            <option value="almacen">Almacén / Farmacia</option>
+                            <option value="comprador">Comprador</option>
+                            <option value="contabilidad">Contabilidad</option>
+                            <option value="peticionario">Centro peticionario</option>
+                            <option value="todos">Todos</option>
+                        </select>
+                    </div>
+                    <div class="btns Widthy">
+                        <button class="purple-btn" (click)="search()">Buscar</button>
+                        <button class="purple-btn" (click)="clearSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="exportPdf()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="launchAddService()">Añadir</button>
+                </div>
+            </div>
+        </div>
+        <div class="main-list">
+            <h1 class="successBtn">{{ servicesMessageSuccess }}</h1>
+            <h1 class="errorBtn">{{ servicessMessageError }}</h1>
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table align">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('depcod')">
+                            Servicio
+                            <span class="sort-indicator" *ngIf="sortField === 'depcod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depdes')">
+                            Descripción
+                            <span class="sort-indicator" *ngIf="sortField === 'depdes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgecod')">
+                            Cód.C.G
+                            <span class="sort-indicator" *ngIf="sortField === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ccocod')">
+                            Centro de Coste
+                            <span class="sort-indicator" *ngIf="sortField === 'ccocod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depalm')">
+                            Almacén / Farmacia
+                            <span class="sort-indicator" *ngIf="sortField === 'depalm'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depcom')">
+                            Comprador
+                            <span class="sort-indicator" *ngIf="sortField === 'depcom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depint')">
+                            Contabilidad
+                            <span class="sort-indicator" *ngIf="sortField === 'depint'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let s of paginatedServices">
+                        <td (click)="showDetails(s)" style="cursor: pointer;">
+                            {{ s.depcod }}
+                        </td>
+                        <td>{{ s.depdes }}</td>
+                        <td>{{ s.cgecod }}</td>
+                        <td>{{ s.ccocod }}</td>
+                        <td>
+                            <input 
+                                type="checkbox"
+                                [checked]="s.depalm === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >  
+                        </td>
+                        <td>
+                            <input 
+                                type="checkbox"
+                                [checked]="s.depcom === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >
+                        </td>
+                        <td>
+                            <input
+                                type="checkbox"
+                                [checked]="s.depint === 1"
+                                class="locked-radio"
+                                (click)="$event.preventDefault()"
+                            >   
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedService"></div>
+            <div class="display" >
+                <div class="modal" *ngIf="selectedService">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles de Servicio</h3>
+                        </div>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+	                        [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="closeDetails()"
+                        >✖</button>
+                    </div>  
+                    <h1 class="successBtn">{{ updateServiceSuccessMessage }}</h1>
+                    <h1 class="errorBtn">{{ updateServiceErrorMessage }}</h1>
+                    <div *ngIf="isUpdating" class="loading-message">
+                        <div class="spinner"></div>
+                        <span>actualizando</span>
+                    </div> 
+                    <div class="detail-container">
+                        <table class="details-table">
+                            <tr>
+                                <td>
+                                    <p class="p-style">Código</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{tempServicio.depcod || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Centro de coste</p>  
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{tempServicio.ccocod || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Centro Gestor</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <h1 class="h1-style">{{tempServicio.cgecod || '#'}}</h1>
+                                        <h1 class="h1-style">{{tempServicio.cgedes || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Descripción</p>
+                                </td>
+                                <td>
+                                    <textarea 
+                                        class="textArea-style large" 
+                                        [(ngModel)]="tempServicio.depdes"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #des
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Unidad tramitadora</p>
+                                </td>
+                                <td colspan="2">
+                                    <div class="cell-content">
+                                        <textarea 
+                                            class="textArea-style short"
+                                            [(ngModel)]="tempServicio.depd1C"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            #d1c
+                                        ></textarea>
+                                        <textarea 
+                                            [(ngModel)]="tempServicio.depd1D" 
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style average"
+                                            #d1d
+                                        ></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Órgano gestor</p>
+                                </td>
+                                <td colspan="2">
+                                    <div class="cell-content">
+                                        <textarea 
+                                            class="textArea-style short"
+                                            [(ngModel)]="tempServicio.depd2C"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            #d2c
+                                        ></textarea>
+                                        <textarea 
+                                            [(ngModel)]="tempServicio.depd2D" 
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style average"
+                                            #d2d
+                                        ></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Oficina contable</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <textarea 
+                                            class="textArea-style short"
+                                            [(ngModel)]="tempServicio.depd3C"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            #d3c
+                                        ></textarea>
+                                        <textarea 
+                                            [(ngModel)]="tempServicio.depd3D" 
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                            class="textArea-style average"
+                                            #d3d
+                                        ></textarea>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Datos de contacto</p>
+                                </td>
+                                <td colspan="2">
+                                    <textarea 
+                                        class="textArea-style heighty large"
+                                        [(ngModel)]="tempServicio.depdco"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #dco
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Datos de entrega</p>
+                                </td>
+                                <td colspan="2">
+                                    <textarea 
+                                        class="textArea-style heighty large"
+                                        [(ngModel)]="tempServicio.depden"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #den
+                                    ></textarea>
+                                </td>
+                                <td colspan="2">
+                                    <div class="checks">
+                                        <input
+                                            type="checkbox"
+                                            [ngModel]="detailFlags.depalm"
+                                            (ngModelChange)="toggleDetailFlag('depalm', $event)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                        > <span class="p-style">Almacenar</span> <br>
+                                        <input
+                                            type="checkbox"
+                                            [ngModel]="detailFlags.depcom"
+                                            (ngModelChange)="toggleDetailFlag('depcom', $event)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                        > <span class="p-style">Comprar</span> <br>
+                                        <input
+                                            type="checkbox"
+                                            [ngModel]="detailFlags.depint"
+                                            (ngModelChange)="toggleDetailFlag('depint', $event)"
+                                            [disabled]="!isUpdate"
+                                            (input)="allowToUpdate = true"
+                                        > <span class="p-style">Contabilizar</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="btns space">
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="isUpdate" 
+                            [ngClass]="{ 'disabled-btn': isUpdate }"
+                            (click)="showAddPersonas()"
+                        >Añadir personas</button>
+                        <button 
+                            class="red-btn" 
+                            *ngIf="isUpdate" 
+                            (click)="cancelar()"
+                        >Cancelar</button>
+                        <button 
+                            class="purple-btn"
+                            [disabled]="isUpdate" 
+                            *ngIf="!isUpdate" 
+                            (click)="modificar()"
+                        >Modificar</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="!isUpdate" 
+	                        *ngIf="isUpdate" 
+                            (click)="isUpdateAllowed(selectedService.depcod, des.value); updateServiceSecond(selectedService.depcod, d1c.value, d1d.value, d2c.value, d2d.value, d3c.value, d3d.value, dco.value, den.value)"
+                        >Guardar</button>
+                        <button 
+                            class="red-btn"
+                            [disabled]="isUpdate" 
+	                        [ngClass]="{ 'disabled-btn': isUpdate }" 
+                        >Borrar</button>
+                    </div>
+                    <div class="more-detail-container">
+                        <div class="tabs" role="tablist" aria-label="Detalle tabs">
+                            <button
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="option === 'personas'"
+                                [class.active-tab]="option === 'personas'"
+                                (click)="setOption('personas')"
+                            > Personas
+                            </button>
+                            <button 
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="option === 'almacen'"
+                                [class.active-tab]="option === 'almacen'"
+                                (click)="[setOption('almacen'), almacenDatos(tempServicio.depcod)]"
+                                [disabled]="detailFlags.depalm !== true"
+                            > Almacen
+                            </button>
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" [ngSwitch]="option">
+                        <ng-container *ngSwitchCase="'personas'">
+                            <h1 class="successBtn">{{personasSuccess}}</h1>
+                            <div *ngIf="isLoadingPersonas" class="loading-message">
+                                <div class="spinner"></div>
+                                <span>Cargando</span>
+                            </div>
+                            <div *ngIf="isAdding" class="loading-message">
+                                <div class="spinner"></div>
+                                <span>añadiendo</span>
+                            </div>
+                            <div class="main-list">
+                                <table class="main-table persona">
+                                    <thead>
+                                        <tr>
+                                            <th>Código Persona</th>
+                                            <th>Nombre</th>
+                                            <th>Acción</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let p of paginatedPersonas">
+                                            <td>{{ p.percod }}</td>
+                                            <td>{{ p.pernom }}</td>
+                                            <td><button class="red-btn" (click)="showDelete(p)">-</button></td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h1 class="errorBtn">{{personasError}}</h1>
+                                <div class="pagination-controls">
+                                    <button (click)="personasPrevPage()" [disabled]="personasPage === 0">Anterior</button>
+                                    <span>Página</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        [max]="personasTotalPages"
+                                        [value]="personasPage + 1"
+                                        (change)="personasGoToPage($event)"
+                                        class="pagination-input"
+                                    />
+                                    <span>de {{ personasTotalPages }}</span>
+                                    <button (click)="personasNextPage()" [disabled]="personasPage + 1 >= personasTotalPages">Siguiente</button>
+                                </div>
+                            </div>
+                        </ng-container>
+                        <ng-container *ngSwitchCase="'almacen'">
+                            <div *ngIf="isLoadingAlmacen" class="loading-message">
+                                <div class="spinner"></div>
+                                <span>Cargando</span>
+                            </div>
+                            <div class="almacen-title">
+                                <p class="p-style">Nombre</p>
+                                <h1 class="h1-style">{{ almacenErro === 'No resultado' ? '-' : almacenArray?.magnom }}</h1>
+                            </div>
+                            <div class="main-list">
+                                <table class="main-table aT">
+                                    <thead>
+                                        <tr>
+                                            <th>Código Tipo</th>
+                                            <th>Tipo de Almacenaje</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr *ngFor="let a of paginatedAlmacen">
+                                            <td>{{a.mtacod}}</td>
+                                            <td>{{a.mtades}}</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                                <h1 class="errorBtn">{{almacenSecondError}}</h1>
+                                <div class="pagination-controls">
+                                    <button (click)="almacenPrevPage()" [disabled]="almacenPage === 0">Anterior</button>
+                                    <span>Página</span>
+                                    <input
+                                        type="number"
+                                        min="1"
+                                        [max]="almacenTotalPages"
+                                        [value]="almacenPage + 1"
+                                        (change)="almacenGoToPage($event)"
+                                        class="pagination-input"
+                                    />
+                                    <span>de {{ almacenTotalPages }}</span>
+                                    <button (click)="almacenNextPage()" [disabled]="almacenPage + 1 >= almacenTotalPages">Siguiente</button>
+                                </div>
+                            </div>
+                        </ng-container>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showAddConfirm"></div>
+<div class="add-confirm-modal" *ngIf="showAddConfirm">
+    <div class="btns">
+        <div class="title">
+            <h3>Añadir un servicio</h3>
+        </div>
+        <button class="purple-btn" (click)="addService(codigo.value, description.value, centroCoste.value, centroGestor.value, d1c_add.value, d1d_add.value, d2c_add.value, d2d_add.value, d3c_add.value, d3d_add.value, den_add.value, dco_add.value)">+ Cargar</button>
+        <button class="red-btn" (click)="closeAddConfirm()">✖</button>
+    </div>
+    <h1 class="errorBtn">{{ addServiceErrorMessage }}</h1>
+    <div *ngIf="isAdding" class="loading-message">
+        <div class="spinner"></div>
+        <span>añadiendo</span>
+    </div>
+    <table class="details-table">
+        <tr>
+            <td>
+                <p class="p-style">Código*</p>
+            </td>
+            <td>
+                <textarea 
+                    class="textArea-style short-add" 
+                    (input)="setInputToLimit($event)" 
+                    #codigo 
+                ></textarea>
+            </td>
+            <td>
+                <p class="p-style">Centro de Coste*</p>
+            </td>
+            <td>
+                <textarea 
+                    (input)="setInputToUpper($event)"  
+                    class="textArea-style short-add" 
+                    #centroCoste 
+                ></textarea>
+            </td>
+            <td>
+                <p class="p-style">Centro Gestor*</p>
+            </td>
+            <td>
+                <textarea 
+                    (input)="setInputToUpper($event)" 
+                    class="textArea-style short-add" 
+                    #centroGestor
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Descripción*</p>
+            </td>
+            <td colspan="5">
+                <textarea 
+                    class="textArea-style long-add" 
+                    #description
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td colspan="6">
+                <div class="cell-content alignCheck">
+                    <div class="checkboxes">
+                        <input type="checkbox" [(ngModel)]="addDepalm">
+                        <span class="p-style">Almacén/Farmacia</span>
+                        <input type="checkbox" [(ngModel)]="addDepcom">
+                        <span class="p-style">Comprador</span>
+                        <input type="checkbox" [(ngModel)]="addDepint">
+                        <span class="p-style">Contabilidad</span>
+                    </div>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Unidad tramitadora</p>
+            </td>
+            <td colspan="5">
+                <div class="cell-content">
+                    <textarea 
+                        class="textArea-style short-add"
+                        #d1c_add
+                    ></textarea>
+                    <textarea 
+                        class="textArea-style average-add"
+                        #d1d_add
+                    ></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Órgano gestor</p>
+            </td>
+            <td colspan="5">
+                <div class="cell-content">
+                    <textarea 
+                        class="textArea-style short-add"
+                        #d2c_add
+                    ></textarea>
+                    <textarea 
+                        class="textArea-style average-add"
+                        #d2d_add
+                    ></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Oficina contable</p>
+            </td>
+            <td colspan="5">
+                <div class="cell-content">
+                    <textarea 
+                        class="textArea-style short-add"
+                        #d3c_add
+                    ></textarea>
+                    <textarea 
+                        class="textArea-style average-add"
+                        #d3d_add
+                    ></textarea>
+                </div>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Datos de entrega</p>
+            </td>
+            <td colspan="5">
+                <textarea 
+                    class="textArea-style long-add hei"
+                    #den_add
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Datos de contacto</p>
+            </td>
+            <td colspan="5">
+                <textarea 
+                    class="textArea-style long-add hei"
+                    #dco_add
+                ></textarea>
+            </td>
+        </tr>
+    </table>
+</div>
+
+<div class="modal-backdrop" *ngIf="showDeleteConfirm"></div>
+<div class="delete-confirm-modal" *ngIf="showDeleteConfirm">
+    <div class="btns">
+        <button class="purple-btn" (click)="closeDeleteConfirm()">✖</button>
+    </div>
+    <h3>¿Seguro que quieres eliminar este Persona?</h3>
+    <h1 class="errorBtn">{{deleErr}}</h1>
+    <div *ngIf="isDeleting" class="loading-message">
+        <div class="spinner"></div>
+        <span>borrando</span>
+    </div>
+    <div class="persona-details">
+        <p class="p-style">Código:</p>
+        <p class="p-style">{{personaTodelete.percod}}</p>
+    </div>
+    <button class="red-btn" (click)="confirmDelete(personaTodelete.percod)">Confirmar</button>
+</div>
+
+<div class="modal-backdrop" *ngIf="addPersonas"></div>
+<div class="proveedor-grid-modal" *ngIf="addPersonas">
+    <div class="btns">
+        <div class="title">
+            <h3>seleccionar personas</h3>
+        </div>
+        <div class="count-selected">
+            <p class="p-style">seleccionado {{count}} personas</p>
+        </div>
+        <button 
+            class="purple-btn" 
+            (click)="addPersonasToService(linesSelected)"
+            [ngClass]="{'disabled-btn': linesSelected.length === 0}"
+        >+ Cargar
+        </button>
+        <button class="red-btn" (click)="closeAddPersonas()">✖</button>
+    </div> 
+    <div class="search-holder">
+        <div class="search-container">
+            <div class="search-form">
+                <input 
+                    type="text" 
+                    class="search-bar"
+                    placeholder="Personas" 
+                    [(ngModel)]="searchPersonasCopy"
+                >
+            </div>
+            <div class="btns Widthy">
+                <button class="purple-btn" (click)="searchCopy()">Buscar</button>
+                <button class="purple-btn" (click)="limpiarSearcCopy()">Limpiar</button>
+            </div>
+        </div>
+    </div>
+    <div *ngIf="isAddingPersonnas" class="loading-message">
+        <div class="spinner"></div>
+        <span>añadiendo</span>
+    </div>
+    <div *ngIf="isLoadingPersonasAdd" class="loading-message">
+        <div class="spinner"></div>
+        <span>Cargando</span>
+    </div>
+    <div class="all-add-content">
+        <table class="main-table pts">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let p of paginatedPersonasCopy" 
+                    style="cursor: pointer;" 
+                    [class.selected-row]="linesSelected.includes(p.percod)"
+                    (click)="selectLines(p.percod)">
+                    <td>
+                        {{p.percod}}
+                    </td>
+                    <td>{{p.pernom}}</td>
+                </tr>
+            </tbody>
+        </table>
+        <h1 class="errorBtn">{{errorCopy}}</h1>
+        <div class="pag">
+            <div class="pagination-controls">
+                <button (click)="prevPageCopy()" [disabled]="pageCopy === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPagesCopy"
+                [value]="pageCopy + 1"
+                (change)="goToPageCopy($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPagesCopy }}</span>
+                <button (click)="nextPageCopy()" [disabled]="pageCopy + 1 >= totalPagesCopy">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="perosanasMessages"></div>
+<div class="add-confirm-modal adj" *ngIf="perosanasMessages">
+    <div class="btns">
+        <button class="red-btn" (click)="closePersonasMessages()">✖</button>
+    </div>
+    <div class="saved-details">
+        <p class="p-style" *ngIf="cargarPersonasError">{{cargarPersonasError}}</p>
+        <p class="p-style" *ngIf="savedNames.length">Personas cargadas: <span class="message-text">{{savedNames}}</span></p>
+        <p class="p-style" *ngIf="unsavedNames.length">Personas ya existentes: <span class="message-text">{{unsavedNames}}</span></p>
+    </div>
+</div>

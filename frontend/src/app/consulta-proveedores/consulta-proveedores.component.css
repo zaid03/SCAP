@@ -1,0 +1,53 @@
+/* search */
+.margin-title { margin-left: 20%;}
+.search-options label { display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }
+.search-options input:focus {outline: none;}
+.search-btns .purple-btn{ margin-right: 10px; }
+.search-btns { margin-left: 10px; }
+.search-options input[type="radio"],
+.hello-modal .anadir-articulo-form input[type="radio"] { margin: 0 6px 0 0; accent-color: #25176b; width: 18px; height: 18px; vertical-align: middle; outline: none; box-shadow: none; }
+/* search */
+/* main table */
+.align thead th:nth-child(1) {max-width: 24 px;}
+.align thead th:nth-child(3),
+.align tbody td:nth-child(5),
+.align tbody td:nth-child(9),
+.align tbody td:nth-child(10),
+.align tbody td:nth-child(11),
+.align tbody td:nth-child(12),
+.align tbody td:nth-child(13) {width: 50px !important; max-width: 50px !important;}
+.grey-row {background-color: #f2f2f2;}
+/* main table */
+/* detail grid */
+.detail-container { display: flex; flex-wrap: wrap; justify-content: center; padding: 5px; gap: 10px;}
+.averageThird {width: 200px; max-width: 260px;}
+/* detail grid */
+/* sub tables and lists */
+.art thead th:first-child,
+.art thead th:nth-child(2),
+.art thead th:nth-child(3),
+.art thead th:nth-child(8) {width: 5% !important;}
+.art thead th:nth-child(4),
+.art thead th:nth-child(7) {width: 20%;}
+.art thead th:nth-child(5),
+.art thead th:nth-child(6),
+.art thead th:nth-child(9) {width: 10%;}
+.art tbody td:last-child {display: flex; align-items: center; }
+.art tbody td:nth-child(6) {justify-items: right !important;}
+.art tbody td:nth-child(8),
+.art tbody td:last-child,
+.pct tbody td:last-child {text-align: center;}
+.pct,
+.pat { width: 100%; }
+.pat { margin-top: 10px; }
+.acuerdo input[type="checkbox"],
+.checkbox { margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none; }
+.checkbox { outline: none; }
+.art h2,
+.pct h1 { text-align: left; font-size: 15px; color: #333; margin: 0; padding: 0; }
+.space { margin-top: 10px; }
+.save-btn-articulos {margin-top: 10px;}
+/* sub tables and lists */
+@media (min-width: 1700px) { .chunk-one, .chunk-two, .chunk-three { width: 22%; }
+.save-btn-articulos {margin-left: 10px;}
+.chunk-four {width: 30%;} }

@@ -1,0 +1,462 @@
+
+<div class="main-page">
+    <app-sidebar #sidebar></app-sidebar>
+    <div 
+    class="sidebar-backdrop" 
+    *ngIf="!sidebar.collapsed" 
+    (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de proveedores</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <form class="search-form" (submit)="onSearchFormSubmit($event)">
+                        <input type="text" class="search-bar" placeholder="Buscar proveedor" name="search" [(ngModel)]="searchTerm" (keyup.enter)="search()"/>
+                        <div class="search-options">
+                            <label>
+                                <input type="radio" name="optiones" value="todos" [(ngModel)]="filterOption" /> Todos
+                                <input type="radio" name="optiones" value="Nobloqueado" [(ngModel)]="filterOption" /> No Bloqueados
+                                <input type="radio" name="optiones" value="bloqueado" [(ngModel)]="filterOption"  /> Bloqueados
+                            </label>
+                        </div>
+                        <div class="search-btns">
+                            <button type="button" class="purple-btn" (click)="search()">Buscar</button>
+                            <button type="button" class="purple-btn" (click)="clearSearch()">Limpiar</button>
+                        </div>
+                    </form>
+                </div> 
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button type="button" (click)="downloadExcel()">Exportar a Excel</button>
+                    <button type="button" (click)="DownloadPDF()">Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+        <div class="main-list">
+            <h1 class="errorBtn">{{error}}</h1>
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table align">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('tercod')">
+                            Código 
+                            <span class="sort-indicator" *ngIf="sortColumn === 'tercod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ternom')">
+                            Nombre
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ternom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ternif')">
+                            NIF
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ternif'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terali')">
+                            Alias
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terali'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('tertel')">
+                            Teléfono
+                            <span class="sort-indicator" *ngIf="sortColumn === 'tertel'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terdom')">
+                            Domicilio
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terdom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('tercpo')">
+                            Código Postal
+                            <span class="sort-indicator" *ngIf="sortColumn === 'tercpo'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terpob')">
+                            Municipio
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terpob'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terayt')">
+                            Código contable
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terayt'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terfax')">
+                            Fax
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terfax'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terweb')">
+                            Web
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terweb'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('tercoe')">
+                            Correo electrónico
+                            <span class="sort-indicator" *ngIf="sortColumn === 'tercoe'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('terobs')">
+                            Observaciones
+                            <span class="sort-indicator" *ngIf="sortColumn === 'terobs'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr 
+                        *ngFor="let p of paginatedProveedores" 
+                        [ngClass]="{ 'grey-row': p.terblo === 1 && isTodos }"
+                    >
+                        <td (click)="showDetails(p)" style="cursor: pointer;">{{ p.tercod }}</td>
+                        <td>{{ p.ternom }}</td>
+                        <td>{{ p.ternif }}</td>
+                        <td>{{ p.terali }}</td>
+                        <td>{{ p.tertel }}</td>
+                        <td>{{ p.terdom }}</td>
+                        <td>{{ p.tercpo }}</td>
+                        <td>{{ p.terpob }}</td>
+                        <td>{{ p.terayt }}</td>
+                        <td>{{ p.terfax }}</td>
+                        <td>{{ p.terweb }}</td>
+                        <td>{{ p.tercoe }}</td>
+                        <td>{{ p.terobs }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button class="pag-btn" (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button class="pag-btn" (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedProveedor"></div>
+            <div class="display" >
+                <div class="modal" *ngIf="selectedProveedor">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles del Proveedor</h3>
+                        </div>
+                        <button class="red-btn" (click)="closeDetails()">✖</button>
+                    </div>
+                    <h1 class="errorBtn">{{ messageError }}</h1>
+                    <div class="detail-container">
+                        <table class="details-table">
+                            <tr>
+                                <td>
+                                    <p class="p-style">Nombre</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedProveedor.ternom || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Dirección</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedProveedor.terdom || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Teléfono</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        class="textArea-style averageThird" 
+                                        [(ngModel)]="selectedProveedor.tertel"
+                                        disabled
+                                    >
+                                    </textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Web</p>
+                                </td>
+                                <td>
+                                    <textarea 
+                                        class="textArea-style averageThird" 
+                                        [(ngModel)]="selectedProveedor.terweb"
+                                        disabled
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Alias</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedProveedor.terali || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Provincia</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <h1 class="h1-style">{{selectedProveedor.procod || '#'}}</h1>
+                                        <h1 class="h1-style">{{selectedProveedor.terpob || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Correo electrónico</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        class="textArea-style averageThird" 
+                                        [(ngModel)]="selectedProveedor.tercoe"
+                                        disabled
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Bloqueado</p>
+                                </td>
+                                <td>
+                                    <input type="checkbox"
+                                        [checked]="selectedProveedor.terblo == 1"
+                                        disabled
+                                        class="checkbox" 
+                                    />
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <div class="cell-content">
+                                        <p class="p-style">Código</p>
+                                        <h1 class="h1-style">{{selectedProveedor.tercod || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <p class="p-style">NIF</p>
+                                        <h1 class="h1-style">{{selectedProveedor.ternif || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <p class="p-style">C.P</p>
+                                        <h1 class="h1-style">{{selectedProveedor.tercpo || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <p class="p-style">C.contable</p>
+                                        <h1 class="h1-style">{{selectedProveedor.terayt || '#'}}</h1>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Fax</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedProveedor.terfax || '#'}}</h1>
+                                </td>
+                                <td>
+                                    <p class="p-style">Tiene acuerdo marco</p>
+                                </td>
+                                <td>
+                                    <input type="checkbox"
+                                        [checked]="selectedProveedor.teracu == 1"
+                                        disabled
+                                        class="checkbox" 
+                                    />
+                                </td>
+                            </tr>
+                        </table>
+                        <div class="wrapper">
+                            <div class="observ">
+                                <p class="p-style">Observaciones:</p>
+                                <textarea 
+                                    class="textArea-style"
+                                    [(ngModel)]="selectedProveedor.terobs"
+                                    disabled
+                                ></textarea>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="more-detail-container">
+                        <div class="tabs" role="tablist" aria-label="Detalle tabs">
+                           <button
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="activeDetailTab === 'contact'"
+                                [class.active-tab]="activeDetailTab === 'contact'"
+                                (click)="showContactPersons(selectedProveedor)"
+                            >
+                                Personas de Contacto
+                            </button>
+                            <button
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="activeDetailTab === 'articulo'"
+                                [class.active-tab]="activeDetailTab === 'articulo'"
+                                (click)="showArticulos(selectedProveedor)"
+                            >
+                                Artículos
+                            </button> 
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" *ngIf="showContactPersonsGrid">
+                        <div *ngIf="isLoading" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>Cargando</span>
+                        </div>
+                        <table class="main-table pct">
+                            <thead>
+                                <tr>
+                                    <th>Nombre</th>
+                                    <th>Teléfono</th>
+                                    <th>Móvil</th>
+                                    <th>Correo electrónico</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let c of paginatedPersonas">          
+                                    <td>
+                                        <h1>{{c.tpenom}}</h1>
+                                    </td>
+                                    <td>
+                                        <h1>{{c.tpetel}}</h1>
+                                    </td>      
+                                    <td>
+                                        <h1>{{c.tpetmo}}</h1>
+                                    </td>
+                                    <td>
+                                        <h1>{{c.tpecoe}}</h1>
+                                    </td>
+                                    <td>
+                                        <h1>{{c.tpeobs}}</h1>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h1 class="errorBtn">{{ personasContactoErrorMessage }}</h1>
+                        <div class="pagination-controls">
+                            <button 
+                                class="pag-btn" 
+                                (click)="prevPagePersona()" 
+                                [disabled]="pagePersona === 0">
+                                Anterior
+                            </button>
+                            <span>Página</span>
+                            <input
+                                type="number"
+                                min="1"
+                                [max]="totalPagesPersonas"
+                                [value]="pagePersona + 1"
+                                (change)="goToPagePersona($event)"
+                                class="pagination-input"
+                            />
+                            <span>de {{ totalPagesPersonas }}</span>
+                            <button 
+                                class="pag-btn" 
+                                (click)="nextPagePersona()" 
+                                [disabled]="page + 1 >= totalPagesPersonas"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" *ngIf="showArticulosGrid">
+                        <div *ngIf="isLoading" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>Cargando</span>
+                        </div>
+                        <table class="main-table art">
+                            <thead>
+                                <tr>
+                                    <th>Familia</th>
+                                    <th>Subfamilia</th>
+                                    <th>Artículo</th>
+                                    <th>Descripcion</th>
+                                    <th>Ref Prov</th>
+                                    <th>Uds. embalaje</th>
+                                    <th>Observaciones</th>
+                                    <th *ngIf="selectedProveedor.teracu == 1">Acuerdo</th>
+                                    <th *ngIf="selectedProveedor.teracu == 1">Precio acuerdo</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let articulo of paginatedArticulos">
+                                    <td>
+                                        <h2>{{ articulo.afacod }}</h2>
+                                    </td>
+                                    <td>
+                                        <h2>{{ articulo.asucod }}</h2>
+                                    </td>
+                                    <td>
+                                        <h2>{{ articulo.artcod }}</h2>
+                                    </td>
+                                    <td>
+                                        <h2 >{{ articulo.description}}</h2>
+                                    </td>
+                                    <td>
+                                        <h2>{{articulo.aprref}}</h2>
+                                    </td>
+                                    <td>
+                                        <h2>{{articulo.apruem}}</h2>
+                                    </td>
+                                    <td>
+                                        <h2>{{articulo.aprobs}}</h2>
+                                    </td>
+                                    <td *ngIf="selectedProveedor.teracu == 1">
+                                        <input type="checkbox"
+                                            [checked]="articulo.apracu == 1"
+                                            class="checkbox"
+                                        />
+                                    </td>
+                                    <td *ngIf="selectedProveedor.teracu == 1">
+                                        <input type="number" [(ngModel)]="articulo.aprpre"/>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h1 class="errorBtn">{{ articuloError }}</h1>
+                        <div class="pagination-controls">
+                            <button 
+                                class="pag-btn" 
+                                (click)="prevPageArticulos()" 
+                                [disabled]="pageArticulo === 0"
+                            >
+                                Anterior
+                            </button>
+                            <span>Página</span>
+                            <input
+                                type="number"
+                                min="1"
+                                [max]="totalPagesArticulos"
+                                [value]="pageArticulo + 1"
+                                (change)="goToPageArticulos($event)"
+                                class="pagination-input"
+                            />
+                            <span>de {{ totalPagesArticulos }}</span>
+                            <button 
+                                class="pag-btn" 
+                                (click)="nextPage()" 
+                                [disabled]="pageArticulo + 1 >= totalPagesArticulos"
+                            >
+                                Siguiente
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

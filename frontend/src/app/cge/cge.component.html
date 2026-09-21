@@ -1,0 +1,350 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Centros gestores</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            class="search-bar"
+                            name="search"
+                            [(ngModel)]="searchTerm"
+                            (ngModelChange)="searchTerm = $event"
+                            (input)="handleSearchInput($event)"
+                            placeholder="Buscar centro gestor"
+                        >
+                    </div>
+                    <div class="btns">
+                        <button class="purple-btn" (click)="searchCentroGestor()">Buscar</button>
+                        <button class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="excelDownload()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="pdfDownload()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="launchAddCentroGestor()">Añadir</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="errorBtn">{{ SearchDownMessageError }}</h1>
+        <div class="main-list">
+            <h1 class="successBtn">{{ successAddCentroGestor }}</h1>
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('cgecod')">
+                            Código
+                            <span class="sort-indicator" *ngIf="sortField === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgedes')">
+                            Descripción
+                            <span class="sort-indicator" *ngIf="sortField === 'cgedes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgeorg')">
+                            Orgánica
+                            <span class="sort-indicator" *ngIf="sortField === 'cgeorg'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgefun')">
+                            Programa
+                            <span class="sort-indicator" *ngIf="sortField === 'cgefun'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('cgecicDisplay')">
+                            Cierre contable
+                            <span class="sort-indicator" *ngIf="sortField === 'cgecicDisplay'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let c of paginatedCentroGestor">
+                        <td (click)="showDetails(c)" style="cursor: pointer;">{{ c.cgecod }}</td>
+                        <td>{{ c.cgedes }}</td>
+                        <td>{{ c.cgeorg }}</td>
+                        <td>{{c.cgefun }}</td>
+                        <td>{{ getkCGECIC(c.cgecic) }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPages"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedCentroGestor"></div>
+            <div class="display">
+                <div class="modal" *ngIf="selectedCentroGestor">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles de centro gestor</h3>
+                        </div>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+                            [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="closeDetails()"
+                        >✖</button>
+                    </div>   
+                    <h1 class="successBtn">{{ centroGestorSuccessMessage }}</h1>
+                    <h1 class="errorBtn">{{ centroGestorErrorMessage }}</h1>
+                    <div *ngIf="isUpdating" class="loading-message">
+                        <div class="spinner"></div>
+                        <span>actualizando</span>
+                    </div>
+                    <div class="detail-container">
+                        <div class="chunk">
+                            <div class="left">
+                                <p class="p-style">Código</p>
+                                <p class="p-style">Programa</p>
+                                <p class="p-style">Estado contable</p>
+                            </div>
+                            <div class="right">
+                                <div class="on-two">
+                                    <h1 class="h1-style">{{tempCentroGestor.cgecod || '#'}}</h1>
+                                    <p class="p-style">Orgánica</p>
+                                    <textarea
+                                        class="mediumText textArea-style" 
+                                        [(ngModel)]="tempCentroGestor.cgeorg"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #cgeorg
+                                    ></textarea>
+                                </div>
+                                <div class="on-two">
+                                    <textarea 
+                                        class="smallText textArea-style" 
+                                        [(ngModel)]="tempCentroGestor.cgefun"
+                                        (input)="allowOnlyDigits($event)"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #cgefun
+                                    ></textarea>
+                                    <p class="p-style">Descripción</p>
+                                    <textarea 
+                                        class="textArea-style tallText" 
+                                        [(ngModel)]="tempCentroGestor.cgedes" 
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        #cgedes
+                                    ></textarea>
+                                </div>
+                                <div class="on-two margin">
+                                    <input 
+                                        type="radio" 
+                                        name="cont-option" 
+                                        [checked]="isCgecic(0)"
+                                        (change)="setCgecic(0)"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                    >
+                                    <span class="radio-name">Abierto</span>
+                                    <input 
+                                        type="radio" 
+                                        name="cont-option" 
+                                        [checked]="isCgecic(2)"
+                                        (change)="setCgecic(2)"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                    >
+                                    <span class="radio-name">Cerrado Para Contabilizar</span>
+                                    <input 
+                                        type="radio" 
+                                        name="cont-option" 
+                                        [disabled]="!isUpdate"
+                                        [checked]="isCgecic(1)"
+                                        (change)="setCgecic(1)"
+                                        (input)="allowToUpdate = true"
+                                    >
+                                    <span class="radio-name">Cerrado</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="long-text">
+                            <p class="p-style">Dirección para pedido</p>
+                            <textarea 
+                                class="textArea-style"
+                                [(ngModel)]="tempCentroGestor.cgedat"
+                                [disabled]="!isUpdate"
+                                (input)="allowToUpdate = true"
+                                #cgedat
+                            ></textarea>
+                        </div>
+                    </div>
+                    <div class="btns marginBtns">
+                        <button 
+                            class="red-btn" 
+                            *ngIf="isUpdate" 
+                            (click)="cancelar()"
+                        >Cancelar</button>
+                        <button 
+                            class="purple-btn"
+                            [disabled]="isUpdate" 
+                            *ngIf="!isUpdate" 
+                            (click)="modificar()"
+                        >Modificar</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="!isUpdate" 
+                            *ngIf="isUpdate" 
+                            (click)="isUpdateAllowed(selectedCentroGestor.cgecod ,cgedes.value ,cgeorg.value ,cgefun.value, cgedat.value)"
+                        >Guardar</button>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+                            [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="openDeleteConfirm(selectedCentroGestor.cgecod)"
+                        >Borrar</button>
+                    </div> 
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showDeleteConfirm"></div>
+<div class="delete-confirm-modal" *ngIf="showDeleteConfirm">
+    <div class="btns">
+        <button class="purple-btn" (click)="closeDeleteConfirm()">✖</button>
+    </div>
+    <h3>¿Seguro que quieres eliminar este Centro gestor?</h3>
+    <h1 class="errorBtn">{{deleErr}}</h1>
+    <div *ngIf="isDeleting" class="loading-message">
+        <div class="spinner"></div>
+        <span>borrando</span>
+    </div>
+    <button class="red-btn" (click)="confirmDelete()">Confirmar</button>
+</div>
+
+<div class="modal-backdrop" *ngIf="showAddConfirm"></div>
+<div class="add-confirm-modal" *ngIf="showAddConfirm">
+    <div class="btns">
+        <div class="title">
+            <h3>Añadir un Centro Gestor</h3>
+        </div>
+        <button class="purple-btn" (click)="AddCentroGestor(codigo.value, organica.value, programa.value, description.value, direction.value)">+ Cargar</button>
+        <button class="red-btn" (click)="closeAddConfirm()">✖</button>
+    </div>
+    <h1 class="errorBtn">{{ centroGestorAddError }}</h1>
+    <div *ngIf="isAdding" class="loading-message">
+        <div class="spinner"></div>
+        <span>añadiendo</span>
+    </div>
+    <table class="details-table cgeDetail">
+        <tr>
+            <td>
+                <p class="p-style">Código*</p>
+            </td>
+            <td>
+                <textarea
+                    class="textArea-style smallText"
+                    (input)="setCgeToUpper($event)"
+                    #codigo
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Orgánica</p>
+            </td>
+            <td>
+                <textarea 
+                    (input)="allowOnlyDigits($event)"
+                    class="textArea-style smallText" 
+                    #organica>
+                </textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Programa</p>
+            </td>
+            <td>
+                <textarea
+                    class="textArea-style smallText"
+                    (input)="allowOnlyDigits($event)"
+                    #programa
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Descripción*</p>
+            </td>
+            <td>
+                <textarea 
+                    #description 
+                    class="textArea-style tallText"
+                ></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Dirección para pedido</p>
+            </td>
+            <td>
+                <textarea #direction class="textArea-style tallText"></textarea>
+            </td>
+        </tr>
+        <tr>
+            <td>
+                <p class="p-style">Estado contable</p>
+            </td>
+            <td>
+                <div class="cell-content">
+                    <input 
+                        type="radio" 
+                        name="cont-option" 
+                        [checked]="newCgecic === 0"
+                        (change)="setAddCgecic(0)"
+                    >
+                    <span class="radio-name">Abierto</span>
+                    <input 
+                        type="radio" 
+                        name="cont-option" 
+                        [checked]="newCgecic === 2"
+                        (change)="setAddCgecic(2)"
+                    >
+                    <span class="radio-name">Cerrado Para Contabilizar</span>
+                    <input 
+                        type="radio" 
+                        name="cont-option" 
+                        [checked]="newCgecic === 1"
+                        (change)="setAddCgecic(1)"
+                    >
+                    <span class="radio-name">Cerrado</span>
+                </div>
+            </td>
+        </tr>
+    </table>
+</div>

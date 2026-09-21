@@ -1,0 +1,27 @@
+/* search */
+.search-container {gap: 20px;}
+/* search */
+/* main-list and table */
+.main-list { width: 50%; }
+.main-table thead th:first-child { width: 20%;}
+/* main-list and table */
+/* detail grid */
+.modal{ width: 65%;}
+.detail-container { display: flex;flex-direction: column; gap: 5px; padding: 1%;}
+.chunk{ display: flex; padding: 2px; gap: 10px;}
+.left { width: 5%; display: flex; flex-direction: column; gap: 10px; justify-content: center; }
+.right { width: 95%; display: flex; flex-direction: column; gap: 10px;}
+.on-two { display: flex; gap: 10px; align-items: center;} 
+.tallText { width: 450px; max-width: 625px;}
+.smallText { width: 50px; max-width: 80px;}
+.delete-confirm-modal {top: 220px;}
+/* detail grid */
+/* add grid */
+.coste-modal { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); background: #fff; border-radius: 16px; box-shadow: 0 8px 32px rgba(44, 62, 80, 0.18), 0 1.5px 6px rgba(44,62,80,0.08); padding: 25px 30px; min-width: 500px; min-height: 100px; z-index: 3000; display: flex; flex-direction: column; align-items: center; }
+.margin{ margin-left: 10px;}
+.title{width: 49%;}
+/* add grid */
+@media (max-width: 1299px), (min-width: 1350px) {
+    .modal {top: 30%;}
+    .delete-confirm-modal {top: 30%;}
+}

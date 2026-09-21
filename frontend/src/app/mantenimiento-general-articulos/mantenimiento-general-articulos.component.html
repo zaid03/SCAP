@@ -1,0 +1,908 @@
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Mantenimiento General de artículos</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <span>Buscar</span>
+                        <input 
+                            type="text"   
+                            class="search-bar" 
+                            placeholder="Buscar"
+                            [(ngModel)]="search"
+                        />
+                        <span>Familia</span>
+                        <input 
+                            type="text" 
+                            class="search-bar smallWidth" 
+                            placeholder="Familia"
+                            name="familia"
+                            [(ngModel)]="afacod"
+                            (input)="afacod = checkUpperFour(afacod)"
+                            maxlength="4"
+                        >
+                        <span>Subfamilia</span>
+                        <input 
+                            type="text" 
+                            name="subfamilia" 
+                            class="search-bar smallWidth"
+                            placeholder="Subfamilia"
+                            [(ngModel)]="asucod"
+                            (input)="asucod = checkUpperFour(asucod)"
+                            maxlength="4"
+                        />
+                        <div class="search-options">
+                            <label>
+                                <input 
+                                    type="radio" 
+                                    name="optiones" 
+                                    value="todos" 
+                                    [(ngModel)]="bloqueado"
+                                /> Todos
+                                <input 
+                                    type="radio" 
+                                    name="optiones" 
+                                    value="nobloqueado" 
+                                    [(ngModel)]="bloqueado"
+                                /> No Bloqueados
+                                <input 
+                                    type="radio" 
+                                    name="optiones" 
+                                    value="bloqueado" 
+                                    [(ngModel)]="bloqueado"
+                                /> Bloqueados
+                            </label>
+                        </div>                    
+                    </div>
+                    <div class="btns">
+                        <button type="button" class="purple-btn" (click)="searchArticulo()">Buscar</button>
+                        <button type="button" class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="DownloadPDF()">Exportar a PDF</button>
+                    <button class="purple-btn" (click)="downloadExcel()">Exportar a EXCEL</button>
+                    <button class="purple-btn" (click)="openAdd()">Añadir artículo</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="errorBtn">{{articuloError}}</h1>
+        <h1 class="successBtn">{{articuloSuccess}}</h1>
+        <div class="main-list">
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('afacod')">
+                            Familia
+                            <span class="sort-indicator" *ngIf="sortColumn === 'afacod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('asucod')">
+                            Subfamilia
+                            <span class="sort-indicator" *ngIf="sortColumn === 'asucod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('artcod')">
+                            Código
+                            <span class="sort-indicator" *ngIf="sortColumn === 'artcod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('artdes')">
+                            Descripción
+                            <span class="sort-indicator" *ngIf="sortColumn === 'artdes'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('artuni')">
+                            Estocaje
+                            <span class="sort-indicator" *ngIf="sortColumn === 'artuni'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('artref')">
+                            Referencia universal
+                            <span class="sort-indicator" *ngIf="sortColumn === 'artref'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('artblo')">
+                            Bloqueo
+                            <span class="sort-indicator" *ngIf="sortColumn === 'artblo'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedArticulos"
+                        [class.bloqueado]="p.artblo === 1"
+                    >
+                        <td
+                            style="cursor: pointer;" 
+                            (click)="showDetails(p)"
+                        >{{p.afacod}}</td>
+                        <td>{{p.asucod}}</td>
+                        <td>{{p.artcod}}</td>
+                        <td>{{p.artdes}}</td>
+                        <td>{{p.artuni}}</td>
+                        <td>{{p.artref}}</td>
+                        <td>{{isBloqueado(p.artblo)}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página {{page + 1}} de {{pagination}}</span>
+                <button (click)="nextPage()">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedArticulo" (click)="closeDetailsSure()"></div>
+            <div class="display">
+                <div class="modal" *ngIf="selectedArticulo">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles de Artículo</h3>
+                        </div>
+                        <button 
+                            class="red-btn"
+                            [disabled]="isUpdate" 
+	                        [ngClass]="{ 'disabled-btn': isUpdate }"  
+                            (click)="closeDetails()"
+                        >✖</button>
+                    </div> 
+                    <h1 class="errorBtn">{{articuloDetailError}}</h1>
+                    <h1 class="successBtn">{{articuloDetailSuccess}}</h1> 
+                    <div *ngIf="isUpdating" class="loading-message">
+                        <div class="spinner"></div>
+                        <span>actualizando</span>
+                    </div>    
+                    <div class="detail-container">
+                        <table class="details-table">
+                            <tr>
+                                <td>
+                                    <p class="p-style">Familia</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.afacod"
+                                            class="textArea-style smallTextArea" 
+                                            disabled
+                                        ></textarea>
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.afa_AFADES"
+                                            class="textArea-style tallText" 
+                                            disabled
+                                        ></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Existencias</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artuni"
+                                        class="textArea-style averageTextArea" 
+                                        disabled
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Stock virtual</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [ngModel]="calculateKEstVir(tempArticulo.artuni, tempArticulo.artsol, tempArticulo.artrec)"
+                                        class="textArea-style averageTextArea"
+                                        disabled 
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Subfamilia</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.asucod"
+                                            class="textArea-style smallTextArea" 
+                                            disabled
+                                        ></textarea>
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.asu_ASUDES"
+                                            class="textArea-style tallText" 
+                                            disabled
+                                        ></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Pte. Servir</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artsol"
+                                        class="textArea-style averageTextArea"
+                                        disabled 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Mínimo</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artmin"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style averageTextArea" 
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Código</p>
+                                </td>
+                                <td>
+                                    <div class="cell-content">
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.artcod"
+                                            class="textArea-style smallTextArea"
+                                            disabled 
+                                        ></textarea>
+                                        <textarea
+                                            [(ngModel)]="tempArticulo.artdes"
+                                            class="textArea-style tallText" 
+                                            disabled
+                                        ></textarea>
+                                    </div>
+                                </td>
+                                <td>
+                                    <p class="p-style">Pte. Entrada</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artrec"
+                                        class="textArea-style averageTextArea"
+                                        disabled 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Óptimo</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artopt"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style averageTextArea" 
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Referencia virtual</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artref"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style fix" 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Uni.Consumo/Unidad</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artuco"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style averageTextArea" 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Solicitar</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [ngModel]="calculateKUniSol(tempArticulo.artuni, tempArticulo.artsol, tempArticulo.artrec, tempArticulo.artmin, tempArticulo.artopt)"
+                                        class="textArea-style averageTextArea" 
+                                        disabled
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Uni./Embalaje</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artuem"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style fix" 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Pedido mínimo</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artpmi"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                        class="textArea-style averageTextArea" 
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Precio Medio</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [(ngModel)]="tempArticulo.artpmp"
+                                        class="textArea-style averageTextArea"
+                                        disabled 
+                                    ></textarea>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Tipo unidades</p>
+                                </td>
+                                <td>
+                                    <select 
+                                        class="select-style selectSpecial"
+                                        [disabled]="!isUpdate"
+                                        [(ngModel)]="auncodMod"
+                                        (change)="allowToUpdate = true"
+                                    >
+                                        <option *ngFor="let t of tipos" [value]="t.auncod">
+                                            {{t.aundes}}
+                                        </option>
+                                    </select>
+                                </td>
+                                <td>
+                                    <p class="p-style">Valor existencia</p>
+                                </td>
+                                <td>
+                                    <textarea
+                                        [ngModel]="calculateKvalExi(tempArticulo.artuni, tempArticulo.artpmp)"
+                                        class="textArea-style averageTextArea" 
+                                        disabled
+                                    ></textarea>
+                                </td>
+                                <td colspan="2">
+                                    <div class="bloq">
+                                        <input 
+                                            class="checkbox" 
+                                            type="checkbox" 
+                                            [disabled]="!isUpdate"
+                                            [checked]="tempArticulo.artblo === 1"
+                                            (change)="tempArticulo.artblo = (tempArticulo.artblo === 1 ? 0 : 1); allowToUpdate = true"
+                                        /> <span class="p-style">Bloqueado</span>
+                                    </div>
+                                </td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="btns margin">
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="isUpdate"
+                            [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="openProveedores()"
+                        >Añadir proveedores</button>
+                        <button 
+                            class="red-btn" 
+                            *ngIf="isUpdate" 
+                            (click)="cancelar()"
+                        >Cancelar</button>
+                        <button 
+                            class="purple-btn"
+                            [disabled]="isUpdate" 
+                            *ngIf="!isUpdate" 
+                            (click)="modificar()"
+                        >Modificar</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="!isUpdate" 
+	                        *ngIf="isUpdate" 
+                            (click)="isUpdateAllowed()"
+                        >Guardar</button>
+                        <button 
+                            class="red-btn" 
+                            [disabled]="isUpdate" 
+                            [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            (click)="openDeleteConfirm()"
+                        >Borrar</button>
+                    </div>
+                    <div class="more-detail-container">
+                        <div class="tabs" role="tablist" aria-label="Detalle tabs">
+                            <button
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="activeDetailTab === 'proveedores'"
+                                [class.active-tab]="activeDetailTab === 'proveedores'"
+                                (click)="showProveedores()"
+                            >
+                                Proveedores
+                            </button>
+                            <button
+                                class="tab-btn"
+                                role="tab"
+                                [attr.aria-selected]="activeDetailTab === 'existencias'"
+                                [class.active-tab]="activeDetailTab === 'existencias'"
+                                (click)="showExistencias()"
+                            >
+                                Existencias
+                            </button> 
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" *ngIf="showProveedoresGrid">
+                        <h1 class="errorBtn">{{proveedoresError}}</h1>
+                        <div *ngIf="isLoadingProveedores" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>Cargando</span>
+                        </div>
+                        <table class="main-table">
+                            <thead>
+                                <tr>
+                                    <th>Cod.Prov</th>
+                                    <th>Proveedor</th>
+                                    <th>Referencia Prov.</th>
+                                    <th>Unid.Embalaje</th>
+                                    <th>Observaciones</th>
+                                    <th>Accíon</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let p of paginatedProveedores">
+                                    <td>{{p.tercod}}</td>
+                                    <td>{{p.ter_TERNOM}}</td>
+                                    <td>
+                                        <textarea 
+                                            [(ngModel)]="p.aprref"
+                                            class="textArea-style tallTextDetail"    
+                                            #refernciaUpdate
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <textarea 
+                                            [(ngModel)]="p.apruem"
+                                            class="textArea-style tallTextDetail"    
+                                            #numberUpdate
+                                        ></textarea>
+                                    </td>
+                                    <td>
+                                        <textarea 
+                                            [(ngModel)]="p.aprobs"
+                                            class="textArea-style tallTextDetail"  
+                                            #descUpdate  
+                                        ></textarea>
+                                    </td>
+                                    <td class="gap">
+                                        <button
+                                            (click)="updateProveedor(p.tercod, refernciaUpdate.value, numberUpdate.value, descUpdate.value)"
+                                            class="purple-btn margin-btn" 
+                                        > ✔ </button>
+                                        <button 
+                                            class="red-btn"
+                                            (click)="showdeleteProv(p.tercod)"
+                                        >-</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination-controls">
+                            <button (click)="prevPageProv()" [disabled]="pageProv === 0">Anterior</button>
+                            <span>Página</span>
+                            <input
+                                type="number"
+                                min="1"
+                                [max]="totalPagesProveedores"
+                                [value]="pageProv + 1"
+                                (change)="goToPageProv($event)"
+                                class="pagination-input"
+                                class="pagination-input"
+                            />
+                            <span>de {{ totalPagesProveedores }}</span>
+                            <button (click)="nextPageProv(  )" [disabled]="pageProv + 1 >= totalPagesProveedores">Siguiente</button>
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" *ngIf="showExistenciasGrid">
+                        <h1 class="errorBtn">{{existenciasError}}</h1>
+                        <div *ngIf="isLoadingExtencias" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>Cargando</span>
+                        </div>
+                        <table class="main-table">
+                            <thead>
+                                <tr>
+                                    <th>Cod.Almacén</th>
+                                    <th>Servicio</th>
+                                    <th>Nombre servicio</th>
+                                    <th>Unidades</th>
+                                    <th>Localización</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let e of paginatedExistencias">
+                                    <td>{{e.magcod}}</td>
+                                    <td>{{e.depcod}}</td>
+                                    <td>{{e.depdes}}</td>
+                                    <td>{{e.meauni}}</td>
+                                    <td>{{e.mealoc}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <div class="pagination-controls">
+                            <button (click)="prevPageExistencias()" [disabled]="pageExistencia === 0">Anterior</button>
+                            <span>Página</span>
+                            <input
+                                type="number"
+                                min="1"
+                                [max]="totalPagesExistencias"
+                                [value]="pageExistencia + 1"
+                                (change)="goToPageExistencias($event)"
+                                class="pagination-input"
+                                class="pagination-input"
+                            />
+                            <span>de {{ totalPagesExistencias }}</span>
+                            <button (click)="nextPageExistencias()" [disabled]="pageExistencia + 1 >= totalPagesExistencias">Siguiente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="showDeleteConfirm" (click)="closeDeleteGrid()"></div>
+<div class="delete-confirm-modal" *ngIf="showDeleteConfirm">
+    <h3>¿Seguro que quieres eliminar este Artículo?</h3>
+    <h1 class="errorBtn">{{delErr}}</h1>
+    <div *ngIf="isDeleting" class="loading-message">
+        <div class="spinner"></div>
+        <span>borrando</span>
+    </div>
+    <button class="red-btn margin-btn" (click)="confirmDelete()">-</button>
+    <button class="purple-btn" (click)="closeDeleteGrid()">✖</button>
+</div>
+
+<div class="modal-backdrop" *ngIf="showAddGrid" (click)="closeAdd()"></div>
+<div class="add-confirm-modal addArt" *ngIf="showAddGrid">
+    <div class="btns">
+        <div class="title">
+            <h3>Añadir una Artículo</h3>  
+        </div>
+        <button class="purple-btn" (click)="addArticulos()">+ Cargar</button>
+        <button class="red-btn" (click)="closeAdd()">✖</button>
+    </div>
+    <h1 class="errorBtn">{{addArticuloError}}</h1>
+    <div *ngIf="isAdding" class="loading-message">
+        <div class="spinner"></div>
+        <span>añadiendo</span>
+    </div>
+    <div class="detail-container">
+        <table class="details-table">
+            <tr>
+                <td>
+                    <p class="p-style">Familia*</p>
+                </td>
+                <td>
+                    <select 
+                        class="select-style selectAdd"
+                        [(ngModel)]="familiaAdd"
+                        (ngModelChange)="fetchSubFamilias($event)"
+                    >
+                        <option *ngFor="let t of familias" [value]="t.afacod">
+                            {{t.afades}}
+                        </option>
+                    </select>
+                </td>
+                <td>
+                    <p class="p-style">Subfamilia*</p>
+                </td>
+                <td>
+                    <select 
+                        class="select-style selectAdd"
+                        [(ngModel)]="subfamiliasAdd"
+                    >
+                        <option *ngFor="let t of subfamilias" [value]="t.asucod">
+                            {{t.asudes}}
+                        </option>
+                    </select>
+                </td>
+                <td>
+                    <p class="p-style">Código*</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="codigoAdd"
+                        (ngModelChange)="codigoAdd = $event.toUpperCase()"
+                    >
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="p-style">Descripción*</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="descriptionAdd"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Referencia universal</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="refUni"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Existencias</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="existenciasAdd"
+                    >
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="p-style">Pte. Servir</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="pteServir"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Pte. Entrada</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="pteEntrada"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Tipo Unidades</p>
+                </td>
+                <td>
+                    <select 
+                        class="select-style selectAdd"
+                        [(ngModel)]="auncodMod"
+                    >
+                        <option *ngFor="let t of tipos" [value]="t.auncod">
+                            {{t.aundes}}
+                        </option>
+                    </select>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="p-style">Estocaje virtual</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [value]="calculateKEstVir(existenciasAdd, pteServir, pteEntrada)"
+                        disabled
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Estocaje óptimo</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="estoOptimo"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Estocaje mínimo</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="estoMinimo"
+                    >
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="p-style">Unidades en embalaje</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="uniEmbalaje"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Unidades de consumo</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="uniDeCon"
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Precio medio ponderado</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [(ngModel)]="preMePon"
+                    >
+                    </textarea>
+                </td>
+            </tr>
+            <tr>
+                <td>
+                    <p class="p-style">Valor existencias</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [value]="calculateKvalExi(existenciasAdd, preMePon)"
+                        disabled
+                    >
+                    </textarea>
+                </td>
+                <td>
+                    <p class="p-style">Solicitar</p>
+                </td>
+                <td>
+                    <textarea
+                        class="textArea-style textAdd"
+                        [value]="calculateKUniSol(existenciasAdd, pteServir, pteEntrada, estoMinimo, estoOptimo)"
+                        disabled
+                    >
+                    </textarea>
+                </td>
+                <td colspan="2">
+                    <div class="bloq">
+                        <input 
+                            type="checkbox" 
+                            class="checkbox" 
+                            [(ngModel)]="bloqAdd"
+                            (change)="bloqAdd = (bloqAdd === 1 ? 0 : 1);"
+                        /><span class="p-style">Bloqueado</span>
+                    </div>
+                </td>
+            </tr>
+        </table>
+    </div>
+</div>
+
+<div class="modal-backdrop" *ngIf="deleteProveedorGrid"></div>
+<div class="delete-confirm-modal" *ngIf="deleteProveedorGrid">
+    <h3>¿Seguro que quieres eliminar este proveedor?</h3>
+    <h1 class="errorBtn">{{delErrProv}}</h1>
+    <div *ngIf="isDeleting" class="loading-message">
+        <div class="spinner"></div>
+        <span>borrando</span>
+    </div>
+    <button class="red-btn margin-btn" (click)="deleteProveedor()">-</button>
+    <button class="purple-btn" (click)="closeDeleteProv()">✖</button>
+</div>
+
+<div class="modal-backdrop" *ngIf="showProveedorGrid"></div>
+<div class="proveedor-grid-modal" *ngIf="showProveedorGrid">
+    <div class="btns btnsGrid">
+        <div class="title">
+            <p class="p-style sizeTitle">Seleccione un proveedor</p>
+        </div>
+        <div class="info">
+            <p class="p-style" *ngIf="provsNumber > 0">Se seleccionan {{provsNumber}} proveedores</p>
+            <button class="purple-btn size" (click)="addProveedorToArticulo()">+</button>
+            <button class="red-btn" (click)="closeProveedores()">✖</button>
+        </div>
+    </div>
+    <div class="search-holder provs-add-search">
+        <div class="search-container">
+            <form class="search-form provs-add">
+                <input type="text" class="search-bar" placeholder="Buscar proveedor" name="search" [(ngModel)]="searchTerm"/>
+                <div class="search-options">
+                    <label>
+                        <input type="radio" name="optiones" value="todos" [(ngModel)]="filterOption" /> Todos
+                        <input type="radio" name="optiones" value="Nobloqueado" [(ngModel)]="filterOption" /> No Bloqueados
+                        <input type="radio" name="optiones" value="bloqueado" [(ngModel)]="filterOption"  /> Bloqueados
+                    </label>
+                </div>
+                <div class="search-btns provs-add-btns">
+                    <button type="button" class="purple-btn" (click)="searchProveedor()">Buscar</button>
+                    <button type="button" class="purple-btn" (click)="clearSearch()">Limpiar</button>
+                </div>
+            </form>
+        </div> 
+    </div>
+    <h1 class="errorBtn">{{error}}</h1>
+    <div *ngIf="isLoadingPro" class="loading-message">
+        <div class="spinner"></div>
+        <span>Cargando</span>
+    </div>
+    <div class="main-list">
+        <table  class="provs-table main-table">
+            <thead>
+                <tr>
+                    <th>Código</th>
+                    <th>Nombre</th>
+                    <th>NIF</th>
+                    <th>Alias</th>
+                    <th>Teléfono</th>
+                    <th>Domicilio</th>
+                    <th>Código Postal</th>
+                    <th>Municipio</th>
+                    <th>Correo electrónico</th>
+                    <th>Observaciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr *ngFor="let p of paginatedProveedoresAdd" [class.grey-row]="p.terblo == 1" [class.selected-row]="isSelected(p.tercod)">
+                    <td style="cursor: pointer;" (click)="selectProveedor(p.tercod)">{{ p.tercod }}</td>
+                    <td>{{ p.ternom }}</td>
+                    <td>{{ p.ternif }}</td>
+                    <td>{{ p.terali }}</td>
+                    <td>{{ p.tertel }}</td>
+                    <td>{{ p.terdom }}</td>
+                    <td>{{ p.tercpo }}</td>
+                    <td>{{ p.terpob }}</td>
+                    <td>{{ p.tercoe }}</td>
+                    <td>{{ p.terobs }}</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+    
+    <div class="container-pag-wrap">
+        <div class="pagination-controls">
+            <button class="pag-btn" (click)="prevPagePro()" [disabled]="pagePro === 0">Anterior</button>
+            <span>Página</span>
+            <input
+            type="number"
+            min="1"
+            [max]="totalPagesPro"
+            [value]="pagePro + 1"
+            (change)="goToPagePro($event)"
+            class="pagination-input"
+            />
+            <span>de {{ totalPagesPro }}</span>
+            <button class="pag-btn" (click)="nextPagePro()" [disabled]="pagePro + 1 >= totalPagesPro">Siguiente</button>
+        </div>
+    </div>
+</div>

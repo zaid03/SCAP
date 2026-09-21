@@ -1,0 +1,89 @@
+/* search */
+.search-container { width: 95%;}
+.search-form { width: 75%;}
+.Widthy { width: 12%;}
+.search-form select { padding: 4px 6px; border-radius: 20px; border: 1px solid #bbb; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; outline: none; box-shadow: 0 1px 4px rgba(56,36,155,0.04); }
+.search-form option { outline: none; font-weight: bold;}
+/* search */
+/* main table */
+.main-list,
+.aT { width: 90%; }
+.align th:first-child,
+.align th:nth-child(3)  { width: 80px; }
+.align th:nth-child(4),
+.align th:nth-child(5),
+.align th:nth-child(6),
+.align th:nth-child(7) {width: 120px;}
+.align tbody td:nth-child(7),
+.align tbody td:nth-child(6),
+.align tbody td:nth-child(5) { text-align: center; }
+.custom-grid-modal .persona thead th:last-child { width: 80px;}
+.persona tbody td:last-child {display: flex; justify-content: center;}
+.custom-grid-modal .persona thead th:first-child {width: 220px;}
+.aT thead th:first-child {width: 150px;}
+/* main table */
+/* detail grid */
+.detail-container { display: flex; flex-wrap: wrap;}
+.special { width: 70%; height: 100px;}
+.large {width: 220px;}
+.average {width: 150px;}
+.short {width: 80px; max-width: 150px;}
+.main-table tbody td input[type="checkbox"],
+.checks input[type="checkbox"],
+.checkboxes input[type="checkbox"] { margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none; }
+.name {margin-left: 5px; font-size: 16px;}
+.checks {display: flex;  gap: 10px; align-items: center;}
+/* detail grid */
+/* detail grid's grids */
+.heighty { height: 50px !important;}
+.almacen-title { margin-top: 5px; width: 100%; display: flex; align-items: center; justify-content: center; gap: 10px;}
+/* detail grid's grids */
+/* add grid */
+.add-confirm-modal { position: fixed; top: 10%; left: 50%; width: 60%; }
+.checkboxes {display: flex; gap: 10px; align-items: center;}
+.title {width: 80%;}
+.short-add {width: 80px; max-width: 95px;}
+.long-add {width: 625px; max-width: 680px;}
+.average-add {width: 530px; max-width: 580px;}
+.hei {height: 50px !important;}
+.details-table {text-align: left;}
+.alignCheck {display: flex; justify-content: center;}
+/* add grid */
+/* add new service grid */
+.custom-grid-modal .add-btn {margin: 5px;}
+.custom-grid-modal .delete-btn { margin-left: 10px;}
+/* .delete-confirm-modal { display: flex; flex-direction: column; align-items: center; gap: 2px;} */
+.persona-details {width: 90%; display: flex; justify-content: center; gap: 10px;}
+/* add new service grid */
+/* add personas for a service */
+.proveedor-grid-modal{ position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 72%; max-width: 95%; max-height: 80vh; overflow: auto; background: #ffffff; border-radius: 12px; padding: 18px; box-shadow: 0 12px 36px rgba(0,0,0,0.18); z-index: 4000; display: flex; flex-direction: column; gap: 12px;}
+.proveedor-grid-modal .search-form {width: 22%;}
+.proveedor-grid-modal .search-container {width: 100%;}
+.proveedor-grid-modal .search-holder {width: 100%;}
+.all-add-content {display: flex; flex-direction: column; align-items: center;}
+.proveedor-grid-modal .pts thead th:first-child {width: 190px;}
+.proveedor-grid-modal .title {width: 60%;}
+.adj {top: 35%;}
+/* add personas for a service */
+/* media querries */
+@media screen and (min-width: 1450px) and (max-width: 1600px) {
+    .search-form {width: 68%;}
+    .Widthy {width: 10%; }
+}
+@media screen and (min-width: 1601px) and (max-width: 1800px) {
+    .search-form {width: 60%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 1801px) and (max-width: 1900px) {
+    .search-form {width: 53%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 1901px) and (max-width: 2099px) {
+    .search-form {width: 50%;}
+    .Widthy {width: 10%;}
+}
+@media screen and (min-width: 2100px) {
+    .search-form {width: 47%;}
+    .Widthy {width: 8%;}
+}
+/* media querries */

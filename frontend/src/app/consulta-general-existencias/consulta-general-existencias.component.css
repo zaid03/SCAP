@@ -1,0 +1,15 @@
+/* search */
+.title-area {width: 25%; justify-content: right;}
+.search-holder {width: 74%;}
+.search-form {width: 40%;}
+.search-holder .btns {width: 12%;}
+/* search */
+/* detail style */
+.smallTextArea {min-width: 10px; width: 50px; max-width: 80px;}
+.tallText {min-width: 80px; width: 200px; max-width: 250px;}
+.averageTextArea {min-width: 100px; width: 120px; max-width: 180px;}
+.checkbox {margin: 0; accent-color: #25176b; width: 14px; height: 18px; vertical-align: middle; outline: none; box-shadow: none;}
+.selectSpecial {height: 30px; width: 277px;}
+.fix {width: 265px; max-width: 340px;}
+.bloq {display: flex; justify-content: center; align-items: center; gap: 10px;}
+/* detail style */

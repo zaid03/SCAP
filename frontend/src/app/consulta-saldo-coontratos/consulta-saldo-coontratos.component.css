@@ -1,0 +1,23 @@
+/* main search */
+.title-area {width: 28%; display: flex; justify-content: flex-end;}
+.search-holder {width: 71%;}
+.search-container {width: 80%;}
+.search-form {width: 76%; gap: 10px;}
+.search-container .btns {width: 16%;}
+.smallWidth {width: 75px;}
+/* main search */
+/* main table */
+.con-tb tbody td:nth-child(11),
+.con-tb tbody td:nth-child(12),
+.con-tb tbody td:last-child {text-align: right;}
+/* main table */
+@media (min-width: 1500px) {
+  .search-form {width: 70%; gap: 10px;}
+}
+@media (min-width: 1800px) {
+  .search-form {width: 55%; gap: 10px;}
+}
+@media (min-width: 2000px) {
+  .search-form {width: 47%; gap: 10px;}
+  .search-container .btns {width: 11%;}
+}
