@@ -37,6 +37,25 @@ public class AfaController {
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
     
+    //method to fetch all familias for consulta analitica de familias
+    @GetMapping("/fetch-familia-analitica/{ent}")
+    public ResponseEntity<?> FetchFamiliaAnalitic (
+        @PathVariable Integer ent
+    ) {
+        try {
+            List<Afa> familias = afaRepository.findByENT(ent);
+
+            if (familias.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(familias);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
     @GetMapping("/by-ent/{ent}/{afacod}")
     public ResponseEntity<?> getByEntAndAfacod(
         @PathVariable int ent, 
@@ -52,6 +71,26 @@ public class AfaController {
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //for the search
+    @GetMapping("/by-ent-like/{ent}/{afades}")
+    public ResponseEntity<?> getByEntAndAfadesLike(
+        @PathVariable int ent, 
+        @PathVariable String afades
+    ) {
+        try {
+            List<ArticuloFamilia> familias = afaRepository.findByENTAndAFADESContaining(ent, afades);
+            if(familias.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Sin resultado");
+            }
+
+            return ResponseEntity.ok(familias);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body("Error : " + ex.getMostSpecificCause().getMessage());
         }
     }
 
@@ -166,5 +205,26 @@ public class AfaController {
 
         afaRepository.save(nueva);
         return ResponseEntity.status(HttpStatus.CREATED).build();
+    }
+
+    //needed to add an articulo for consulta general
+    @GetMapping("/fetching-fams/{ent}")
+    public ResponseEntity<?> famsFetching (
+        @PathVariable Integer ent
+    ) {
+        try {
+            if (ent == null) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+
+            List<Afa> familias = afaRepository.findByENT(ent);
+            if (familias.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(familias);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
     }
 }

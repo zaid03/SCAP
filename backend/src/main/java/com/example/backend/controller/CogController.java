@@ -15,11 +15,15 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.backend.dto.COGAIPOnlyDto;
 import com.example.backend.dto.CogCgeProjection;
 import com.example.backend.dto.CogSaveDto;
+import com.example.backend.dto.SaldoContrato;
+import com.example.backend.service.HistoricaADContratoSearch;
+import com.example.backend.service.SaldoContratoSearch;
 import com.example.backend.sqlserver2.model.Cog;
 import com.example.backend.sqlserver2.model.CogId;
 import com.example.backend.sqlserver2.repository.CogRepository;
@@ -29,6 +33,10 @@ import com.example.backend.sqlserver2.repository.CogRepository;
 public class CogController {
     @Autowired
     private CogRepository cogRepository;
+    @Autowired
+    private SaldoContratoSearch saldoContratoSearch;
+    @Autowired
+    private HistoricaADContratoSearch historicaADContratoSearch;
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -298,5 +306,91 @@ public class CogController {
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
+    }
+
+    //main fetch for C.saldo de contrato
+    @GetMapping("/Saldo-contrato/{ent}/{eje}")
+    public ResponseEntity<?> fetchSaldoContrato (
+        @PathVariable Integer ent,
+        @PathVariable String eje
+    ) {
+        try {
+            List<SaldoContrato> contratos = cogRepository.findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONot(ent, eje, 3, 1);
+            if (contratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(contratos);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //filtering for C.saldo de contrato
+    @GetMapping("/search-saldo-contrato/{ent}/{eje}")
+    public ResponseEntity<?> searchSaldoContrato (
+        @PathVariable Integer ent,
+        @PathVariable String eje,
+        @RequestParam(required = false) String cge,
+        @RequestParam(required = false) String contrato,
+        @RequestParam(required = false) String proveedor
+    ) {
+        try {
+            if (cge == null && contrato == null && proveedor == null) {
+            return ResponseEntity.badRequest().body("Faltan datos obligatorios");
+            }
+
+            List<SaldoContrato> contratos = saldoContratoSearch.searchSaldoContratos(ent, eje, cge, contrato, proveedor);
+            if (contratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(contratos);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }  
+    }
+
+    //main fetch for historica de ad
+    @GetMapping("/historia-ADcontrato/{ent}/{eje}")
+    public ResponseEntity<?> fetchHistoriaADContrato (
+        @PathVariable Integer ent,
+        @PathVariable String eje
+    ) {
+        try {
+            List<SaldoContrato> contratos = cogRepository.findByENTAndEJEAndCot_conn_CONTIP(ent, eje, 3);
+            if (contratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(contratos);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //filtering for historica de ad
+    @GetMapping("/search-historia-ADcontrato/{ent}/{eje}")
+    public ResponseEntity<?> searchHistoriaContrato (
+        @PathVariable Integer ent,
+        @PathVariable String eje,
+        @RequestParam(required = false) String cge,
+        @RequestParam(required = false) String contrato,
+        @RequestParam(required = false) String proveedor
+    ) {
+        try {
+            if (cge == null && contrato == null && proveedor == null) {
+            return ResponseEntity.badRequest().body("Faltan datos obligatorios");
+            }
+
+            List<SaldoContrato> contratos = historicaADContratoSearch.historicaADContratoSearch(ent, eje, cge, contrato, proveedor);
+            if (contratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(contratos);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }  
     }
 }

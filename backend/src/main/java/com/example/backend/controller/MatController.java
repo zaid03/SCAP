@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.controller.MatController.MatDto;
+import com.example.backend.dto.magcodOnly;
 import com.example.backend.sqlserver2.model.Mag;
 import com.example.backend.sqlserver2.model.Mat;
 import com.example.backend.sqlserver2.model.Mta;
@@ -51,7 +51,7 @@ public class MatController {
         @PathVariable String depcod
     ) {
         try {
-            Optional<Mag> service = magRepository.findByENTAndDEPCOD(ent, depcod);
+            Optional<magcodOnly> service = magRepository.findByENTAndDEPCOD(ent, depcod);
             if (service.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Sin resultado");
             }

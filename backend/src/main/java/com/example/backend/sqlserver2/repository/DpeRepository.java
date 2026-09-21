@@ -10,11 +10,15 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.data.domain.Pageable;
 
 import com.example.backend.dto.personasPorServiciosProjection;
+import com.example.backend.dto.ServiceMagsProjection;
 import com.example.backend.sqlserver2.model.Dpe;
 import com.example.backend.sqlserver2.model.DpeId;
 
 @Repository
 public interface DpeRepository extends JpaRepository<Dpe, DpeId> {
+    //fetch for C.exitencias almacen
+    List<ServiceMagsProjection> findByENTAndEJEAndPERCODAndDep_Cge_CGECODAndDep_DEPALM(Integer ent, String eje, String percod, String cgecod, Integer depalm);
+
     //inserting services
     List<Dpe> findByENTAndEJEAndDEPCOD(Integer ENT, String EJE, String DEPCOD);
 

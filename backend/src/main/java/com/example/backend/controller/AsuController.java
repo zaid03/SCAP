@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -28,6 +29,49 @@ public class AsuController {
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
+
+    // Method to find Asu records by ENT and AFACOD
+    @GetMapping("/by-ent/{ent}/{afacod}/{asucod}")
+    public ResponseEntity<?> getByEntAndAfacodOrAsucod(
+            @PathVariable int ent,
+            @PathVariable String afacod,
+            @PathVariable String asucod
+    ) {
+        try {
+            List<Asu> byAfacod = asuRepository.findByENTAndAFACOD(ent, afacod);
+        
+            List<Asu> byAsucod = asuRepository.findByENTAndASUCOD(ent, asucod);
+            
+            List<Asu> combined = Stream.concat(byAfacod.stream(), byAsucod.stream())
+                .distinct()
+                .toList();
+            
+            return ResponseEntity.ok(combined);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    // Method to find Asu records by ENT and ASUCOD like
+    @GetMapping("/by-ent-like/{ent}/{asudes}")
+    public ResponseEntity<?> getByEntAndAsudesLike(
+            @PathVariable int ent,
+            @PathVariable String asudes
+    ) {
+        try {
+            List<Asu> subfamilias = asuRepository.findAllByENTAndASUDESContaining(ent, asudes);
+            if(subfamilias.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(subfamilias);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
 
     //find an art name
     @GetMapping("/art-name/{ent}/{afacod}/{asucod}")
@@ -134,6 +178,28 @@ public class AsuController {
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //needed to add an articulo for consulta general
+    @GetMapping("/fetching-subs/{ent}/{afacod}")
+    public ResponseEntity<?> subsFetching (
+        @PathVariable Integer ent,
+        @PathVariable String afacod
+    ) {
+        try {
+            if (ent == null || afacod == null) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+
+            List<Asu> subfamilias = asuRepository.findByENTAndAFACOD(ent, afacod);
+            if (subfamilias.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(subfamilias);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
 }

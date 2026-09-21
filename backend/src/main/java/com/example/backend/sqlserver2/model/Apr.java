@@ -2,8 +2,12 @@ package com.example.backend.sqlserver2.model;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -36,6 +40,24 @@ public class Apr {
 
     @Column(nullable = true)
     private Integer APRACU;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumns({
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "AFACOD", referencedColumnName = "AFACOD", insertable = false, updatable = false),
+        @JoinColumn(name = "ASUCOD", referencedColumnName = "ASUCOD", insertable = false, updatable = false),
+        @JoinColumn(name = "ARTCOD", referencedColumnName = "ARTCOD", insertable = false, updatable = false),
+    })
+    private Art art;
+    public Art getArt() {return art;}
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumns({
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "TERCOD", referencedColumnName = "TERCOD", insertable = false, updatable = false)
+    })
+    private Ter ter;
+    public Ter getTer() {return ter;}
 
     public Integer getENT() {return ENT;}
     public void setENT(Integer ENT) {this.ENT = ENT;}

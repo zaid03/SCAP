@@ -1,8 +1,12 @@
 package com.example.backend.sqlserver2.model;
 
 import jakarta.persistence.Entity;
+import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinColumns;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.Table;
 
 @Entity
@@ -38,6 +42,15 @@ public class Mag {
     private String MUNCOD;
 
     private String PERCOD;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumns({
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "DEPCOD", referencedColumnName = "DEPCOD", insertable = false, updatable = false)
+
+    })
+    public Dep dep;
+    public Dep getDep() {return dep;}
 
     public Integer getENT() { return ENT; }
     public void setENT(Integer ENT) { this.ENT = ENT; }

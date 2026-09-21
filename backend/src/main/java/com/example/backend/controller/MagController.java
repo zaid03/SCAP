@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.MagShortDto;
+import com.example.backend.dto.magcodOnly;
 import com.example.backend.sqlserver2.model.Mag;
 import com.example.backend.sqlserver2.repository.MagRepository;
 
@@ -25,15 +26,19 @@ public class MagController {
         @PathVariable String depcod
     ) {
         try {
-            Optional<Mag> magOpt = magRepository.findByENTAndDEPCOD(ent, depcod);
+            Optional<magcodOnly> magOpt = magRepository.findByENTAndDEPCOD(ent, depcod);
             
             if (magOpt.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND)
                     .body("No resultado");
             }
             
-            Mag mag = magOpt.get();
-            MagShortDto dto = new MagShortDto(mag.getMAGCOD(), mag.getMAGNOM());
+            magcodOnly mag = magOpt.get();
+
+            MagShortDto dto = new MagShortDto(
+                mag.getMAGCOD(),
+                mag.getMAGNOM()
+            );
             
             return ResponseEntity.ok(dto);
         } catch (DataAccessException ex) {

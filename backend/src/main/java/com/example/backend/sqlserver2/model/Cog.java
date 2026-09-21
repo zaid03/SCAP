@@ -45,8 +45,16 @@ public class Cog {
         @JoinColumn(name = "CGECOD", referencedColumnName = "CGECOD", insertable = false, updatable = false)
     })
     private Cge cge;
-
     public Cge getCge() { return cge; }
+
+    @ManyToOne
+    @JoinColumns({
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "EJE", referencedColumnName = "EJE", insertable = false, updatable = false),
+        @JoinColumn(name = "CONCOD", referencedColumnName = "CONCOD", insertable = false, updatable = false)
+    })
+    private Cot cot;
+    public Cot getCot() { return cot; }
     
     public Integer getENT() {return ENT;}
     public void setENT(Integer ENT) {this.ENT = ENT;}

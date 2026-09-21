@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.backend.dto.AlmacenbyDep;
+import com.example.backend.dto.ConsultaAlmacenes;
 import com.example.backend.dto.DepWithCgeView;
 import com.example.backend.sqlserver2.model.Dep;
 import com.example.backend.sqlserver2.model.DepId;
@@ -296,5 +298,45 @@ public class DepController {
         return (dep.getDEPALM() == null || dep.getDEPALM() == 0) &&
             (dep.getDEPCOM() == null || dep.getDEPCOM() == 0) &&
             (dep.getDEPINT() == null || dep.getDEPINT() == 0);
+    }
+
+    //selecing services for consulta de almcenes 
+    @GetMapping("/fetch-consulta-almacenes/{ent}/{eje}")
+    public ResponseEntity<?> fetchConsultaAlmacenes (
+        @PathVariable Integer ent,
+        @PathVariable String eje
+    ) {
+        try {
+            List<ConsultaAlmacenes> almacenes = depRepository.findByENTAndEJEAndDEPALM(ent, eje, 1);
+
+            if (almacenes.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(almacenes);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //selecting almacen for consulta de articulos por almacen
+    @GetMapping("/fetch-almacenes-nombre/{ent}/{eje}/{percod}/{cgecod}")
+    public ResponseEntity<?> fetchAlmacenesNombre(
+        @PathVariable Integer ent,
+        @PathVariable String eje,
+        @PathVariable String percod,
+        @PathVariable String cgecod
+    ) {
+        try {
+            List<AlmacenbyDep> almacenes = depRepository.findByENTAndEJEAndDEPALMAndDpes_PERCODAndCge_CGECOD(ent, eje, 1, percod, cgecod);
+            if (almacenes.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(almacenes);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
     }
 }
