@@ -146,30 +146,35 @@
                             <span class="sort-indicator" *ngIf="sortColumn === 'facdat'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 9)"></div>
                         </th>
+                        <th class="sortable resizable" (click)="toggleSort('concod')">
+                            Contrato AD
+                            <span class="sort-indicator" *ngIf="sortColumn === 'concod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
                         <th class="sortable resizable" (click)="toggleSort('facado')">
                             ADO
                             <span class="sort-indicator" *ngIf="sortColumn === 'facado'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facfco')">
                             F.contable
                             <span class="sort-indicator" *ngIf="sortColumn === 'facfco'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('getPendingApply(p)')">
                             Pte. Aplicar
                             <span class="sort-indicator" *ngIf="sortColumn === 'getPendingApply(p)'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('cgecod')">
                             C.Gestor
                             <span class="sort-indicator" *ngIf="sortColumn === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 14)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('getStaus(p.facado, p.facimp, p.faciec, p.facidi)')">
                             Estado
                             <span class="sort-indicator" *ngIf="sortColumn === 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 14)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 15)"></div>
                         </th>
                     </tr>
                 </thead>
@@ -185,6 +190,7 @@
                         <td>{{ p.facann }}</td>
                         <td>{{ p.facfac }}</td>
                         <td>{{ p.facdat | date:'dd-MM-yyyy' }}</td>
+                        <td>{{ p.concod }}</td>
                         <td>{{ p.facado }}</td>
                         <td>{{ p.facfco | date:'dd-MM-yyyy' }}</td>
                         <td>{{getPendingApply(p) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
@@ -411,17 +417,25 @@
                                     <h1 class="h1-style">{{selectedFacturas.facfco | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Observaciones:</p>
+                                </td>
+                                <td colspan="3" class="expand">
+                                    <textarea 
+                                        class="textArea-style"
+                                        [(ngModel)]="selectedFacturas.facobs"
+                                       disabled
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Contrato AD:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedFacturas.concod}}</h1>
+                                </td>
+                            </tr>
                         </table>
-                        <div class="wrapper">
-                            <div class="observ">
-                                <p class="p-style">Observaciones:</p>
-                                <textarea 
-                                    class="textArea-style"
-                                    [(ngModel)]="selectedFacturas.facobs"
-                                    disabled
-                                ></textarea>
-                            </div>
-                        </div>
                     </div>
                     <div class="more-detail-container">
                         <div class="tabs" role="tablist" aria-label="Opciones de Albaranes">

@@ -25,4 +25,7 @@ public interface CotRepository extends JpaRepository<Cot, CotId> {
 
     //selecting one contratos for add
     Optional<CotContratoProjection> findProjectedByConnCONTIPAndConnENTAndConnEJEAndConnCONCOD(Integer CONTIP, Integer ent, String eje, Integer concod);
+
+    //needed for cargar facturas
+    List<Cot> findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(Integer ent, String eje, Integer tercod, Integer conblo, Integer contip);
 }

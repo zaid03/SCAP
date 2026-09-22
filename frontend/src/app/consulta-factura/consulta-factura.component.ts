@@ -126,7 +126,7 @@ export class ConsultaFacturaComponent {
   }
 
   //main table functions
-  sortField: 'facnum' | 'tercod' | 'ter_TERNOM' | 'ter_TERNIF' | 'facfre' | 'facimp' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'facado' | 'facfco' |'getPendingApply(p)' | 'cgecod' | 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)' | null = null;
+  sortField: 'facnum' | 'tercod' | 'ter_TERNOM' | 'ter_TERNIF' | 'facfre' | 'facimp' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'concod' | 'facado' | 'facfco' |'getPendingApply(p)' | 'cgecod' | 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   private defaultProveedores: any[] = [];
@@ -270,6 +270,7 @@ export class ConsultaFacturaComponent {
       facann: row.facann ?? '',
       facfac: row.facfac ?? '',
       facdat: this.formatDate(row.facdat),
+      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: this.formatDate(row.facfco),
       pendingApply: this.formatCurrency(this.getPendingApply(row)),
@@ -288,6 +289,7 @@ export class ConsultaFacturaComponent {
       { header: 'Año', dataKey: 'facann' },
       { header: 'R.C.F', dataKey: 'facfac' },
       { header: 'F.Factura', dataKey: 'facdat' },
+      { header: 'Contrato AD', dataKey: 'concod' },
       { header: 'ADO', dataKey: 'facado' },
       { header: 'F. Contable', dataKey: 'facfco' },
       { header: 'Pte. Aplicar', dataKey: 'pendingApply' },
@@ -321,7 +323,8 @@ export class ConsultaFacturaComponent {
         facdoc: { cellWidth: 20 },
         facann: { cellWidth: 15 },
         facfac: { cellWidth: 15 },
-        facdat: { cellWidth: 28 },
+        facdat: { cellWidth: 20 },
+        concod: { cellWidth: 15 },
         facado: { cellWidth: 15 },
         facfco: { cellWidth: 15 },
         pendingApply: { cellWidth: 15 },
@@ -356,6 +359,7 @@ export class ConsultaFacturaComponent {
       facann: row.facann ?? '',
       facfac: row.facfac ?? '',
       facdat: row.facdat ?? '',
+      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: row.facfco ?? '',
       getPendingApply: this.getPendingApply(row) ?? '',
@@ -366,7 +370,7 @@ export class ConsultaFacturaComponent {
     const worksheet = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, [['Listado de facturas']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe total', 'Num.Factura', 'Año', 'R.C.F', 'F.Factura', 'Ado', 'F.Contable', 'Pte. Aplicar', 'C.gestor', 'Estado']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe total', 'Num.Factura', 'Año', 'R.C.F', 'F.Factura', 'Contrato AD', 'Ado', 'F.Contable', 'Pte. Aplicar', 'C.gestor', 'Estado']], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
 
     worksheet['!cols'] = [
@@ -379,6 +383,7 @@ export class ConsultaFacturaComponent {
       { wch: 20 },
       { wch: 15 },
       { wch: 20 },
+      { wch: 10},
       { wch: 20 },
       { wch: 15 },
       { wch: 15 },

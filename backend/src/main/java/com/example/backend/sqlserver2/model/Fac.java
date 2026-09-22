@@ -101,6 +101,9 @@ public class Fac {
     @Column(nullable = true)
     private double FACDTO;
 
+    @Column(nullable = true)
+    private Integer CONCOD;
+
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumns({
         @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
@@ -188,4 +191,7 @@ public class Fac {
     
     public double getFACDTO() { return FACDTO; }
     public void setFACDTO(double FACDTO) { this.FACDTO = FACDTO; }
+
+    public Integer getCONCOD() {return CONCOD;}
+    public void setCONCOD(Integer CONCOD) {this.CONCOD = CONCOD;} 
 }

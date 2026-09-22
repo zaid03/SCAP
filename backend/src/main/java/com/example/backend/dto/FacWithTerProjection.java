@@ -29,7 +29,7 @@ public interface FacWithTerProjection {
     String getFACOPG();             
     String getFACTPG();
     Double getFACDTO();
-    
+    Integer getCONCOD();
     String getTer_TERNOM();
     String getTer_TERNIF();
 }

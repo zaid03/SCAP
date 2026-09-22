@@ -1,7 +1,11 @@
 package com.example.backend.service;
 
+import com.example.backend.dto.CuentaBancaria;
 import com.example.backend.dto.FacturaInsertDto;
+import com.example.backend.dto.Tercero;
+import com.example.backend.exception.XmlParsingException;
 import com.example.backend.sqlserver2.model.Cfg;
+import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Ter;
@@ -11,6 +15,8 @@ import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.TerRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.sqlserver2.repository.CotRepository;
+
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +36,10 @@ public class FacturaInsertService {
     private GbsRepository gbsRepository;
     @Autowired
     private FdeRepository fdeRepository;
+    @Autowired
+    private SicalService sicalService;
+    @Autowired
+    private CotRepository cotRepository;
 
     public NamesResponse insertFacturas(List<FacturaInsertDto> facturas) {
         List<FacturaInfo> savedNames = new ArrayList<>();
@@ -48,7 +58,8 @@ public class FacturaInsertService {
                     new FacturaInfo(
                         factura.get(0).getFACANN(),
                         factura.get(0).getFACTDC(),
-                        factura.get(0).getFACFAC()
+                        factura.get(0).getFACFAC(),
+                        ""
                     )
                 );
             } else {
@@ -58,6 +69,31 @@ public class FacturaInsertService {
 
                 Integer maxFacnum = facRepository.findMaxFACNUMByENTAndEJE(dto.ENT, dto.EJE);
                 int newFacnum = (maxFacnum == null ? 1 : maxFacnum + 1);
+
+                int facoct = 0;
+                try {
+                    String tercod = String.valueOf(ter.getTERCOD());
+
+                    List<Tercero> terceros = sicalService.getTerceros(
+                        null,
+                        null,
+                        tercod,
+                        dto.orgCode,
+                        dto.entidad,
+                        dto.eje
+                    );
+
+                    if (terceros != null && !terceros.isEmpty()) {
+                        for (CuentaBancaria cuenta : terceros.get(0).getCuentasBancarias()) {
+                            if (!"B".equalsIgnoreCase(cuenta.TDB_SIT())) {
+                                facoct = Integer.parseInt(cuenta.TDB_ORD());
+                                break;
+                            }
+                        }
+                    }
+                } catch (XmlParsingException | NumberFormatException exception) {
+                    facoct = 0;
+                }
 
                 Fac fac = new Fac();
                 fac.setENT(dto.ENT);
@@ -79,30 +115,41 @@ public class FacturaInsertService {
                 fac.setFACFPG(cfg.getCFGFPG());
                 fac.setFACOPG(cfg.getCFGOPG());
                 fac.setFACTPG(cfg.getCFGTPG());
+                fac.setCONCOD(0);
+                fac.setFACOCT(facoct);
                 facRepository.save(fac);
 
-                List<Gbs> gbsRows = gbsRepository.findByENTAndEJEAndCGECOD(dto.ENT, dto.EJE, dto.CGECOD);
-                for (Gbs gbs : gbsRows) {
-                    Fde fde = new Fde();
-                    fde.setENT(dto.ENT);
-                    fde.setEJE(dto.EJE);
-                    fde.setFACNUM(newFacnum);
-                    fde.setFDEREF(gbs.getGBSREF());
-                    fde.setFDEOPE(gbs.getGBSOPE());
-                    fde.setFDEORG(gbs.getGBSORG());
-                    fde.setFDEFUN(gbs.getGBSFUN());
-                    fde.setFDEECO(gbs.getGBSECO());
-                    fde.setFDESUB(gbs.getGBSSUB());
-                    fde.setFDEIMP(0.0);
-                    fde.setFDEDIF(0.0);
-                    fdeRepository.save(fde);
+                String facturaMessage = "";
+                List<Gbs> gbsRows =
+                gbsRepository.findByENTAndEJEAndCGECOD(dto.ENT, dto.EJE, dto.CGECOD);
+                List<Cot> cotRows = cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(dto.ENT, dto.EJE, ter.getTERCOD(), 0, 3);
+                if (cotRows.isEmpty()) {
+                    for (Gbs gbs : gbsRows) {
+                        Fde fde = new Fde();
+                        fde.setENT(dto.ENT);
+                        fde.setEJE(dto.EJE);
+                        fde.setFACNUM(newFacnum);
+                        fde.setFDEREF(gbs.getGBSREF());
+                        fde.setFDEOPE(gbs.getGBSOPE());
+                        fde.setFDEORG(gbs.getGBSORG());
+                        fde.setFDEFUN(gbs.getGBSFUN());
+                        fde.setFDEECO(gbs.getGBSECO());
+                        fde.setFDESUB(gbs.getGBSSUB());
+                        fde.setFDEIMP(0.0);
+                        fde.setFDEDIF(0.0);
+
+                        fdeRepository.save(fde);
+                    }
+                } else {
+                    facturaMessage = "PROVEEDOR CON CONTRATO AD";
                 }
 
                 savedNames.add(
                     new FacturaInfo(
                         dto.FACANN,
                         dto.FACTDC,
-                        dto.FACFAC
+                        dto.FACFAC,
+                        facturaMessage
                     )
                 );
             }
@@ -119,6 +166,7 @@ public class FacturaInsertService {
     public record FacturaInfo(
         Integer facann,
         String factdc,
-        Integer facfac
+        Integer facfac,
+        String message
     ) {}
 }

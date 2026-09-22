@@ -1,5 +1,8 @@
 package com.example.backend.dto;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Tercero {
     private String idenTercero;
     private String NIFtercero;
@@ -20,6 +23,7 @@ public class Tercero {
     private String nombreCompleto;  
     private String apellido1;       
     private String apellido2;
+    private List<CuentaBancaria> cuentasBancarias = new ArrayList<>();
 
     public String getIdenTercero() { return idenTercero; }
     public void setIdenTercero(String idenTercero) { this.idenTercero = idenTercero; }
@@ -77,4 +81,7 @@ public class Tercero {
 
     public String getApellido2() { return apellido2; }
     public void setApellido2(String apellido2) { this.apellido2 = apellido2; }
+
+    public List<CuentaBancaria> getCuentasBancarias() {return cuentasBancarias;}
+    public void setCuentasBancarias(List<CuentaBancaria> cuentasBancarias) {this.cuentasBancarias = cuentasBancarias;}
 }

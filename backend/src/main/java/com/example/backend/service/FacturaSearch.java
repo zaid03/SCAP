@@ -150,7 +150,8 @@ public class FacturaSearch {
     ) {
         return facturas.stream().filter(f -> 
             (f.getTERCOD() != null && f.getTERCOD().toString().equals(main_filter)) ||
-            (f.getFACFAC() != null && f.getFACFAC().toString().equals(main_filter))
+            (f.getFACFAC() != null && f.getFACFAC().toString().equals(main_filter)) ||
+            (f.getFACNUM() != null && f.getFACNUM().toString().equals(main_filter))
         ).toList();
     }
     private List<FacWithTerProjection> filterByTernifOrFacado (

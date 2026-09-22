@@ -28,4 +28,7 @@ public interface FacRepository extends JpaRepository<Fac, FacId>, JpaSpecificati
 
     //selecting a factura for info updates upon a crud op done on facturas
     Optional<FacWithTerProjection> findByENTAndEJEAndFACNUM(Integer ent, String eje, Integer facnum);
+
+    //needed for cargar facturas 
+    List<Fac> findByENTAndEJEAndTERCOD(Integer ent, String eje, Integer tercod);
 }

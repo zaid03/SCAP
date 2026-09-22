@@ -109,7 +109,7 @@ export class MonitorContabilizacionComponent {
     })
   }
   
-  sortField: 'facnum' | 'tercod' | 'ternom' | 'ternif' | 'facfre' | 'facimp' | 'facdto' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'factxt' | 'facado' |'FFACFCO' | null = null;
+  sortField: 'facnum' | 'tercod' | 'ternom' | 'ternif' | 'facfre' | 'facimp' | 'facdto' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'factxt' | 'concod' | 'facado' |'FFACFCO' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   private defaultProveedores: any[] = [];
@@ -236,6 +236,7 @@ export class MonitorContabilizacionComponent {
       facfac: row.facfac ?? '',
       facdat: this.formatDate(row.facdat),
       fctxt: row.factxt ?? '',
+      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: this.formatDate(row.facfco)
     }));
@@ -254,6 +255,7 @@ export class MonitorContabilizacionComponent {
       { header: 'R.C.F', dataKey: 'facfac' },
       { header: 'F.Factura', dataKey: 'facdat' },
       { header: 'Descripción', dataKey: 'factxt'},
+      { header: 'Contrato AD', dataKey: 'concod' },
       { header: 'OP.Contable', dataKey: 'facado' },
       { header: 'F.Contable', dataKey: 'facfco' }
     ];
@@ -291,6 +293,7 @@ export class MonitorContabilizacionComponent {
         facfac: { cellWidth: 18 },
         facdat: { cellWidth: 20 },
         factxt: { cellWidth: 36},
+        concod: { cellWidth: 15 },
         facado: { cellWidth: 15 },
         facfco: { cellWidth: 20 }
       }
@@ -320,6 +323,7 @@ export class MonitorContabilizacionComponent {
       facfac: row.facfac ?? '',
       facdat: row.facdat ?? '',
       factxt: row.factxt ?? '',
+      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: row.facfco ?? ''
     }));
@@ -327,7 +331,7 @@ export class MonitorContabilizacionComponent {
     const worksheet = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, [['Listado de facturas']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe', 'Descuentos', 'Núm. Factura', 'Año', 'R.C.F', 'F.Factura', 'Descripción', 'OP.Contable', 'F.Contable']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe', 'Descuentos', 'Núm. Factura', 'Año', 'R.C.F', 'F.Factura', 'Descripción', 'Contrato AD', 'OP.Contable', 'F.Contable']], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
 
     worksheet['!cols'] = [
@@ -342,7 +346,8 @@ export class MonitorContabilizacionComponent {
       { wch: 15 },
       { wch: 15 },
       { wch: 40 },
-      { wch: 30 },
+      { wch: 25 },
+      { wch: 10},
       { wch: 30 },
       { wch: 30 }
     ];

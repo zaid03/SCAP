@@ -19,4 +19,7 @@ public class FacturaInsertDto {
     public String FACTXT;
     public Double FACDTO;
     public LocalDateTime FACFRE;
+    public String orgCode;
+    public String entidad;
+    public String eje;
 }

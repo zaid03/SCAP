@@ -84,7 +84,12 @@
                 <div class="menu-panel" *ngIf="showMenu">
                     <button class="purple-btn" (click)="downloadExcel()">Exportar a Excel</button>
                     <button class="purple-btn" (click)="DownloadPDF()">Exportar a PDF</button>
-                    <button class="purple-btn" (click)="openFacturaAdd()">Cargar facturas</button>
+                    <button 
+                        class="purple-btn" 
+                        (click)="openFacturaAdd()" 
+                        [disabled]="estadogc === 1" 
+                        [ngClass]="{ 'disabled-btn': estadogc === 1 }"
+                    >Cargar facturas</button>
                 </div>
             </div>
         </div>
@@ -148,30 +153,35 @@
                             <span class="sort-indicator" *ngIf="sortColumn === 'facdat'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 9)"></div>
                         </th>
+                        <th class="sortable resizable" (click)="toggleSort('concod')">
+                            Contrato AD
+                            <span class="sort-indicator" *ngIf="sortColumn === 'concod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
                         <th class="sortable resizable" (click)="toggleSort('facado')">
                             ADO
                             <span class="sort-indicator" *ngIf="sortColumn === 'facado'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facfco')">
                             F.contable
                             <span class="sort-indicator" *ngIf="sortColumn === 'facfco'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('getPendingApply(p)')">
                             Pte. Aplicar
                             <span class="sort-indicator" *ngIf="sortColumn === 'getPendingApply(p)'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('cgecod')">
                             C.Gestor
                             <span class="sort-indicator" *ngIf="sortColumn === 'cgecod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 14)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('getStaus(p.facado, p.facimp, p.faciec, p.facidi)')">
                             Estado
                             <span class="sort-indicator" *ngIf="sortColumn === 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 14)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 15)"></div>
                         </th>
                     </tr>
                 </thead>
@@ -187,6 +197,7 @@
                         <td>{{ p.facann }}</td>
                         <td>{{ p.facfac }}</td>
                         <td>{{ p.facdat | date:'dd-MM-yyyy' }}</td>
+                        <td>{{ p.concod }}</td>
                         <td>{{ p.facado }}</td>
                         <td>{{ p.facfco | date:'dd-MM-yyyy' }}</td>
                         <td>{{getPendingApply(p) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
@@ -431,28 +442,41 @@
                                     <h1 class="h1-style">{{selectedFacturas.facfco | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Observaciones:</p>
+                                </td>
+                                <td colspan="3" class="expand">
+                                    <textarea 
+                                        class="textArea-style"
+                                        [(ngModel)]="tempFactura.facobs"
+                                        [disabled]="!isUpdate"
+                                        (input)="allowToUpdate = true"
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Contrato AD:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedFacturas.concod}}</h1>
+                                </td>
+                            </tr>
                         </table>
-                        <div class="wrapper">
-                            <div class="observ">
-                                <p class="p-style">Observaciones:</p>
-                                <textarea 
-                                    class="textArea-style"
-                                    [(ngModel)]="tempFactura.facobs"
-                                    [disabled]="!isUpdate"
-                                    (input)="allowToUpdate = true"
-                                ></textarea>
-                            </div>
-                        </div>
                     </div>
                     <div class="btns">
                         <button 
                             class="purple-btn" 
-                            [disabled]="isUpdate" 
-	                        [ngClass]="{ 'disabled-btn': isUpdate }"
+                            [disabled]="!albaranes.length" 
+	                        [class.disabled-btn]="!albaranes.length"
+                        >Cambiar Contrato AD</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="isUpdate || isBlockedCheck" 
+                            [class.disabled-btn]="isUpdate || isBlockedCheck"
                             (click)="openAlbaranesAdd()"
                         >Añadir albaran</button>
                         <button 
-                            class="red-btn" 
+                            class="red-btn"
                             *ngIf="isUpdate" 
                             (click)="cancelar()"
                         >Cancelar</button>
@@ -584,7 +608,12 @@
                                                         <td>{{ a.solsub }}</td>
                                                         <td>{{ a.albobs }}</td>
                                                         <td>
-                                                            <button class="red-btn" (click)="showDeleteAlbaran(a)">-</button>
+                                                            <button 
+                                                                class="red-btn" 
+                                                                (click)="showDeleteAlbaran(a)"
+                                                                [disabled]="isBlockedCheck === true" 
+                                                                [ngClass]="{ 'disabled-btn': isBlockedCheck === true }"
+                                                            >-</button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -991,6 +1020,7 @@
                         <th>Año</th>
                         <th>R.C.F.</th>
                         <th>Número Factura</th>
+                        <th *ngIf="hasSavedMessages">Message</th>
                     </tr>
                 </thead>
                 <tbody>
@@ -998,6 +1028,7 @@
                         <td>{{s.facann}}</td>
                         <td>{{s.factdc}}</td>
                         <td>{{s.facfac}}</td>
+                        <td *ngIf="hasSavedMessages">{{s.message}}</td>
                     </tr>
                 </tbody>
             </table>

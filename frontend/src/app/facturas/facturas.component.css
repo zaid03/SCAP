@@ -34,6 +34,7 @@
 .details-table td:nth-child(8) {text-align: right;}
 .averageThird {width: 220px; max-width: 260px;}
 .cell-content {display: flex; gap: 5px;}
+.expand textarea {width: 560px; max-width: 580px !important; height: 40px;}
 /* main-detail grid */
 /* sub detail grids */
 .detail-grid { display: flex; flex-direction: column; gap: 14px; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); padding: 16px; border: 1px solid #e5e7eb; border-radius: 10px; background: #f9fafb; }

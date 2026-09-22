@@ -170,15 +170,20 @@
                             <span class="sort-indicator" *ngIf="sortColumn === 'FACTXT'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 11)"></div>
                         </th>
+                        <th class="sortable resizable" (click)="toggleSort('concod')">
+                            Contrato AD
+                            <span class="sort-indicator" *ngIf="sortColumn === 'concod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                        </th>
                         <th class="sortable resizable" (click)="toggleSort('facado')">
                             OP. Contable
                             <span class="sort-indicator" *ngIf="sortColumn === 'facado'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 12)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facfco')">
                             F.contable
                             <span class="sort-indicator" *ngIf="sortColumn === 'facfco'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 13)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 14)"></div>
                         </th>
                     </tr>
                 </thead>
@@ -201,6 +206,7 @@
                         <td>{{f.facfac}}</td>
                         <td>{{f.facdat | date:'dd-MM-yyyy'}}</td>
                         <td>{{f.factxt}}</td>
+                        <td>{{f.concod }}</td>
                         <td>{{f.facado}}</td>
                         <td>{{f.facfco | date:'dd-MM-yyyy'}}</td>
                     </tr>
@@ -431,17 +437,25 @@
                                     <h1 class="h1-style">{{selectedFacturas.facfco | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                             </tr>
+                            <tr>
+                                <td>
+                                    <p class="p-style">Observaciones:</p>
+                                </td>
+                                <td colspan="3" class="expand">
+                                    <textarea 
+                                        class="textArea-style"
+                                        [(ngModel)]="selectedFacturas.facobs"
+                                        disabled
+                                    ></textarea>
+                                </td>
+                                <td>
+                                    <p class="p-style">Contrato AD:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedFacturas.concod}}</h1>
+                                </td>
+                            </tr>
                         </table>
-                        <div class="wrapper">
-                            <div class="observ">
-                                <p class="p-style">Observaciones:</p>
-                                <textarea 
-                                    class="textArea-style"
-                                    [(ngModel)]="selectedFacturas.facobs"
-                                    disabled
-                                ></textarea>
-                            </div>
-                        </div>
                     </div>
                     <div class="more-detail-container">
                         <div class="tabs" role="tablist" aria-label="Detalle tabs">

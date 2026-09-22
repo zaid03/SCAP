@@ -20,6 +20,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import com.example.backend.dto.CuentaBancaria;
 import com.example.backend.dto.Tercero;
 import com.example.backend.exception.XmlParsingException;
 import com.example.sical.CryptoSical;
@@ -98,6 +99,17 @@ public class SicalService {
         RestTemplate restTemplate = new RestTemplate();
         String responseXml = restTemplate.postForObject(wsUrl, request, String.class);
 
+        System.out.println("========== RAW SICAL RESPONSE ==========");
+System.out.println(responseXml);
+System.out.println("Contains detbco: " +
+        (responseXml != null && responseXml.contains("detbco")));
+System.out.println("Contains TDB_SIT: " +
+        (responseXml != null && responseXml.contains("TDB_SIT")));
+System.out.println("Contains TDB_ORD: " +
+        (responseXml != null && responseXml.contains("TDB_ORD")));
+System.out.println("========== END RAW SICAL RESPONSE ==========");
+
+
         return parseTerceros(responseXml);
         } catch (XmlParsingException ex) {
             throw ex;
@@ -113,9 +125,11 @@ public class SicalService {
             String sml = extractAndUnescapeXmlContent(xml);
             Document doc = parseXmlDocument(sml);
             NodeList tercerosNodes = doc.getElementsByTagName("tercero");
+            List<CuentaBancaria> cuentasBancarias = parseCuentasBancarias(doc);
 
             for (int i = 0; i < tercerosNodes.getLength(); i++) {
                 Tercero t = parseTerceroFromElement((Element) tercerosNodes.item(i));
+                t.setCuentasBancarias(cuentasBancarias);
                 result.add(t);
             }
         } catch (XmlParsingException ex) {
@@ -125,6 +139,27 @@ public class SicalService {
         }
 
         return result;
+    }
+
+    private List<CuentaBancaria> parseCuentasBancarias(Document doc) {
+        List<CuentaBancaria> cuentas = new ArrayList<>();
+        NodeList bankNodes = doc.getElementsByTagName("detbco");
+
+        for (int i = 0; i < bankNodes.getLength(); i++) {
+            String raw = bankNodes.item(i).getTextContent();
+
+            String[] parts = raw.split(Pattern.quote("-@-"), -1);
+
+            String TDB_ORD = parts.length > 1 ? parts[1].trim() : "";
+            String TDB_SIT = parts.length > 7 ? parts[7].trim() : "";
+
+            cuentas.add(new CuentaBancaria(
+                    TDB_ORD,
+                    TDB_SIT
+            ));
+        }
+
+        return cuentas;
     }
 
     private String extractAndUnescapeXmlContent(String xml) {

@@ -116,6 +116,11 @@ public class ContabilizacionService {
         
         sb.append("<fecont>").append(fechaContable).append("</fecont>");
         
+
+        if (fac.getFACDOC() != null) {
+            sb.append("<ndoc>").append(CryptoSical.encodeBase64(fac.getFACDOC())).append("</ndoc>");
+        }
+
         if (fac.getFACDAT() != null) {
             sb.append("<fdoc>").append(formatDate(fac.getFACDAT())).append("</fdoc>");
         }
@@ -217,11 +222,11 @@ public class ContabilizacionService {
             if (fde.getFDEREF() != null) {
                 sb.append("<refe>").append(fde.getFDEREF()).append("</refe>");
             }
-            // if (datosWs.prya() != null) sb.append("<prya>").append(datosWs.prya()).append("</prya>");
-            // if (datosWs.pryt() != null) sb.append("<pryt>").append(datosWs.pryt()).append("</pryt>");
-            // if (datosWs.pryo() != null) sb.append("<pryo>").append(CryptoSical.encodeSha1Base64(datosWs.pryo())).append("</pryo>");
-            // if (datosWs.pryn() != null) sb.append("<pryn>").append(datosWs.pryn()).append("</pryn>");
-            // if (datosWs.pryx() != null) sb.append("<pryx>").append(datosWs.pryx()).append("</pryx>");
+            if (datosWs.prya() != null) sb.append("<prya>").append(datosWs.prya()).append("</prya>");
+            if (datosWs.pryt() != null) sb.append("<pryt>").append(datosWs.pryt()).append("</pryt>");
+            if (datosWs.pryo() != null) sb.append("<pryo>").append(CryptoSical.encodeBase64(datosWs.pryo())).append("</pryo>");
+            if (datosWs.pryn() != null) sb.append("<pryn>").append(datosWs.pryn()).append("</pryn>");
+            if (datosWs.pryx() != null) sb.append("<pryx>").append(datosWs.pryx()).append("</pryx>");
             sb.append("<imp>").append(imp).append("</imp>");
             sb.append("</linea>");
         }
@@ -376,24 +381,19 @@ public class ContabilizacionService {
                     org.w3c.dom.Node opNode = opNodes.item(0);
                     org.w3c.dom.NodeList children = opNode.getChildNodes();
                     
-                    for (int i = 0; i < children.getLength(); i++) {
-                        org.w3c.dom.Node child = children.item(i);
-                        if (child.getNodeType() == org.w3c.dom.Node.ELEMENT_NODE) {
-                            String name = child.getNodeName();
-                            String value = child.getTextContent();
-                            
-                            switch (name) {
-                                case "opeext" -> dto.setOpeext(value);
-                                case "opesical" -> dto.setOpesical(value);
-                                case "nap" -> dto.setNap(value);
-                                case "referencia" -> dto.setReferencia(value);
-                                case "importe" -> dto.setImporte(value);
-                                case "ejercicio" -> dto.setEjercicio(value);
-                                case "organica" -> dto.setOrganica(decodeIfBase64(value));
-                                case "funcional" -> dto.setFuncional(decodeIfBase64(value));
-                                case "economica" -> dto.setEconomica(decodeIfBase64(value));
-                            }
+                    if (opNodes.getLength() > 0) {
+                        String operationText = opNodes.item(0).getTextContent().trim();
+                        String[] fields = operationText.split("-@-", -1);
+
+                        if (fields.length > 1) {
+                            dto.setOpeext(fields[0]);
+                            dto.setOpesical(fields[1]);
                         }
+
+                        if (fields.length > 2) dto.setNap(fields[2]);
+                        if (fields.length > 3) dto.setReferencia(fields[3]);
+                        if (fields.length > 4) dto.setImporte(fields[4]);
+                        if (fields.length > 5) dto.setEjercicio(fields[5]);
                     }
                 }
                 dto.setMensaje("Operación generada correctamente");
