@@ -82,6 +82,7 @@
 .albaran-search-options .albaran-options-btns {width: 10%;}
 .selected {text-align: center; margin: 0px;}
 .albran-add .main-table tbody td:nth-child(3) {text-align: right;}
+.messageGrid {justify-content: center !important; margin: 10px;}
 /* add albaranes grid */
 /* delete modal */
 .delete-confirm-modal .margin {margin-left: 10px;}

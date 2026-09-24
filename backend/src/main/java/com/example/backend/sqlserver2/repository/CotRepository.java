@@ -32,4 +32,7 @@ public interface CotRepository extends JpaRepository<Cot, CotId> {
 
     //fetching contratos to cambiar AD
     List<CambiarADProjection> findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(Integer ent, String eje, Integer conblo, Integer contip, Integer tercod);
+
+    //needed for adding an alabaran for a factura
+    int countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(Integer ent, String eje, Integer conblo, Integer contip, Integer tercod);
 }

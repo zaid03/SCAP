@@ -950,6 +950,7 @@
                 <th>Importe</th>
                 <th>Reg. Entrada</th>
                 <th>Fecha registro</th>
+                <th>Contrato</th>
                 <th>Centro destino</th>
                 <th>Centro Comprador</th>
             </tr>
@@ -966,6 +967,7 @@
                 <td>{{a.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{a.albnum}}</td>
                 <td>{{a.albfre | date:'dd-MM-yyyy'}}</td>
+                <td>{{concodChosen}}</td>
                 <td>{{a.depcod}}</td>
                 <td>{{a.albcom}}</td>
             </tr>
@@ -985,6 +987,68 @@
         />
         <span>de {{ totalPagesAlbaranesAdd }}</span>
         <button (click)="nextPageAlbaraneAdd()" [disabled]="pageAlbaranesAdd + 1 >= totalPagesAlbaranesAdd">Siguiente</button>
+    </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="askGrid"></div>
+<div class="delete-confirm-modal" *ngIf="askGrid">
+    <p class="p-style">EL PROVEEDOR TIENE CONTRATOS AD,  ¿QUIERE SELECCIONAR UNO O LA FACTURA NO ES DE CONTRATO?</p>
+    <div class="btns messageGrid">
+        <button class="red-btn" (click)="saidNo()">No</button>
+        <button class="purple-btn" (click)="saidYes()">Sí</button>
+    </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="getConcodGrid"></div>
+<div class="delete-confirm-modal adj" *ngIf="getConcodGrid">
+    <div class="btns">
+        <div class="title cambiarAD">
+            <h1 class="art-title">Elige un contrato</h1>
+        </div>
+        <button class="red-btn margin" (click)="closeGetConcodGrid()">✖</button>
+    </div>
+    <div class="saved-details special">
+        <div *ngIf="isLoadingContratos" class="loading-message">
+            <div class="spinner"></div>
+            <span>Cargando</span>
+        </div>
+        <p class="errorBtn" *ngIf="ADGridMessageError">{{ADGridMessageError}}</p>
+        <div class="content-container">
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Contrato</th>
+                        <th>Económica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr 
+                        *ngFor="let p of paginatedContratos" 
+                        (click)="getConcod(p)"
+                        style="cursor: pointer;"
+                    >
+                        <td>{{p.conn?.concod}}</td>
+                        <td>{{p.conn?.condes}}</td>
+                        <td>{{p.conn?.conlot}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPageContratos()" [disabled]="pageContatos === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPagesContatos"
+                    [value]="page + 1"
+                    (change)="goToPageContratos($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPagesContatos }}</span>
+                <button (click)="nextPageContratos()" [disabled]="page + 1 >= totalPagesContatos">Siguiente</button>
+            </div>
+        </div>
     </div>
 </div>
 

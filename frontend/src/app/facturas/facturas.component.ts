@@ -809,14 +809,87 @@ export class FacturasComponent {
   albaranesAdd: any[] = [];
   openAlbaranesAdd() {
     this.limpiarMEssages();
-    this.albaranesAddGrid = true;
+    
     this.tercod = this.selectedFacturas.tercod;
-    this.fetchAlrabanes();
+    if (!this.albaranes?.length && this.selectedFacturas.concod === 0) {
+      this.checkAlbaranByCon();
+    } else {
+      this.albaranesAddGrid = true;
+      this.fetchAlrabanes();
+    }
   }
 
   closeAlbaranesAdd() {
     this.albaranesAddGrid = false;
     this.limpiarSearch();
+  }
+
+  hasData = 0;
+  checkAlbaranByCon() {
+    console.log("called")
+    this.http.get<any>(`${environment.backendUrl}/api/con/quickCheck/${this.entcod}/${this.eje}/${this.tercod}`).subscribe({
+      next: (res) => {
+        this.hasData = res;
+        console.log(res)
+        if (this.hasData > 0) {
+          this.openAskGrid();
+        } else {
+          this.albaranesAddGrid = true;
+          this.fetchAlrabanes();
+        }
+      },
+      error: (err) => {
+        console.warn(err.error.error || err.error);
+      }
+    })
+  }
+
+  askGrid: boolean = false;
+  openAskGrid() {
+    this.askGrid = true;
+  }
+
+  closeAskGrid() {
+    this.askGrid = false;
+    this.hasData = 0;
+  }
+
+  concodChosen: string = '';
+  saidYes() {
+    this.limpiarMEssages();
+    this.closeAskGrid();
+    this.openGetConcodGrid();
+  }
+
+  getConcodGrid: boolean = false;
+  openGetConcodGrid() {
+    this.limpiarMEssages();
+    this.getConcodGrid = true;
+    this.fetchContatosAd();
+  }
+
+  closeGetConcodGrid() {
+    this.getConcodGrid = false;
+    this.contratosPorAD = [];
+    this.pageContatos = 0;
+    this.saidNo();
+  }
+
+  getConcod(p: any) {
+    this.concodChosen = p?.conn?.concod;
+    this.albaranesAddGrid = true;
+    this.getConcodGrid = false;
+    this.contratosPorAD = [];
+    this.pageContatos = 0;
+    console.log(this.concodChosen)
+    this.fetchAlrabanes();
+  }
+
+  saidNo() {
+    this.limpiarMEssages();
+    this.closeAskGrid()
+    this.albaranesAddGrid = true;
+    this.fetchAlrabanes();
   }
 
   fetchAlrabanes() {
