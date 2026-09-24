@@ -649,6 +649,10 @@ export class MonitorContabilizacionComponent {
   contaFac: number = 0;
   totalContaFac: number = 0;
   contabilizarResults: { facnum: number; success: boolean; message: string }[] = [];
+
+  setContrato(): void {
+    this.ESCONTRATO = this.selectedFacturas?.concod !== 0;
+  }
   async contabilizar() {
     this.closeContaConfirm();
     this.limpiarMEssages();
@@ -702,6 +706,7 @@ export class MonitorContabilizacionComponent {
   newFacado: string = '';
   isContabilizando: boolean = false;
   contabilizarFacturaAsync(factura: any): Promise<void> {
+    this.setContrato();
     return new Promise(async (resolve) => {
       const payload = {
         pwd: ".",
@@ -774,6 +779,7 @@ export class MonitorContabilizacionComponent {
   updateFactura(facnum: number, facado: any, facfco: string) {
     this.closeContaConfirm();
     this.limpiarMEssages();
+    this.setContrato();
     return new Promise<void>((resolve, reject) => {
       const payload = {
         "ENT": this.entcod,

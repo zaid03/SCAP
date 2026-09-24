@@ -46,4 +46,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
 
   //cambiar contrato with a the option of selecting contrato
   List<CogCgeProjection> findAllByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
+
+  //needed for contabilizacion
+  Optional<Cog> findOneByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
 }

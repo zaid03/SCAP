@@ -28,19 +28,14 @@ import com.example.backend.sqlserver2.repository.TerRepository;
 @RestController
 @RequestMapping("/api/contabilizacion")
 public class ContabilizacionController {
-
     @Autowired
     private ContabilizacionService contabilizacionService;
-
     @Autowired
     private FacRepository facRepository;
-
     @Autowired
     private FdeRepository fdeRepository;
-
     @Autowired
     private FdtRepository fdtRepository;
-
     @Autowired
     private TerRepository terRepository;
 
@@ -92,10 +87,25 @@ public class ContabilizacionController {
 
             List<Fde> fdeList = fdeRepository.findByENTAndEJEAndFACNUM(request.getEntcod(), request.getEje(), request.getFacnum());
             List<Fdt> fdtList = fdtRepository.findByENTAndEJEAndFACNUM(request.getEntcod(), request.getEje(), request.getFacnum());
+            System.out.println("[CONTRATO] facnum=" + request.getFacnum() + " esContrato=" + request.getEsContrato()
+        + " fdeList=" + fdeList.size() + " fdtList=" + fdtList.size());
+
+            boolean esContrato = Boolean.TRUE.equals(request.getEsContrato());
+            double kImporteTotal = 0;
+            Fde lineaPrincipal = null;
+            if (esContrato) {
+                ContabilizacionService.ContratoPrep prep =
+                        contabilizacionService.prepararLineasContrato(request, fdeList);
+                kImporteTotal = prep.kImporteTotal();
+                lineaPrincipal = prep.lineaPrincipal();
+            }
 
             String smlInput = contabilizacionService.buildSmlInput(request, fac, fdeList, fdtList, terAyt);
             String soapResponse = contabilizacionService.sendSmlRequest(smlInput, request.getWebserviceUrl());
             ContabilizacionResponseDto response = contabilizacionService.parseResponse(soapResponse);
+
+            System.out.println("[CONTRATO] respuesta SICAL: exito=" + response.isExito()
+        + " opesical=" + response.getOpesical() + " mensaje=" + response.getMensaje());
 
             if (response.isExito()) {
                 if (response.getOpesical() != null) {
@@ -108,6 +118,18 @@ public class ContabilizacionController {
                     fac.setFACFCO(LocalDateTime.of(year, month, day, 0, 0));
                 }
                 facRepository.save(fac);
+                if (esContrato) {
+                    try {
+                        String avisos = contabilizacionService.actualizarSaldosContrato(request, fac, lineaPrincipal, kImporteTotal);
+                        System.out.println("[CONTRATO] SICAL OK -> actualizando COG (kImporteTotal=" + kImporteTotal + ")");
+                        if (avisos != null) {
+                            response.setMensaje(response.getMensaje() + ". Aviso: " + avisos);
+                        }
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                        response.setMensaje(response.getMensaje() + ". Aviso: no se pudieron actualizar los saldos del contrato: " + e.getMessage());
+                    }
+                }
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);
