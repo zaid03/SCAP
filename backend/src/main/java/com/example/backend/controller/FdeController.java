@@ -12,8 +12,9 @@ import com.example.backend.sqlserver2.model.FdeId;
 import com.example.backend.sqlserver2.model.Gbs;
 import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
-import com.example.backend.sqlserver2.repository.CotRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
 import com.example.backend.sqlserver2.repository.FacRepository;
+import com.example.backend.dto.CogCgeProjection;
 import com.example.backend.dto.FdeFacTerProjection;
 import com.example.backend.dto.FdeResumeDto;
 import com.example.backend.dto.ProjectionContabilizar;
@@ -39,9 +40,9 @@ public class FdeController {
     @Autowired
     private ContabilizadoSearch contabilizadoSearch;
     @Autowired
-    private CotRepository cotRepository;
-    @Autowired
     private GbsRepository gbsRepository;
+    @Autowired
+    private CogRepository cogRepository;
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -245,6 +246,72 @@ public class FdeController {
                 fde.setFDEIMP(0.00);
                 fde.setFDEDIF(0.00);
                 fdeRepository.save(fde);
+            }
+
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //cambiar contrato with a the option of selecting contrato
+    public record CPatchCon(Integer ENT, String EJE, String CGECOD, Integer CONCOD, String CONLOT, Integer FACNUM) {}
+    @Transactional
+    @PatchMapping("/AD-con-Cont")
+    public ResponseEntity<?> contConAD (
+        @RequestBody CPatchCon payload
+    ) {
+        try {
+            if (payload.ENT() == null || payload.EJE() == null|| payload.CGECOD() == null || payload.CONCOD() == null || payload.CONLOT() == null || payload.FACNUM() == null) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+
+            FacId id = new FacId(payload.ENT(), payload.EJE(), payload.FACNUM());
+            Optional<Fac> factura = facRepository.findById(id);
+            if (factura.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+            List<CogCgeProjection> cogs = cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(payload.ENT(), payload.EJE(), payload.CONCOD(), payload.CGECOD());
+            if (cogs.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registros para llenar la tabla " + SIN_RESULTADO);
+            }
+            CogCgeProjection cog = cogs.get(0);
+            if (cog.getCOGRFD() == null || cog.getCOGRFD().isBlank()) {
+                return ResponseEntity.badRequest()
+                    .body("Referencia " + SIN_RESULTADO);
+            }
+
+            Fac fac = factura.get();
+            fac.setCONCOD(payload.CONCOD());
+            facRepository.save(fac);
+            fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
+            
+
+            Fde fde1 = new Fde();
+            fde1.setENT(payload.ENT());
+            fde1.setEJE(payload.EJE());
+            fde1.setFACNUM(payload.FACNUM());
+            fde1.setFDEREF(cog.getCOGRFD());
+            fde1.setFDEOPE(cog.getCOGOPD());
+            fde1.setFDEORG(cog.getCge().getCGEORG());
+            fde1.setFDEFUN(cog.getCge().getCGEFUN());
+            fde1.setFDEECO(payload.CONLOT());
+            fde1.setFDEIMP(0.00);
+            fde1.setFDEDIF(0.00);
+            fdeRepository.save(fde1);
+            
+            if (cog.getCOGRF2() != null && !cog.getCOGRF2().isBlank()) {
+                Fde fde2 = new Fde();
+                fde2.setENT(payload.ENT());
+                fde2.setEJE(payload.EJE());
+                fde2.setFACNUM(payload.FACNUM());
+                fde2.setFDEREF(cog.getCOGRF2());
+                fde2.setFDEOPE(cog.getCOGOP2());
+                fde2.setFDEORG(cog.getCge().getCGEORG());
+                fde2.setFDEFUN(cog.getCge().getCGEFUN());
+                fde2.setFDEIMP(0.00);
+                fde2.setFDEDIF(0.00);
+                fdeRepository.save(fde2);
             }
 
             return ResponseEntity.noContent().build();

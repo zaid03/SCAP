@@ -43,4 +43,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCot_ter_TERNOMContainingOrENTAndEJEAndCot_conn_CONTIPAndCot_ter_TERNIFContaining(Integer ent1, String eje1, Integer contip1, String ternom, Integer ent2, String eje2, Integer contip2, String ternif);
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCge_CGECODAndCONCOD(Integer ent, String eje, Integer contip, String cgecod, Integer concod);
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCge_CGECODAndCot_conn_CONDESContaining(Integer ent, String eje, Integer contip, String cgecod, String condes);
+
+  //cambiar contrato with a the option of selecting contrato
+  List<CogCgeProjection> findAllByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
 }

@@ -1309,6 +1309,28 @@ export class FacturasComponent {
   changeContrato(p: any) {
     const facnum = this.selectedFacturas.facnum;
     const concod = p?.conn?.concod;
+    const conlot = p?.conn?.conlot;
+    const payload = {
+      "ENT": this.entcod,
+      "EJE": this.eje,
+      "CGECOD": this.centroGestor,
+      "CONCOD": concod,
+      "CONLOT": conlot,
+      "FACNUM": facnum
+    }
+    this.isUpdatingContrato = true;
+    this.openADMessages();
+    this.http.patch(`${environment.backendUrl}/api/fde/AD-con-Cont`, payload).subscribe({
+      next: (res) => {
+        this.isUpdatingContrato = false;
+        this.openADMessages();
+        this.ADMessageSuccess = 'El AD del contrato se actualizó correctamente para esta factura.';
+      },
+      error: (err) => {
+        this.isUpdatingContrato = false;
+        this.ADMessageError = err.error.error || err.error;
+      }
+    })
   }
 
 
