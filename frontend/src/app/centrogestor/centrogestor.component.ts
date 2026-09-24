@@ -38,7 +38,7 @@ export class CentrogestorComponent implements OnInit {
 
     this.loading = true;
     this.fetchMenus();
-    this.http.get<any[]>(`${environment.backendUrl}/api/cge/${this.entcod}/${this.eje}/${this.perfil}`)
+    this.http.get<any[]>(`${environment.backendUrl}/api/cge/${this.entcod}/${this.eje}/${this.usucod}`)
     .subscribe({
       next: resp => {
         if (resp?.length > 1) {
