@@ -54,7 +54,7 @@ public class ContabilizacionService {
         if (lineas == null || lineas.size() != 1) {
             throw new SmlBuildingException("WS 2.49: se esperaba 1 linea para " + ope);
         }
-        Double saldo = lineas.get(0).getSaldo();   // <-- assumes getSaldo() exists on Operaciones.Linea
+        Double saldo = lineas.get(0).getSaldo(); 
             System.out.println("[CONTRATO] consultarSaldo: saldo = " + saldo + " (limporte=" + lineas.get(0).getLimporte() + ")");
 
         if (saldo == null) {
@@ -96,12 +96,10 @@ public class ContabilizacionService {
     System.out.println("[CONTRATO] linea 2 (reserva):     ope=" + l2.getFDEOPE() + " eco=" + l2.getFDEECO());
 
 
-        // 1. KImporteTotal
         double kImporteTotal = nz(l1.getFDEIMP()) + nz(l1.getFDEDIF());
 
             System.out.println("[CONTRATO] KImporteTotal = " + kImporteTotal);
 
-        // 2. Saldo of line 1's operation
         double saldo = consultarSaldo(req.getOrg(), req.getEnt(), req.getEje(),
                 String.valueOf(l1.getFDEOPE()),
                 l1.getFDEREF() != null ? String.valueOf(l1.getFDEREF()) : null,
@@ -113,13 +111,11 @@ public class ContabilizacionService {
             return new ContratoPrep(kImporteTotal, l1);
         }
 
-        // 1.1 line 2 gets the same economic code as line 1
         l2.setFDEECO(l1.getFDEECO());
 
         System.out.println("[CONTRATO] saldo INSUFICIENTE -> se divide entre linea 1 y linea 2");
     l2.setFDEECO(l1.getFDEECO());
     System.out.println("[CONTRATO] linea 2 FDEECO puesto a " + l2.getFDEECO());
-        // 1.2.1 missing amount
         double kImpFalta = kImporteTotal - saldo;
         double dif1 = nz(l1.getFDEDIF());
         double imp1 = nz(l1.getFDEIMP());
@@ -127,7 +123,6 @@ public class ContabilizacionService {
             System.out.println("[CONTRATO] kImpFalta = " + kImpFalta + " | dif1 = " + dif1 + " | imp1 = " + imp1);
 
         if (kImpFalta <= dif1) {
-            // 1.2.2 take it all from FDEDIF
                     System.out.println("[CONTRATO] caso 1.2.2: todo sale de FDEDIF");
 
             l1.setFDEDIF(round2(dif1 - kImpFalta));
@@ -135,7 +130,6 @@ public class ContabilizacionService {
         } else {
                     System.out.println("[CONTRATO] caso 1.2.3: todo FDEDIF + resto de FDEIMP");
 
-            // 1.2.3 take all FDEDIF + the rest from FDEIMP
             double resto = kImpFalta - dif1;
             l2.setFDEIMP(round2(resto));
             l2.setFDEDIF(round2(dif1));
@@ -204,7 +198,6 @@ public class ContabilizacionService {
             System.out.println("[CONTRATO] COGOP2 vacio -> no se consulta AD secundaria");
         }
 
-        // TODO: liquidar AD principal (histórico + mover secundaria a principal)
         cogRepository.save(cog);
         System.out.println("[CONTRATO] COG DESPUES: COGIAP=" + cog.getCOGIAP()
             + " COGIMP=" + cog.getCOGIMP() + " COGIM2=" + cog.getCOGIM2());
