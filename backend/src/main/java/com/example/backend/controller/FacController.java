@@ -17,8 +17,10 @@ import org.springframework.web.bind.annotation.*;
 import com.example.backend.service.FacContabilizacionSpecification;
 import com.example.backend.service.FacturaInsertService;
 import com.example.backend.service.FacturaSearch;
+import com.example.backend.service.SicalService;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Gbs;
+import com.example.backend.sqlserver2.model.Ter;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.FacId;
 import com.example.backend.sqlserver2.repository.FacRepository;
@@ -26,6 +28,9 @@ import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.backend.dto.FacWithTerProjection;
 import com.example.backend.dto.FacturaInsertDto;
+import com.example.backend.dto.Tercero;
+import com.example.backend.exception.XmlParsingException;
+import com.example.backend.dto.CuentaBancaria;
 
 @RestController
 @RequestMapping("/api/fac")
@@ -40,6 +45,8 @@ public class FacController {
     private GbsRepository gbsRepository;
     @Autowired
     private FacturaSearch facturaSearch;
+    @Autowired
+    private SicalService sicalService;
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -134,7 +141,7 @@ public class FacController {
     }
 
     //modifying a factura
-    public record facturaUpdate(String FACOBS, String CONCTP, String CONCPR, String CONCCR, String FACFPG, String FACOPG, String FACTPG, Integer FACOCT) {}
+    public record facturaUpdate(String FACOBS, String CONCTP, String CONCPR, String CONCCR, String FACFPG, String FACOPG, String FACTPG, Integer FACOCT, String tercod, String orgCode, String entidad) {}
     @PatchMapping("/update-factura/{ent}/{eje}/{facnum}")
     public ResponseEntity<?> updateFactura(
         @PathVariable Integer ent,
@@ -143,29 +150,55 @@ public class FacController {
         @RequestBody facturaUpdate payload
     ) {
         try {
-            if (payload == null) {
+            if (payload == null || payload.tercod() == null || payload.tercod() == null || payload.tercod() == null || payload.orgCode() == null || payload.entidad() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Falta un dato obligatorio");
             }
 
             FacId id = new FacId(ent, eje, facnum);
             Optional<Fac> facOptio = facRepository.findById(id);
             if (facOptio.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND)
-                    .body(SIN_RESULTADO);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
-            Fac factura = facOptio.get();
-            factura.setFACOBS(payload.FACOBS());
-            factura.setCONCTP(payload.CONCTP());
-            factura.setCONCPR(payload.CONCPR());
-            factura.setCONCCR(payload.CONCCR());
-            factura.setFACFPG(payload.FACFPG());
-            factura.setFACOPG(payload.FACOPG());
-            factura.setFACTPG(payload.FACTPG());
-            factura.setFACOCT(payload.FACOCT());
-            facRepository.save(factura);
+            try {
 
-            return ResponseEntity.noContent().build();
+                List<Tercero> terceros = sicalService.getTerceros(
+                    null,
+                    null,
+                    payload.tercod(),
+                    payload.orgCode(),
+                    payload.entidad(),
+                    eje
+                );
+
+                boolean hasActiveAccount = false;
+                if (terceros != null && !terceros.isEmpty()) {
+                    for (CuentaBancaria cuenta : terceros.get(0).getCuentasBancarias()) {
+                        if (!"B".equalsIgnoreCase(cuenta.TDB_SIT())) {
+                            hasActiveAccount = true;
+                            break;
+                        }
+                    }
+                }
+                if (hasActiveAccount) {
+                    Fac factura = facOptio.get();
+                    factura.setFACOBS(payload.FACOBS());
+                    factura.setCONCTP(payload.CONCTP());
+                    factura.setCONCPR(payload.CONCPR());
+                    factura.setCONCCR(payload.CONCCR());
+                    factura.setFACFPG(payload.FACFPG());
+                    factura.setFACOPG(payload.FACOPG());
+                    factura.setFACTPG(payload.FACTPG());
+                    factura.setFACOCT(payload.FACOCT());
+                    facRepository.save(factura);
+
+                    return ResponseEntity.noContent().build();
+                } else {
+                    return ResponseEntity.badRequest().body("Cuenta de tercero no existe o está de baja");
+                }
+            } catch (XmlParsingException exception) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Cuenta de tercero no existe o está de baja");
+            }
         } catch (Exception ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMessage());
         }

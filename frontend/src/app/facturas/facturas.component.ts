@@ -628,6 +628,7 @@ export class FacturasComponent {
     this.isUpdatingFactura = true;
     const backendDate = this.toBackendDate(this.tempFactura.facfre);
     const facnum = this.tempFactura.facnum;
+    const tercod = this.selectedFacturas?.tercod;
 
     Object.assign(this.selectedFacturas, this.tempFactura);
     
@@ -639,7 +640,10 @@ export class FacturasComponent {
       "FACFPG": this.tempFactura.facfpg,
       "FACOPG": this.tempFactura.facopg,
       "FACTPG": this.tempFactura.factpg,
-      "FACOCT": this.tempFactura.facoct
+      "FACOCT": this.tempFactura.facoct,
+      "tercod": tercod,
+      "orgCode": this.WSorg,
+      "entidad": this.WSent,
     }
 
     this.http.patch(`${environment.backendUrl}/api/fac/update-factura/${this.entcod}/${this.eje}/${facnum}`, payload).subscribe({
