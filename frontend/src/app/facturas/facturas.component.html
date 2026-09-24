@@ -468,6 +468,7 @@
                             class="purple-btn" 
                             [disabled]="!albaranes.length" 
 	                        [class.disabled-btn]="!albaranes.length"
+                            (click)="openChangeAD()"
                         >Cambiar Contrato AD</button>
                         <button 
                             class="purple-btn" 
@@ -1053,4 +1054,73 @@
             </table>
         </div>
     </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="changeADGrid"></div>
+<div class="delete-confirm-modal adj" *ngIf="changeADGrid">
+    <div class="btns">
+        <div class="title cambiarAD">
+            <h1 class="art-title">Cambiar contrato AD</h1>
+        </div>
+        <button class="red-btn margin" (click)="closeChangeAD()">✖</button>
+    </div>
+    <div class="saved-details special">
+        <div class="sinCont">
+            <button class="purple-btn" (click)="removeContrato()">Factura sin contrato</button>
+        </div>
+        <div *ngIf="isLoadingContratos" class="loading-message">
+            <div class="spinner"></div>
+            <span>Cargando</span>
+        </div>
+        <p class="errorBtn" *ngIf="ADGridMessageError">{{ADGridMessageError}}</p>
+        <div class="content-container">
+            <table class="main-table">
+                <thead>
+                    <tr>
+                        <th>Código</th>
+                        <th>Contrato</th>
+                        <th>Económica</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr 
+                        *ngFor="let p of paginatedContratos" 
+                        (click)="changeContrato(p)"
+                        style="cursor: pointer;"
+                    >
+                        <td>{{p.conn?.concod}}</td>
+                        <td>{{p.conn?.condes}}</td>
+                        <td>{{p.conn?.conlot}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPageContratos()" [disabled]="pageContatos === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPagesContatos"
+                    [value]="page + 1"
+                    (change)="goToPageContratos($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPagesContatos }}</span>
+                <button (click)="nextPageContratos()" [disabled]="page + 1 >= totalPagesContatos">Siguiente</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="ADMessagesGrid"></div>
+<div class="delete-confirm-modal" *ngIf="ADMessagesGrid">
+    <div class="btns">
+        <button class="red-btn margin" (click)="closeADMessages()">✖</button>
+    </div>
+    <div *ngIf="isUpdatingContrato" class="loading-message">
+        <div class="spinner"></div>
+        <span>Actualizando</span>
+    </div>
+    <p class="errorBtn size" *ngIf="ADMessageError">{{ADMessageError}}</p>
+    <p class="successBtn size" *ngIf="ADMessageSuccess">{{ADMessageSuccess}}</p>
 </div>

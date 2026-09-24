@@ -11,7 +11,7 @@ import com.example.backend.sqlserver2.model.GbsId;
 
 @Repository
 public interface  GbsRepository extends JpaRepository<Gbs, GbsId>{
-    //for the main list of bolsa por cge
+    //for the main list of bolsa por cge and cambiar contrato sin contrato option
     List<Gbs> findByENTAndEJEAndCGECOD(int ent, String eje, String cgecod);
 
     //for deleting a centro gestor

@@ -4,8 +4,10 @@ import java.util.List;
 import java.util.Optional;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.ProjectionContabilizar;
 import com.example.backend.sqlserver2.model.Fde;
@@ -37,4 +39,9 @@ public interface FdeRepository extends JpaRepository<Fde, FdeId> {
 
     //selecting all facturas in consulta de del contabilizado
     List<FdeFacTerProjection> findByENTAndEJEAndFac_FACFCOIsNotNullAndFDEIMPGreaterThanOrENTAndEJEAndFac_FACFCOIsNotNullAndFDEDIFGreaterThan(Integer ent1, String eje1, Double fdeimp, Integer ent2, String eje2, Double fdedif);
+
+    //cambiar contrato sin contrato option
+    @Modifying
+    @Transactional
+    int deleteByENTAndEJEAndFACNUM(Integer ent, String eje, Integer facnum);
 }

@@ -3,12 +3,16 @@ package com.example.backend.controller;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.FacId;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.FdeId;
+import com.example.backend.sqlserver2.model.Gbs;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
+import com.example.backend.sqlserver2.repository.CotRepository;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.dto.FdeFacTerProjection;
 import com.example.backend.dto.FdeResumeDto;
@@ -34,6 +38,10 @@ public class FdeController {
     private ContabilizarSearch contabilizarSearch;
     @Autowired
     private ContabilizadoSearch contabilizadoSearch;
+    @Autowired
+    private CotRepository cotRepository;
+    @Autowired
+    private GbsRepository gbsRepository;
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -195,6 +203,53 @@ public class FdeController {
             return ResponseEntity.ok(facturas);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //cambiar contrato sin contrato option
+    public record CPatch(Integer ENT, String EJE, String CGECOD, Integer FACNUM) {}
+    @Transactional
+    @PatchMapping("/AD-sin-Cont")
+    public ResponseEntity<?> contSinAD (
+        @RequestBody CPatch payload
+    ) {
+        try {
+            if (payload.ENT() == null || payload.EJE() == null|| payload.CGECOD() == null || payload.FACNUM() == null) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+            
+            List<Gbs> bolsas = gbsRepository.findByENTAndEJEAndCGECOD(payload.ENT(), payload.EJE(), payload.CGECOD());
+            if (bolsas.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Eliminado pero Bolsas " + SIN_RESULTADO);
+            }
+            FacId id = new FacId(payload.ENT(), payload.EJE(), payload.FACNUM());
+            Optional<Fac> factura = facRepository.findById(id);
+            if (factura.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+            Fac fac = factura.get();
+            fac.setCONCOD(0);
+            facRepository.save(fac);
+
+            fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
+            for (Gbs gbs: bolsas) {
+                Fde fde = new Fde();
+                fde.setENT(payload.ENT());
+                fde.setEJE(payload.EJE());
+                fde.setFACNUM(payload.FACNUM());
+                fde.setFDEREF(gbs.getGBSREF());
+                fde.setFDEOPE(gbs.getGBSOPE());
+                fde.setFDEORG(gbs.getGBSORG());
+                fde.setFDEFUN(gbs.getGBSFUN());
+                fde.setFDEECO(gbs.getGBSECO());
+                fde.setFDEIMP(0.00);
+                fde.setFDEDIF(0.00);
+                fdeRepository.save(fde);
+            }
+
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
 }

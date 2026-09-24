@@ -90,6 +90,13 @@
 .special {width: 98%;}
 .adjs {text-align: center;}
 /* special */
+/* cambiar ad grid */
+.cambiarAD {width: 80% !important;}
+.cambiarAD .art-title {width: 100%;}
+.content-container {display: flex; flex-direction: column; align-items: center;}
+.sinCont {display: flex; flex-direction: column; align-items: center;}
+.size {font-size: 20px !important;}
+/* cambiar ad grid */
 @media (min-width: 1700px) { .tallTextarea {width: 250px; max-width: 300px;}
 .averageTextarea{ width: 120px; max-width: 190px;}
 .albran-add .title {width: 65%;} }

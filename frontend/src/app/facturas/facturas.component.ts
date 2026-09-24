@@ -1251,6 +1251,103 @@ export class FacturasComponent {
     return this.savedNames.some((saved:any) => !!saved.message);
   }
 
+  //cambiar de AD
+  changeADGrid: boolean = false;
+  ADGridMessageError: string = '';
+  contratosPorAD: any[] = [];
+  pageContatos = 0;
+  isLoadingContratos: boolean = false;
+  openChangeAD() {
+    this.limpiarMEssages();
+    this.changeADGrid = true;
+    this.fetchContatosAd();
+  }
+
+  closeChangeAD() {
+    this.limpiarMEssages();
+    this.changeADGrid = false;
+    this.contratosPorAD = [];
+    this.pageContatos = 0;
+  }
+
+  fetchContatosAd() {
+    this.isLoadingContratos = true;
+    this.http.get<any>(`${environment.backendUrl}/api/con/cambio-contratos/${this.entcod}/${this.eje}/${this.selectedFacturas.tercod}`).subscribe({
+      next: (res) => {
+        this.contratosPorAD = res;
+        this.pageContatos = 0;
+        this.isLoadingContratos = false;
+      },
+      error: (err) => {
+        this.isLoadingContratos = false;
+        this.ADGridMessageError = err.error.error || err.error;
+      }
+    })
+  }
+  get paginatedContratos(): any[] {
+    if (!this.contratosPorAD || this.contratosPorAD.length === 0) return [];
+    const start = this.pageContatos * this.pageSize;
+    return this.contratosPorAD.slice(start, start + this.pageSize);
+  }
+  get totalPagesContatos(): number {
+    return Math.max(1, Math.ceil((this.contratosPorAD?.length ?? 0) / this.pageSize));
+  }
+  prevPageContratos(): void {
+    if (this.pageContatos > 0) this.pageContatos--;
+  }
+  nextPageContratos(): void {
+    if (this.pageContatos < this.totalPages - 1) this.pageContatos++;
+  }
+  goToPageContratos(event: any): void {
+    const inputPage = Number(event.target.value);
+    if (inputPage >= 1 && inputPage <= this.totalPages) {
+      this.pageContatos = inputPage - 1;
+    }
+  }
+
+  isUpdatingContrato: boolean = false;
+  changeContrato(p: any) {
+    const facnum = this.selectedFacturas.facnum;
+    const concod = p?.conn?.concod;
+  }
+
+
+  removeContrato() {
+    const facnum = this.selectedFacturas.facnum;
+    const payload = {
+      "ENT": this.entcod,
+      "EJE": this.eje,
+      "CGECOD": this.centroGestor,
+      "FACNUM": facnum
+    }
+    this.isUpdatingContrato = true;
+    this.openADMessages();
+    this.http.patch(`${environment.backendUrl}/api/fde/AD-sin-Cont`, payload).subscribe({
+      next: (res) => {
+        this.isUpdatingContrato = false;
+        this.openADMessages();
+        this.ADMessageSuccess = 'El AD del contrato se actualizó correctamente para esta factura.';
+      },
+      error: (err) => {
+        this.isUpdatingContrato = false;
+        this.ADMessageError = err.error.error || err.error;
+      }
+    })
+  }
+
+  ADMessagesGrid: boolean = false;
+  ADMessageSuccess: string = '';
+  ADMessageError: string = '';
+  openADMessages() {
+    this.ADMessagesGrid = true;
+  }
+
+  closeADMessages() {
+    this.limpiarMEssages();
+    this.ADMessagesGrid = false;
+    this.closeChangeAD();
+  }
+
   //misc 
   limpiarMEssages() {
     this.filterFacturaMessage = '';
@@ -1265,5 +1362,8 @@ export class FacturasComponent {
     this.albaranError = '';
     this.descuentosError = '';
     this.cargarFacturaError = '';
+    this.ADGridMessageError = '';
+    this.ADMessageSuccess = '';
+    this.ADMessageError = '';
   }
 }

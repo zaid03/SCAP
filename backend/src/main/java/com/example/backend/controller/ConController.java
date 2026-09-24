@@ -11,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import com.example.backend.dto.CambiarADProjection;
 import com.example.backend.dto.ContratoDto;
 import com.example.backend.service.CotContratoProjection;
 import com.example.backend.service.ContratosSearch;
@@ -29,7 +30,7 @@ public class ConController {
     private ConRepository conRepository;
     @Autowired
     private ContratosSearch contratosSearch;
-
+    
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
 
@@ -136,7 +137,7 @@ public class ConController {
         @RequestBody CAdd payload
     ) {
         try {
-            if(payload == null || payload.ENT() == null || payload.EJE() == null || payload.CONDES() == null || payload.CONLOT() == null || payload.TERCOD() == null) {
+            if (payload == null || payload.ENT() == null || payload.EJE() == null || payload.CONDES() == null || payload.CONLOT() == null || payload.TERCOD() == null) {
                 return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
             }
 
@@ -172,6 +173,25 @@ public class ConController {
                 .collect(Collectors.toList());
 
             return ResponseEntity.ok(dto);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //fetching contratos to cambiar AD
+    @GetMapping("/cambio-contratos/{ent}/{eje}/{tercod}")
+    public ResponseEntity<?> contratosCambio(
+        @PathVariable Integer ent,
+        @PathVariable String eje,
+        @PathVariable Integer tercod
+    ) {
+        try {
+            List<CambiarADProjection> contratos = cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(ent, eje, 0, 3, tercod);
+            if (contratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            } 
+
+            return ResponseEntity.ok(contratos);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
