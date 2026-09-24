@@ -858,7 +858,7 @@ export class FacturasComponent {
     this.hasData = 0;
   }
 
-  concodChosen: string = '';
+  concodChosen = 0;
   saidYes() {
     this.limpiarMEssages();
     this.closeAskGrid();
@@ -880,7 +880,7 @@ export class FacturasComponent {
   }
 
   getConcod(p: any) {
-    this.concodChosen = p?.conn?.concod;
+    this.concodChosen = p?.conn?.concod || 0;
     this.albaranesAddGrid = true;
     this.getConcodGrid = false;
     this.contratosPorAD = [];
@@ -900,7 +900,7 @@ export class FacturasComponent {
     this.limpiarMEssages();
     this.isLoadingAlbaranes = true;
 
-    this.http.get<any>(`${environment.backendUrl}/api/alb/albaranes-factura/${this.entcod}/${this.tercod}/${this.eje}/${this.centroGestor}`).subscribe({
+    this.http.get<any>(`${environment.backendUrl}/api/alb/albaranes-factura/${this.concodChosen}/${this.entcod}/${this.tercod}/${this.eje}/${this.centroGestor}`).subscribe({
       next: (res) => {
         this.isLoadingAlbaranes = false;
         this.albaranesAdd = res;
@@ -932,7 +932,7 @@ export class FacturasComponent {
     if (this.albaranesDesde && !this.albaranesHasta) {
       const backendDate = this.toBackendDate(this.albaranesDesde);
       this.isLoadingAlbaranes = true;
-      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Desde/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Desde/${this.concodChosen}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
         next: (res) => {
           this.isLoadingAlbaranes = false;
           this.albaranesAdd = res;
@@ -948,7 +948,7 @@ export class FacturasComponent {
     } else if (!this.albaranesDesde && this.albaranesHasta) {      
       const backendDate = this.toBackendDate(this.albaranesHasta);
       this.isLoadingAlbaranes = true;
-      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Hasta/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Hasta/${this.concodChosen}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
         next: (res) => {
           this.isLoadingAlbaranes = false;
           this.albaranesAdd = res;

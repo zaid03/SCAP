@@ -19,67 +19,118 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
 
     //fetching albaranes for adding to a factura
     @Query(
-        value = "SELECT T1.ALBREF AS ALBREF, T1.ALBDAT AS ALBDAT, T1.ALBBIM AS ALBBIM, T1.ALBNUM AS ALBNUM, T1.ALBFRE AS ALBFRE, T1.CONCTP AS CONCTP, T1.CONCPR AS CONCPR, T1.CONCCR AS CONCCR, " +
-                "T2.DEPCOD AS DEPCOD, T1.ALBCOM AS ALBCOM " +
-                "FROM ALB T1 " +
-                "LEFT JOIN DEP T2 ON T1.ENT = T2.ENT AND T1.ALBCOM = T2.DEPCOD " +
-                "WHERE T1.ENT = :ent " +
-                "AND T2.EJE = :eje " +
-                "AND T2.CGECOD = :cgecod " +
-                "AND T1.FACNUM = :facnum " +
-                "AND T1.TERCOD = :tercod",
-        nativeQuery = true
+        value = """
+            SELECT DISTINCT
+                ALB.ALBREF,
+                ALB.ALBDAT,
+                ALB.ALBBIM,
+                ALB.ALBNUM,
+                ALB.ALBFRE,
+                ALB.DEPCOD,
+                ALB.ALBCOM,
+                ALB.CONCTP,
+                ALB.CONCPR,
+                ALB.CONCCR
+            FROM ALB
+            JOIN DEP
+                ON ALB.ENT = DEP.ENT
+            AND ALB.ALBCOM = DEP.DEPCOD
+            JOIN SOL
+                ON ALB.ENT = SOL.ENT
+            AND ALB.SOLNUM = SOL.SOLNUM
+            WHERE SOL.SOLSUB = 0
+            AND SOL.CONCOD = :CONCOD
+            AND ALB.ENT = :ENT
+            AND ALB.EJE = :EJE
+            AND DEP.CGECOD = :CGECOD
+            AND ALB.FACNUM = 0
+            AND ALB.TERCOD = :TERCOD
+        """, nativeQuery = true
     )
     List<albFacturaDto> findAlbFactura(
-        @Param("ent") Integer ent,
-        @Param("tercod") Integer tercod,
-        @Param("facnum") Integer facnum,
-        @Param("eje") String eje,
-        @Param("cgecod") String cgecod
+        @Param("CONCOD") Integer CONCOD,
+        @Param("ENT") Integer ENT,
+        @Param("EJE") String EJE,
+        @Param("CGECOD") String CGECOD,
+        @Param("TERCOD") Integer TERCOD
     );
 
     //searching in albaranes for adding to a factura
     @Query(
-        value = "SELECT T1.ALBREF AS ALBREF, T1.ALBDAT AS ALBDAT, T1.ALBBIM AS ALBBIM, T1.ALBNUM AS ALBNUM, T1.ALBFRE AS ALBFRE, T1.CONCTP AS CONCTP, T1.CONCPR AS CONCPR, T1.CONCCR AS CONCCR, " +
-                "T2.DEPCOD AS DEPCOD, T1.ALBCOM AS ALBCOM " +
-                "FROM ALB T1 " +
-                "LEFT JOIN DEP T2 ON T1.ENT = T2.ENT AND T1.ALBCOM = T2.DEPCOD " +
-                "WHERE T1.ENT = :ent " +
-                "AND T2.EJE = :eje " +
-                "AND T2.CGECOD = :cgecod " +
-                "AND T1.FACNUM = :facnum " +
-                "AND T1.TERCOD = :tercod " +
-                "AND T1.ALBDAT >= :albdat",
-        nativeQuery = true
+        value = """
+            SELECT DISTINCT
+                ALB.ALBREF,
+                ALB.ALBDAT,
+                ALB.ALBBIM,
+                ALB.ALBNUM,
+                ALB.ALBFRE,
+                ALB.DEPCOD,
+                ALB.ALBCOM,
+                ALB.CONCTP,
+                ALB.CONCPR,
+                ALB.CONCCR
+            FROM ALB
+            JOIN DEP
+                ON ALB.ENT = DEP.ENT
+            AND ALB.ALBCOM = DEP.DEPCOD
+            JOIN SOL
+                ON ALB.ENT = SOL.ENT
+            AND ALB.SOLNUM = SOL.SOLNUM
+            WHERE SOL.SOLSUB = 0
+            AND SOL.CONCOD = :CONCOD
+            AND ALB.ENT = :ENT
+            AND ALB.EJE = :EJE
+            AND DEP.CGECOD = :CGECOD
+            AND ALB.FACNUM = 0
+            AND ALB.TERCOD = :TERCOD
+            AND ALB.ALBDAT >= :ALBDAT
+        """, nativeQuery = true
     )
     List<albFacturaDto> findAlbFacturaGreaterThanEqual(
-        @Param("ent") Integer ent,
-        @Param("tercod") Integer tercod,
-        @Param("facnum") Integer facnum,
-        @Param("albdat") LocalDateTime albdat,
-        @Param("eje") String eje,
-        @Param("cgecod") String cgecod
+        @Param("CONCOD") Integer CONCOD,
+        @Param("ENT") Integer ENT,
+        @Param("EJE") String EJE,
+        @Param("CGECOD") String CGECOD,
+        @Param("TERCOD") Integer TERCOD,
+        @Param("ALBDAT") LocalDateTime ALBDAT
     );
 
     @Query(
-        value = "SELECT T1.ALBREF AS ALBREF, T1.ALBDAT AS ALBDAT, T1.ALBBIM AS ALBBIM, T1.ALBNUM AS ALBNUM, T1.ALBFRE AS ALBFRE, T1.CONCTP AS CONCTP, T1.CONCPR AS CONCPR, T1.CONCCR AS CONCCR, " +
-                "T2.DEPCOD AS DEPCOD, T1.ALBCOM AS ALBCOM " +
-                "FROM ALB T1 " +
-                "LEFT JOIN DEP T2 ON T1.ENT = T2.ENT AND T1.ALBCOM = T2.DEPCOD " +
-                "WHERE T1.ENT = :ent " +
-                "AND T2.EJE = :eje " +
-                "AND T2.CGECOD = :cgecod " +
-                "AND T1.FACNUM = :facnum " +
-                "AND T1.TERCOD = :tercod " +
-                "AND T1.ALBDAT <= :albdat",
-        nativeQuery = true
+        value = """
+            SELECT DISTINCT
+                ALB.ALBREF,
+                ALB.ALBDAT,
+                ALB.ALBBIM,
+                ALB.ALBNUM,
+                ALB.ALBFRE,
+                ALB.DEPCOD,
+                ALB.ALBCOM,
+                ALB.CONCTP,
+                ALB.CONCPR,
+                ALB.CONCCR
+            FROM ALB
+            JOIN DEP
+                ON ALB.ENT = DEP.ENT
+            AND ALB.ALBCOM = DEP.DEPCOD
+            JOIN SOL
+                ON ALB.ENT = SOL.ENT
+            AND ALB.SOLNUM = SOL.SOLNUM
+            WHERE SOL.SOLSUB = 0
+            AND SOL.CONCOD = :CONCOD
+            AND ALB.ENT = :ENT
+            AND ALB.EJE = :EJE
+            AND DEP.CGECOD = :CGECOD
+            AND ALB.FACNUM = 0
+            AND ALB.TERCOD = :TERCOD
+            AND ALB.ALBDAT <= :ALBDAT
+        """, nativeQuery = true
     )
     List<albFacturaDto> findAlbFacturaLessThanEqual(
-        @Param("ent") Integer ent,
-        @Param("tercod") Integer tercod,
-        @Param("facnum") Integer facnum,
-        @Param("albdat") LocalDateTime albdat,
-        @Param("eje") String eje,
-        @Param("cgecod") String cgecod
+        @Param("CONCOD") Integer CONCOD,
+        @Param("ENT") Integer ENT,
+        @Param("EJE") String EJE,
+        @Param("CGECOD") String CGECOD,
+        @Param("TERCOD") Integer TERCOD,
+        @Param("ALBDAT") LocalDateTime ALBDAT
     );
 }

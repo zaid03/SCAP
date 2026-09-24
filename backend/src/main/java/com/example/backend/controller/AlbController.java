@@ -76,15 +76,16 @@ public class AlbController {
     }
 
     //fetching albaranes for adding to a factura
-    @GetMapping("/albaranes-factura/{ent}/{tercod}/{eje}/{cgecod}")
+    @GetMapping("/albaranes-factura/{concod}/{ent}/{tercod}/{eje}/{cgecod}")
     public ResponseEntity<?> fetchAlbaranesByServices(
+        @PathVariable Integer concod,
         @PathVariable Integer ent,
         @PathVariable Integer tercod,
         @PathVariable String eje,
         @PathVariable String cgecod
     ) {
         try {
-            List<albFacturaDto> albaranes = albRepository.findAlbFactura(ent, tercod, 0, eje, cgecod);
+            List<albFacturaDto> albaranes = albRepository.findAlbFactura(concod, ent, eje, cgecod, tercod);
             if (albaranes.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
@@ -96,8 +97,9 @@ public class AlbController {
     }
 
     //searching in albaranes for adding to a factura
-    @GetMapping("/search-albaranes-Desde/{ent}/{tercod}/{albdat}/{eje}/{cgecod}")
+    @GetMapping("/search-albaranes-Desde/{concod}/{ent}/{tercod}/{albdat}/{eje}/{cgecod}")
     public ResponseEntity<?> searchAlbaranesByDesde(
+        @PathVariable Integer concod,
         @PathVariable Integer ent,
         @PathVariable Integer tercod,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @PathVariable LocalDateTime albdat,
@@ -105,7 +107,7 @@ public class AlbController {
         @PathVariable String cgecod
     ) {
         try {
-            List<albFacturaDto> albaranes = albRepository.findAlbFacturaGreaterThanEqual(ent, tercod, 0, albdat, eje, cgecod);
+            List<albFacturaDto> albaranes = albRepository.findAlbFacturaGreaterThanEqual(concod, ent, eje, cgecod, tercod, albdat);
             if (albaranes.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
@@ -116,8 +118,9 @@ public class AlbController {
         }
     }
 
-    @GetMapping("/search-albaranes-Hasta/{ent}/{tercod}/{albdat}/{eje}/{cgecod}")
+    @GetMapping("/search-albaranes-Hasta/{concod}/{ent}/{tercod}/{albdat}/{eje}/{cgecod}")
     public ResponseEntity<?> searchAlbaranesByHasta(
+        @PathVariable Integer concod,
         @PathVariable Integer ent,
         @PathVariable Integer tercod,
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @PathVariable LocalDateTime albdat,
@@ -125,7 +128,7 @@ public class AlbController {
         @PathVariable String cgecod
     ) {
         try {
-            List<albFacturaDto> albaranes = albRepository.findAlbFacturaLessThanEqual(ent, tercod, 0, albdat, eje, cgecod);
+            List<albFacturaDto> albaranes = albRepository.findAlbFacturaLessThanEqual(concod, ent, eje, cgecod, tercod, albdat);
             if (albaranes.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
