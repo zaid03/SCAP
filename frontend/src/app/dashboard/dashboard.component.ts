@@ -191,6 +191,12 @@ export class DashboardComponent implements OnInit {
       case 'MAlmacen':
         this.router.navigate(['/MAlmacen']);
         break;
+      case 'CSaldoCon':
+        this.router.navigate(['/CSaldoCon']);
+        break;
+      case 'CHistoriaADCon':
+        this.router.navigate(['/CHistoriaADCon']);
+        break;
       default:
         break;
     }
