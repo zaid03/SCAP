@@ -109,7 +109,7 @@ export class MonitorContabilizacionComponent {
     })
   }
   
-  sortField: 'facnum' | 'tercod' | 'ternom' | 'ternif' | 'facfre' | 'facimp' | 'facdto' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'factxt' | 'concod' | 'facado' |'FFACFCO' | null = null;
+  sortField: 'facnum' | 'tercod' | 'ternom' | 'ternif' | 'facfre' | 'facimp' | 'facdto' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'factxt' | 'facado' |'FFACFCO' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   private defaultProveedores: any[] = [];
@@ -236,7 +236,6 @@ export class MonitorContabilizacionComponent {
       facfac: row.facfac ?? '',
       facdat: this.formatDate(row.facdat),
       fctxt: row.factxt ?? '',
-      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: this.formatDate(row.facfco)
     }));
@@ -255,7 +254,6 @@ export class MonitorContabilizacionComponent {
       { header: 'R.C.F', dataKey: 'facfac' },
       { header: 'F.Factura', dataKey: 'facdat' },
       { header: 'Descripción', dataKey: 'factxt'},
-      { header: 'Contrato AD', dataKey: 'concod' },
       { header: 'OP.Contable', dataKey: 'facado' },
       { header: 'F.Contable', dataKey: 'facfco' }
     ];
@@ -293,7 +291,6 @@ export class MonitorContabilizacionComponent {
         facfac: { cellWidth: 18 },
         facdat: { cellWidth: 20 },
         factxt: { cellWidth: 36},
-        concod: { cellWidth: 15 },
         facado: { cellWidth: 15 },
         facfco: { cellWidth: 20 }
       }
@@ -323,7 +320,6 @@ export class MonitorContabilizacionComponent {
       facfac: row.facfac ?? '',
       facdat: row.facdat ?? '',
       factxt: row.factxt ?? '',
-      concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: row.facfco ?? ''
     }));
@@ -331,7 +327,7 @@ export class MonitorContabilizacionComponent {
     const worksheet = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, [['Listado de facturas']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe', 'Descuentos', 'Núm. Factura', 'Año', 'R.C.F', 'F.Factura', 'Descripción', 'Contrato AD', 'OP.Contable', 'F.Contable']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe', 'Descuentos', 'Núm. Factura', 'Año', 'R.C.F', 'F.Factura', 'Descripción', 'OP.Contable', 'F.Contable']], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
 
     worksheet['!cols'] = [
@@ -346,8 +342,7 @@ export class MonitorContabilizacionComponent {
       { wch: 15 },
       { wch: 15 },
       { wch: 40 },
-      { wch: 25 },
-      { wch: 10},
+      { wch: 30 },
       { wch: 30 },
       { wch: 30 }
     ];
@@ -648,11 +643,8 @@ export class MonitorContabilizacionComponent {
   ESCONTRATO: boolean = false;
   contaFac: number = 0;
   totalContaFac: number = 0;
+  filterFacturaMessageSuccess: string = '';
   contabilizarResults: { facnum: number; success: boolean; message: string }[] = [];
-
-  setContrato(): void {
-    this.ESCONTRATO = this.selectedFacturas?.concod !== 0;
-  }
   async contabilizar() {
     this.closeContaConfirm();
     this.limpiarMEssages();
@@ -689,9 +681,9 @@ export class MonitorContabilizacionComponent {
     const fallidas = this.contabilizarResults.filter(r => !r.success).length;
     
     if (exitosas > 0 && fallidas === 0) {
-      this.filterfacturaSuccess = `${exitosas} factura(s) contabilizada(s) correctamente`;
+      this.filterFacturaMessageSuccess = `${exitosas} factura(s) contabilizada(s) correctamente`;
     } else if (exitosas > 0 && fallidas > 0) {
-      this.filterfacturaSuccess = `${exitosas} factura(s) contabilizada(s)`;
+      this.filterFacturaMessageSuccess = `${exitosas} factura(s) contabilizada(s)`;
       this.filterFacturaMessage = `${fallidas} factura(s) con errores`;
     } else if (fallidas > 0) {
       this.filterFacturaMessage = `${fallidas} factura(s) con errores`;
@@ -706,7 +698,6 @@ export class MonitorContabilizacionComponent {
   newFacado: string = '';
   isContabilizando: boolean = false;
   contabilizarFacturaAsync(factura: any): Promise<void> {
-    this.setContrato();
     return new Promise(async (resolve) => {
       const payload = {
         pwd: ".",
@@ -779,24 +770,23 @@ export class MonitorContabilizacionComponent {
   updateFactura(facnum: number, facado: any, facfco: string) {
     this.closeContaConfirm();
     this.limpiarMEssages();
-    this.setContrato();
     return new Promise<void>((resolve, reject) => {
       const payload = {
         "ENT": this.entcod,
         "EJE": this.eje,
         "FACNUM": facnum,
         "FACADO": facado,
-        "FACFCO": facfco,
+        "FACFCO": `${facfco}T00:00:00`,
         "CGECOD": this.centroGestor,
         "ESCONTRATO": this.ESCONTRATO
       };
 
-      this.http.patch<any>(`${environment.backendUrl}/api/facturas/contabilizar-facturas`, payload).subscribe({
+      this.http.patch<any>(`${environment.backendUrl}/api/fac/contabilizar-facturas`, payload).subscribe({
         next: () => {
           resolve();
         },
         error: (err) => {
-          reject(err.error || err.message || 'Error al actualizar factura');
+          reject(err.error.error || err.error);
         }
       });
     });
@@ -812,5 +802,6 @@ export class MonitorContabilizacionComponent {
     this.facturaDetailSuccess = '';
     this.facturaDetailError = '';
     this.searchError = '';
+    this.filterFacturaMessageSuccess = '';
   }
 }
