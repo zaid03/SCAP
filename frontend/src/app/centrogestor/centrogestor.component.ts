@@ -37,6 +37,7 @@ export class CentrogestorComponent implements OnInit {
     if (user) {this.usucod = user}
 
     this.loading = true;
+    this.fetchSwVarables();
     this.fetchMenus();
     this.http.get<any[]>(`${environment.backendUrl}/api/cge/${this.entcod}/${this.eje}/${this.usucod}`)
     .subscribe({
@@ -94,6 +95,26 @@ export class CentrogestorComponent implements OnInit {
     sessionStorage.setItem('EsComprador', JSON.stringify({value: false}));
     sessionStorage.setItem('EsAlmacen', JSON.stringify({value : false}));
     this.router.navigate(['/dashboard']);
+  }
+
+  sicalVariables: any = [];
+  fetchSwVarables() {
+    this.http.get(`${environment.backendUrl}/api/ayt/fetch-all/${this.entcod}`).subscribe({
+      next: (res) => {
+        this.sicalVariables = res;
+        if (this.sicalVariables === 0) {
+          alert("Faltan parámetros para conectar los WS en la configuración");
+          this.router.navigate(['/']);
+        }
+        
+        sessionStorage.setItem('WSORG', JSON.stringify({ WSORG: this.sicalVariables[0].ent_ORG}));
+        sessionStorage.setItem('WSENT', JSON.stringify({ WSENT: this.sicalVariables[0].ent_COD }));
+      },
+      error: (err) => {
+        alert("Server error");
+        this.router.navigate(['/']);
+      }
+    })
   }
 
   fetchMenus() {
