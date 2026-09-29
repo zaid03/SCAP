@@ -398,9 +398,21 @@
                                     <td>{{c.cogiap | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{getKdisponible(c.cogimp, c.cogim2, c.cogaip) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td class="borderI">
-                                        <button class="red-btn" (click)="showDeleteCentro(c)">-</button>
-                                        <button class="purple-btn" (click)="checkBeforeAdd(c)">D</button>
-                                        <button class="red-btn" (click)="openDeleteD(c)">D</button>
+                                        <button 
+                                            class="red-btn" 
+                                            (click)="showDeleteCentro(c)"
+                                            title="Quitar centro gestor"
+                                        >-</button>
+                                        <button 
+                                            class="purple-btn" 
+                                            (click)="checkBeforeAdd(c)"
+                                            title="Añadir D"
+                                        >D</button>
+                                        <button 
+                                            class="red-btn" 
+                                            (click)="openDeleteD(c)"
+                                            title="Quitar D"
+                                        >D</button>
                                     </td>
                                 </tr>
                             </tbody>

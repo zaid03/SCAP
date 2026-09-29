@@ -1,15 +1,13 @@
 package com.example.backend.dto;
 
-import java.math.BigDecimal;
-
 public interface CoaArtProjection {
     ArtInfo getArt();
-    BigDecimal getCOAPRE();
+    Double getCOAPRE();
 
     interface ArtInfo {
-        Integer getAFACOD();
-        Integer getASUCOD();
-        Integer getARTCOD();
+        String getAFACOD();
+        String getASUCOD();
+        String getARTCOD();
         String getARTDES();
     }
 }

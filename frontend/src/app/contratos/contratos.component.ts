@@ -931,7 +931,11 @@ export class ContratosComponent {
   }
 
   getKdisponible(COGIMP: number, COGIM2: number, COGIAP: number) {
-    return (COGIMP + COGIM2) - COGIAP;
+    const imp = COGIMP ?? 0;
+    const im2 = COGIM2 ?? 0;
+    const iap = COGIAP ?? 0;
+
+    return (imp + im2) - iap;
   }
 
   centroGestorDelete: boolean = false;
@@ -987,6 +991,7 @@ export class ContratosComponent {
     this.addCentroGestor = false;
     this.centroGestoresAdd = [];
     this.coughtCentros = [];
+    this.searchCentro = '';
   }
 
   fetchCentroGestores() {
