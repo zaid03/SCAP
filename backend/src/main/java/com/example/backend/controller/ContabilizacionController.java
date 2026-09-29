@@ -93,6 +93,14 @@ public class ContabilizacionController {
             List<Fde> fdeList = fdeRepository.findByENTAndEJEAndFACNUM(request.getEntcod(), request.getEje(), request.getFacnum());
             List<Fdt> fdtList = fdtRepository.findByENTAndEJEAndFACNUM(request.getEntcod(), request.getEje(), request.getFacnum());
 
+            boolean esContrato = Boolean.TRUE.equals(request.getEsContrato());
+            double kImporteTotal = 0.0;
+            if (esContrato) {
+                ContabilizacionService.ContratoPreparado prep = contabilizacionService.prepararLineasContrato(request, fdeList);
+                fdeList = prep.lineas();               
+                kImporteTotal = prep.kImporteTotal();
+            }
+
             String smlInput = contabilizacionService.buildSmlInput(request, fac, fdeList, fdtList, terAyt);
             String soapResponse = contabilizacionService.sendSmlRequest(smlInput, request.getWebserviceUrl());
             ContabilizacionResponseDto response = contabilizacionService.parseResponse(soapResponse);
@@ -110,6 +118,15 @@ public class ContabilizacionController {
                 System.out.println("Before save, FACADO=" + fac.getFACADO());
                 Fac saved = facRepository.save(fac);
                 System.out.println("After save, FACADO=" + saved.getFACADO());
+
+                try {
+                    contabilizacionService.actualizarAcumulados(request, saved, fdeList, kImporteTotal);
+                } catch (Exception accEx) {
+                    accEx.printStackTrace();
+                    response.setMensaje(response.getMensaje()
+                        + ". ATENCIÓN: la operación se generó pero falló la actualización de acumulados: "
+                        + accEx.getMessage());
+                }
                 return ResponseEntity.ok(response);
             } else {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response);

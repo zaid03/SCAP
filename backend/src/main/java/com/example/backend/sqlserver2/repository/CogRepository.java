@@ -1,26 +1,30 @@
 package com.example.backend.sqlserver2.repository;
 
-import org.springframework.data.jpa.repository.JpaRepository;
-import com.example.backend.sqlserver2.model.Cog;
-import com.example.backend.sqlserver2.model.CogId;
-import com.example.backend.dto.COGAIPOnlyDto;
-import com.example.backend.dto.CogCgeProjection;
-import com.example.backend.dto.SaldoContrato;
-
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
+
+import com.example.backend.dto.COGAIPOnlyDto;
+import com.example.backend.dto.CogCgeProjection;
+import com.example.backend.dto.SaldoContrato;
+import com.example.backend.sqlserver2.model.Cog;
+import com.example.backend.sqlserver2.model.CogId;
+
 public interface CogRepository extends JpaRepository<Cog, CogId> {
-    //selecting centro gestores for contrato
-    List<CogCgeProjection> findAllByENTAndEJEAndCONCOD(Integer ENT, String EJE, Integer CONCOD);
+  //selecting centro gestores for contrato
+  List<CogCgeProjection> findAllByENTAndEJEAndCONCOD(Integer ENT, String EJE, Integer CONCOD);
 
-    //needed for deleting a centro gestor from a contrato
-    Optional<COGAIPOnlyDto> findByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
+  //needed for deleting a centro gestor from a contrato
+  Optional<COGAIPOnlyDto> findByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
-    //needed for adding centro gestor to a contrato
-    Boolean existsByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
+  //needed for adding centro gestor to a contrato
+  Boolean existsByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
-    //main fetch for C.saldo de contrato
+  //main fetch for C.saldo de contrato
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONot(Integer ent, String eje, Integer contip, Integer conblo);
 
   //filtering for C.saldo de contrato
@@ -49,4 +53,16 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
 
   //needed for contabilizacion
   Optional<Cog> findOneByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
+
+  Optional<Cog> findCogByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
+
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Query("UPDATE Cog c SET c.COGIAP = COALESCE(c.COGIAP, 0) - :imp " + "WHERE c.ENT = :ent AND c.EJE = :eje AND c.CONCOD = :con AND c.CGECOD = :cge")
+  int restarPedidosPendientes(@Param("imp") double imp, @Param("ent") Integer ent, @Param("eje") String eje, @Param("con") Integer con, @Param("cge") String cge);
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Query("UPDATE Cog c SET c.COGIMP = :saldo WHERE c.ENT = :ent AND c.EJE = :eje AND c.CONCOD = :con AND c.CGECOD = :cge")
+  int actualizarSaldoPrincipal(@Param("saldo") double saldo, @Param("ent") Integer ent, @Param("eje") String eje,  @Param("con") Integer con, @Param("cge") String cge);
+  @Modifying(flushAutomatically = true, clearAutomatically = true)
+  @Query("UPDATE Cog c SET c.COGIM2 = :saldo WHERE c.ENT = :ent AND c.EJE = :eje AND c.CONCOD = :con AND c.CGECOD = :cge")
+  int actualizarSaldoSecundario(@Param("saldo") double saldo, @Param("ent") Integer ent, @Param("eje") String eje, @Param("con") Integer con, @Param("cge") String cge);
 }

@@ -89,6 +89,7 @@
                     class="purple-btn"
                     (click)="contabilizarChecks()"
                     [disabled]="estadogc === null || estadogc > 0"
+                    [ngClass]="{ 'disabled-btn': estadogc === null || estadogc > 0 }" 
                 >
                     Contabilizar
                 </button>
@@ -700,7 +701,7 @@
     </div>
     <div class="saved-details special">
         <div *ngIf="contabilizarResults.length > 0" class="results-container">
-            <h1 class="sucessBtn">{{filterFacturaMessageSuccess}}</h1>
+            <h1 class="successBtn">{{filterFacturaMessageSuccess}}</h1>
             <h1 class="errorBtn">{{filterFacturaMessage}}</h1>
             <div *ngFor="let result of contabilizarResults" 
                 [class.successBtn]="result.success" 

@@ -644,7 +644,7 @@ export class MonitorContabilizacionComponent {
   contaFac: number = 0;
   totalContaFac: number = 0;
   filterFacturaMessageSuccess: string = '';
-  contabilizarResults: { facnum: number; success: boolean; message: string }[] = [];
+  contabilizarResults: { facnum: number; success: boolean; message: string; warning?: boolean }[] = [];
   async contabilizar() {
     this.closeContaConfirm();
     this.limpiarMEssages();
@@ -721,10 +721,13 @@ export class MonitorContabilizacionComponent {
             try {
               await this.updateFactura(factura.facnum, this.newFacado, this.fechaContable);
               
+              const aviso = response.mensaje?.includes('ATENCIÓN') ? response.mensaje : '';
+
               this.contabilizarResults.push({
                 facnum: factura.facnum,
                 success: true,
-                message: `OP: ${this.newFacado}`
+                message: aviso ? `OP: ${this.newFacado}. ${aviso}` : `OP: ${this.newFacado}`,
+                warning: !!aviso
               });
             } catch (err: any) {
               this.contabilizarResults.push({

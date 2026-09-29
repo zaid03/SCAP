@@ -16,10 +16,15 @@ import com.example.backend.dto.ContabilizacionRequestDto;
 import com.example.backend.dto.ContabilizacionResponseDto;
 import com.example.backend.dto.Operaciones;
 import com.example.backend.exception.SmlBuildingException;
+import com.example.backend.sqlserver2.model.Cog;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Fdt;
+import com.example.backend.sqlserver2.repository.CogRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.sical.CryptoSical;
+
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ContabilizacionService {
@@ -29,9 +34,174 @@ public class ContabilizacionService {
     @Autowired
     private OperacionesService operacionesService;
 
+    @Autowired
+    private GbsRepository gbsRepository;
+
+    @Autowired
+    private CogRepository cogRepository;
+
+
+    public record ContratoPreparado(List<Fde> lineas, double kImporteTotal) {}
+
+    private double totalFde(Fde f) {
+        return (f.getFDEIMP() != null ? f.getFDEIMP() : 0.0) + (f.getFDEDIF() != null ? f.getFDEDIF() : 0.0);
+    }
+
+    private double round2(double v) {
+        return Math.round(v * 100.0) / 100.0;
+    }
+
+    private Fde copiarFde(Fde o) {
+        Fde c = new Fde();
+        c.setENT(o.getENT());
+        c.setEJE(o.getEJE());
+        c.setFACNUM(o.getFACNUM());
+        c.setFDEREF(o.getFDEREF());
+        c.setFDEOPE(o.getFDEOPE());
+        c.setFDEORG(o.getFDEORG());
+        c.setFDEFUN(o.getFDEFUN());
+        c.setFDEECO(o.getFDEECO());
+        c.setFDESUB(o.getFDESUB());
+        c.setFDEIMP(o.getFDEIMP());
+        c.setFDEDIF(o.getFDEDIF());
+        return c;
+    }
+
+    public ContratoPreparado prepararLineasContrato(ContabilizacionRequestDto req, List<Fde> original) throws Exception {
+        List<Fde> fdeList = new java.util.ArrayList<>();
+        for (Fde f : original) {
+            fdeList.add(copiarFde(f));
+        }
+
+        Fde principal = null;
+        for (Fde f : fdeList) {
+            if (totalFde(f) > 0 && f.getFDEECO() != null) {
+                principal = f;
+                break;
+            }
+        }
+        if (principal == null) {
+            throw new SmlBuildingException("Contrato: no se encontró la línea FDE con importe y económico");
+        }
+
+        Fde reserva = null;
+        for (Fde f : fdeList) {
+            if (f != principal) {
+                reserva = f;
+                break;
+            }
+        }
+        if (reserva == null) {
+            throw new SmlBuildingException("Contrato: no se encontró la segunda línea FDE (reserva)");
+        }
+
+        double kImporteTotal = round2(totalFde(principal));
+
+        LineaGastoDefinitivo datos = consultarOperacionGastoDefinitivo(principal, req.getOrg(), req.getEnt(), req.getEje());
+        if (datos == null || datos.saldo() == null) {
+            throw new SmlBuildingException("Contrato: no se pudo obtener el saldo de la operación " + principal.getFDEOPE());
+        }
+        double saldo = datos.saldo();
+        System.out.println("Contrato: KImporteTotal=" + kImporteTotal + " saldo=" + saldo);
+
+        if (saldo >= kImporteTotal) {
+            return new ContratoPreparado(fdeList, kImporteTotal); // con la primera línea basta
+        }
+
+        reserva.setFDEECO(principal.getFDEECO());
+
+        double imp1 = principal.getFDEIMP() != null ? principal.getFDEIMP() : 0.0;
+        double dif1 = principal.getFDEDIF() != null ? principal.getFDEDIF() : 0.0;
+        double kImpFalta = round2(kImporteTotal - saldo);
+
+        if (kImpFalta <= dif1) {
+            principal.setFDEDIF(round2(dif1 - kImpFalta));
+            reserva.setFDEDIF(kImpFalta);
+            reserva.setFDEIMP(0.0);
+        } else {
+            double resto = round2(kImpFalta - dif1);
+            reserva.setFDEIMP(resto);
+            reserva.setFDEDIF(dif1);
+            principal.setFDEIMP(round2(imp1 - resto));
+            principal.setFDEDIF(0.0);
+        }
+
+        System.out.println("Contrato reparto -> principal imp=" + principal.getFDEIMP() + " dif=" + principal.getFDEDIF() + " | reserva imp=" + reserva.getFDEIMP() + " dif=" + reserva.getFDEDIF());
+
+        return new ContratoPreparado(fdeList, kImporteTotal);
+    }
+
+    @Transactional("sqlServer2TransactionManager")
+    public void actualizarAcumulados(ContabilizacionRequestDto req, Fac fac, List<Fde> fdeList, double kImporteTotal) {
+        if (Boolean.TRUE.equals(req.getEsContrato())) {
+            actualizarContrato(req, fac, fdeList, kImporteTotal);
+        } else {
+            actualizarGbs(fac, fdeList);
+        }
+    }
+
+    private void actualizarGbs(Fac fac, List<Fde> fdeList) {
+        for (Fde fde : fdeList) {
+            double imp = round2(totalFde(fde));
+            if (imp <= 0) continue;
+            int n = gbsRepository.acumular(imp, fac.getENT(), fac.getEJE(), fac.getCGECOD(),
+                    fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO());
+            System.out.println("GBS acumulado imp=" + imp + " eco=" + fde.getFDEECO() + " filas=" + n);
+        }
+    }
+
+    private void actualizarContrato(ContabilizacionRequestDto req, Fac fac, List<Fde> fdeList, double kImporteTotal) {
+        if (fac.getCONCOD() == null) {
+            throw new IllegalStateException("La factura no tiene contrato (CONCOD) asociado");
+        }
+        Cog cog = cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+                fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD())
+            .orElseThrow(() -> new IllegalStateException("No existe COG para el contrato " + fac.getCONCOD()));
+
+        cogRepository.restarPedidosPendientes(kImporteTotal, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
+
+        Fde ref = null;
+        for (Fde f : fdeList) {
+            if (f.getFDEECO() != null) { ref = f; break; }
+        }
+        if (ref == null) return;
+
+        if (cog.getCOGOPD() != null && !cog.getCOGOPD().isBlank()) {
+            Double saldo = consultarSaldoOperacion(req, cog.getCOGOPD(), cog.getCOGRFD(), ref);
+            if (saldo != null) {
+                cogRepository.actualizarSaldoPrincipal(saldo, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
+            }
+        }
+
+        if (cog.getCOGOP2() != null && !cog.getCOGOP2().isBlank()) {
+            Double saldo = consultarSaldoOperacion(req, cog.getCOGOP2(), cog.getCOGRF2(), ref);
+            if (saldo != null) {
+                cogRepository.actualizarSaldoSecundario(saldo, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
+            }
+        }
+    }
+
+    private Double consultarSaldoOperacion(ContabilizacionRequestDto req, String numOpe, String referencia, Fde ref) {
+        try {
+            List<Operaciones> resultado = operacionesService.getOperaciones(req.getOrg(), req.getEnt(), numOpe, numOpe,
+                    null, ref.getFDEORG(), ref.getFDEFUN(), ref.getFDEECO(), referencia, null, null, null, req.getEje());
+            if (resultado == null || resultado.size() != 1) {
+                System.out.println("WS 2.49 (COG): resultado inesperado para op=" + numOpe);
+                return null;
+            }
+            List<Operaciones.Linea> lineas = resultado.get(0).getLineaList();
+            if (lineas == null || lineas.isEmpty()) return null;
+            return lineas.get(0).getSaldo();
+        } catch (Exception e) {
+            System.out.println("========== WS 2.49 (COG) FALLIDA ==========");
+            e.printStackTrace();
+            return null;
+        }
+    }
+
     public String buildSmlInput(ContabilizacionRequestDto req, Fac fac, List<Fde> fdeList, List<Fdt> fdtList, String terAyt) throws Exception {
         if (req == null) {
-        throw new SmlBuildingException("Request cannot be null");
+            throw new SmlBuildingException("Request cannot be null");
         }
 
         if (fac == null) {
@@ -486,13 +656,12 @@ public class ContabilizacionService {
             return CryptoSical.decodeBase64(value);
         } catch (Exception e) {
             System.out.println("========== REQUEST FAILED ==========");
-    e.printStackTrace();
+            e.printStackTrace();
             return value;
         }
     }
 
-    private record LineaGastoDefinitivo(String nlinea, String prya, String pryt,
-                                     String pryo, String pryn, String pryx) {}
+    private record LineaGastoDefinitivo(String nlinea, String prya, String pryt, String pryo, String pryn, String pryx, Double saldo) {}
 
     private LineaGastoDefinitivo consultarOperacionGastoDefinitivo(Fde fde, String orgCode, String entidad, String eje) {
         try {
@@ -504,12 +673,12 @@ public class ContabilizacionService {
             List<Operaciones> resultado = operacionesService.getOperaciones(orgCode, entidad, numeroOperDesde, numeroOperDesde, null, fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO(), referencia, null, null, null, eje);
 
             if (!resultado.isEmpty()) {
-    Operaciones op = resultado.get(0);
-    System.out.println("Operacion " + op.getNumope() + " eco=" + fde.getFDEECO()
-        + " codope=" + op.getCodope()
-        + " fase=" + op.getFase()
-        + " signo=" + op.getSigno());
-}
+                Operaciones op = resultado.get(0);
+                System.out.println("Operacion " + op.getNumope() + " eco=" + fde.getFDEECO()
+                    + " codope=" + op.getCodope()
+                    + " fase=" + op.getFase()
+                    + " signo=" + op.getSigno());
+            }
 
             if (resultado.isEmpty()) {
                 System.out.println("WS 2.49: sin resultado para FDEOPE=" + numope + " refe=" + referencia);
@@ -537,7 +706,8 @@ public class ContabilizacionService {
                     l.getPryt(),
                     l.getPryo(),
                     l.getPryn(),
-                    l.getPryx() != null ? String.valueOf(l.getPryx()) : null
+                    l.getPryx() != null ? String.valueOf(l.getPryx()) : null,
+                    l.getSaldo() // NEW
             );
         } catch (Exception e) {
             System.out.println("========== WS 2.49 CONSULTA FALLIDA ==========");
