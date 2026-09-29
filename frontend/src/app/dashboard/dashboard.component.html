@@ -230,7 +230,7 @@
   </div>
 </div>
 
-<div class="modal-backdrop" *ngIf="showServices" (click)="closeShowServices()"></div>
+<div class="modal-backdrop" *ngIf="showServices"></div>
 <div class="add-confirm-modal" *ngIf="showServices">
   <div class="btns">
     <div class="title">
@@ -239,8 +239,12 @@
     <button class="red-btn" (click)="closeShowServices()">✖</button>
   </div>
   <h1 class="errorBtn">{{servicesError}}</h1>
-  <div class="detail-services">
-    <table class="main-table">
+  <div *ngIf="isLoading" class="loading-message">
+    <div class="spinner"></div>
+    <span>Cargando</span>
+  </div>
+  <div class="main-list">
+    <table class="main-table ust">
       <thead>
         <tr>
           <th>Código</th>
@@ -260,7 +264,7 @@
             <input 
               type="checkbox"
               [checked]="p.depcom === 1"
-              class="locked-radio"
+              class="checkbox"
               (click)="$event.preventDefault()"
             >
           </td>
@@ -268,7 +272,7 @@
             <input 
               type="checkbox"
               [checked]="p.depalm === 1"
-              class="locked-radio"
+              class="checkbox"
               (click)="$event.preventDefault()"
             >
           </td>
@@ -276,12 +280,26 @@
             <input 
               type="checkbox"
               [checked]="p.depint === 1"
-              class="locked-radio"
+              class="checkbox"
               (click)="$event.preventDefault()"
             >
           </td>
         </tr>
       </tbody>
     </table>
+    <div class="pagination-controls">
+      <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+      <span>Página</span>
+      <input
+      type="number"
+      min="1"
+      [max]="totalPages"
+      [value]="page + 1"
+      (change)="goToPage($event)"
+      class="pagination-input"
+      />
+      <span>de {{ totalPages }}</span>
+      <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+    </div>
   </div>
 </div>
