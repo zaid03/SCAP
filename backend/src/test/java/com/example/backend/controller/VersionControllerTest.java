@@ -408,4 +408,25 @@ public class VersionControllerTest {
             .andExpect(jsonPath("$").isMap())
             .andExpect(jsonPath("$.version").isString());
     }
+
+    @Test
+    void getVersion_matchesActualImplementationVersion() throws Exception {
+        String implementationVersion =
+            VersionController.class.getPackage().getImplementationVersion();
+
+        String expected = implementationVersion;
+
+        if (expected != null && expected.contains("-")) {
+            expected = expected.substring(0, expected.indexOf('-'));
+        }
+
+        if (expected == null) {
+            expected = "desconocida";
+        }
+
+        mockMvc.perform(get("/api/version/num")
+                .accept(MediaType.APPLICATION_JSON))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$.version").value(expected));
+    }
 }

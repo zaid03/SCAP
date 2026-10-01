@@ -1,5 +1,8 @@
 package com.example.backend.controller;
 
+import com.example.backend.dto.AnaliticaArticulosProjectin.AfaProjection;
+import com.example.backend.dto.AnaliticaArticulosProjectin;
+import com.example.backend.dto.ArticleProjection;
 import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.dto.ArtAsuContratoProjection;
@@ -24,6 +27,7 @@ import java.util.List;
 
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -279,5 +283,291 @@ public class ArtControllerTest {
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchAnaliticaArticulos_returns200WithList() throws Exception {
+        AnaliticaArticulosProjectin projection = new AnaliticaArticulosProjectin() {
+            @Override
+            public String getAFACOD() {
+                return "AF";
+            }
+
+            @Override
+            public String getARTCOD() {
+                return "ART";
+            }
+
+            @Override
+            public String getARTDES() {
+                return "Test article";
+            }
+
+            @Override
+            public AfaProjection getAfa() {
+                return new AfaProjection() {
+                    @Override
+                    public String getAFADES() {
+                        return "Test family";
+                    }
+                };
+            }
+        };
+
+        when(artRepository.findByENT(1))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/fetch-analitica-articulos/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].afacod").value("AF"))
+            .andExpect(jsonPath("$[0].artcod").value("ART"))
+            .andExpect(jsonPath("$[0].artdes").value("Test article"))
+            .andExpect(jsonPath("$[0].afa.afades").value("Test family"));
+    }
+
+    @Test
+    void fetchAnaliticaArticulos_returns404WhenEmpty() throws Exception {
+        when(artRepository.findByENT(1))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/art/fetch-analitica-articulos/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchAnaliticaArticulos_returns500OnException() throws Exception {
+        when(artRepository.findByENT(1))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get("/api/art/fetch-analitica-articulos/1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchConsultaGeneral_returns200WithList() throws Exception {
+        ArticleProjection projection = new ArticleProjection() {
+            @Override public String getAFACOD() { return "AF"; }
+            @Override public String getAfa_AFADES() { return "Family"; }
+            @Override public String getASUCOD() { return "ASU"; }
+            @Override public String getAsu_ASUDES() { return "Subfamily"; }
+            @Override public String getARTCOD() { return "ART"; }
+            @Override public String getARTDES() { return "Test article"; }
+            @Override public String getARTREF() { return "REF"; }
+            @Override public Integer getARTBLO() { return 0; }
+            @Override public Double getARTUNI() { return 1.0; }
+            @Override public Double getARTSOL() { return 2.0; }
+            @Override public Double getARTREC() { return 3.0; }
+            @Override public String getAun_AUNDES() { return "Unit"; }
+            @Override public Double getARTUCO() { return 10.0; }
+            @Override public Double getARTUEM() { return 11.0; }
+            @Override public Double getARTPMI() { return 12.0; }
+            @Override public Double getARTPMP() { return 13.0; }
+            @Override public Double getARTMIN() { return 14.0; }
+            @Override public Double getARTOPT() { return 15.0; }
+        };
+
+        when(artRepository.findByENT(eq(1), any()))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/fetch-consulta-general/1")
+                .param("page", "2")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].artcod").value("ART"))
+            .andExpect(jsonPath("$[0].artdes").value("Test article"));
+
+        verify(artRepository).findByENT(eq(1), argThat(page ->
+            page.getPageNumber() == 2 && page.getPageSize() == 20
+        ));
+    }
+
+    @Test
+    void fetchConsultaGeneral_returns404WhenEmpty() throws Exception {
+        when(artRepository.findByENT(eq(1), any()))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/art/fetch-consulta-general/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchConsultaGeneral_returns500OnException() throws Exception {
+        when(artRepository.findByENT(eq(1), any()))
+            .thenThrow(new RuntimeException("DB error"));
+
+        mockMvc.perform(get("/api/art/fetch-consulta-general/1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchConsultaGeneralExport_returns200WithList() throws Exception {
+        ArticleProjection projection = new ArticleProjection() {
+            @Override public String getAFACOD() { return "AF"; }
+            @Override public String getAfa_AFADES() { return "Family"; }
+            @Override public String getASUCOD() { return "ASU"; }
+            @Override public String getAsu_ASUDES() { return "Subfamily"; }
+            @Override public String getARTCOD() { return "ART"; }
+            @Override public String getARTDES() { return "Test article"; }
+            @Override public String getARTREF() { return "REF"; }
+            @Override public Integer getARTBLO() { return 0; }
+            @Override public Double getARTUNI() { return 1.0; }
+            @Override public Double getARTSOL() { return 2.0; }
+            @Override public Double getARTREC() { return 3.0; }
+            @Override public String getAun_AUNDES() { return "Unit"; }
+            @Override public Double getARTUCO() { return 10.0; }
+            @Override public Double getARTUEM() { return 11.0; }
+            @Override public Double getARTPMI() { return 12.0; }
+            @Override public Double getARTPMP() { return 13.0; }
+            @Override public Double getARTMIN() { return 14.0; }
+            @Override public Double getARTOPT() { return 15.0; }
+        };
+
+        when(artRepository.findAllByENT(1))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/export-consulta-general/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].artcod").value("ART"))
+            .andExpect(jsonPath("$[0].artdes").value("Test article"));
+    }
+
+    @Test
+    void fetchConsultaGeneralExport_returns404WhenEmpty() throws Exception {
+        when(artRepository.findAllByENT(1))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/art/export-consulta-general/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchConsultaGeneralExport_returns500OnException() throws Exception {
+        when(artRepository.findAllByENT(1))
+            .thenThrow(new RuntimeException("DB error"));
+
+        mockMvc.perform(get("/api/art/export-consulta-general/1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void getPag_returns200WithPagination() throws Exception {
+        when(artRepository.countByENT(1))
+            .thenReturn(45);
+
+        mockMvc.perform(get("/api/art/get-pag/1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().string("45"));
+    }
+
+    @Test
+    void getPag_returns404WhenZero() throws Exception {
+        when(artRepository.countByENT(1))
+            .thenReturn(0);
+
+        mockMvc.perform(get("/api/art/get-pag/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void getPag_returns500OnException() throws Exception {
+        when(artRepository.countByENT(1))
+            .thenThrow(new RuntimeException("DB error"));
+
+        mockMvc.perform(get("/api/art/get-pag/1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchArticles_returns200WithList() throws Exception {
+        ArticleProjection projection = new ArticleProjection() {
+            @Override public String getAFACOD() { return "AF"; }
+            @Override public String getAfa_AFADES() { return "Family"; }
+            @Override public String getASUCOD() { return "ASU"; }
+            @Override public String getAsu_ASUDES() { return "Subfamily"; }
+            @Override public String getARTCOD() { return "ART"; }
+            @Override public String getARTDES() { return "Test article"; }
+            @Override public String getARTREF() { return "REF"; }
+            @Override public Integer getARTBLO() { return 0; }
+            @Override public Double getARTUNI() { return 1.0; }
+            @Override public Double getARTSOL() { return 2.0; }
+            @Override public Double getARTREC() { return 3.0; }
+            @Override public String getAun_AUNDES() { return "Unit"; }
+            @Override public Double getARTUCO() { return 10.0; }
+            @Override public Double getARTUEM() { return 11.0; }
+            @Override public Double getARTPMI() { return 12.0; }
+            @Override public Double getARTPMP() { return 13.0; }
+            @Override public Double getARTMIN() { return 14.0; }
+            @Override public Double getARTOPT() { return 15.0; }
+        };
+
+        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/search/1")
+                .param("search", "bolt")
+                .param("afacod", "AF")
+                .param("asucod", "ASU")
+                .param("bloqueado", "todos")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].artcod").value("ART"))
+            .andExpect(jsonPath("$[0].artdes").value("Test article"));
+    }
+
+    @Test
+    void searchArticles_returns404WhenEmpty() throws Exception {
+        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/art/search/1")
+                .param("search", "bolt")
+                .param("afacod", "AF")
+                .param("asucod", "ASU")
+                .param("bloqueado", "todos"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchArticles_returns500OnException() throws Exception {
+        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+            .thenThrow(new RuntimeException("DB error"));
+
+        mockMvc.perform(get("/api/art/search/1")
+                .param("search", "bolt")
+                .param("afacod", "AF")
+                .param("asucod", "ASU")
+                .param("bloqueado", "todos"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string("Error: DB error"));
     }
 }

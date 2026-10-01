@@ -486,6 +486,42 @@ public class DpeControllerTest {
     }
 
     @Test
+    void getPaginationNumber_returnsCount() throws Exception {
+        when(dpeRepository.countByENTAndEJE(1, "E1")).thenReturn(45);
+
+        mockMvc.perform(get("/api/depe/personas-servicios-pagination/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().string("45"));
+
+        verify(dpeRepository).countByENTAndEJE(1, "E1");
+    }
+
+    @Test
+    void getPaginationNumber_returnsNotFoundWhenCountIsZero() throws Exception {
+        when(dpeRepository.countByENTAndEJE(1, "E1")).thenReturn(0);
+
+        mockMvc.perform(get("/api/depe/personas-servicios-pagination/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void getPaginationNumber_returns500OnException() throws Exception {
+        when(dpeRepository.countByENTAndEJE(1, "E1"))
+            .thenThrow(new RuntimeException("Unexpected error"));
+
+        mockMvc.perform(get("/api/depe/personas-servicios-pagination/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
     void deleteAllPersonaServices_returns500OnDataAccessException() throws Exception {
         when(dpeRepository.findByENTAndEJEAndPERCOD(1, "E1", "U1")).thenReturn(List.of(new Dpe()));
         when(dpeRepository.deleteByENTAndEJEAndPERCOD(1, "E1", "U1"))
