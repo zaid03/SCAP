@@ -401,4 +401,123 @@ public class AfaControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Faltan datos obligatorios")));
     }
+
+    @Test
+    void fetchFamiliaAnalitic_returns200WithList() throws Exception {
+        Afa a = new Afa();
+        a.setAFACOD("AF1");
+        a.setAFADES("Familia 1");
+
+        when(afaRepository.findByENT(1)).thenReturn(List.of(a));
+
+        mockMvc.perform(get("/api/afa/fetch-familia-analitica/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void fetchFamiliaAnalitic_returns404WhenEmpty() throws Exception {
+        when(afaRepository.findByENT(1)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/afa/fetch-familia-analitica/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchFamiliaAnalitic_returns400OnDataAccessException() throws Exception {
+        when(afaRepository.findByENT(anyInt()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/afa/fetch-familia-analitica/1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error")));
+    }
+
+    @Test
+    void getByEntAndAfadesLike_returns200WithList() throws Exception {
+        ArticuloFamilia familia = new ArticuloFamilia() {
+            @Override
+            public String getAFACOD() {
+                return "AF1";
+            }
+
+            @Override
+            public String getAFADES() {
+                return "Familia Test";
+            }
+        };
+
+        when(afaRepository.findByENTAndAFADESContaining(1, "Test"))
+            .thenReturn(List.of(familia));
+
+        mockMvc.perform(get("/api/afa/by-ent-like/1/Test")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].afades").value("Familia Test"));
+    }
+
+    @Test
+    void getByEntAndAfadesLike_returns404WhenEmpty() throws Exception {
+        when(afaRepository.findByENTAndAFADESContaining(1, "Nothing"))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/afa/by-ent-like/1/Nothing"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void getByEntAndAfadesLike_returns400OnDataAccessException() throws Exception {
+        when(afaRepository.findByENTAndAFADESContaining(anyInt(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/afa/by-ent-like/1/Test"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error")));
+    }
+
+    @Test
+    void famsFetching_returns200WithList() throws Exception {
+        Afa a = new Afa();
+        a.setAFACOD("AF1");
+        a.setAFADES("Familia 1");
+
+        when(afaRepository.findByENT(1)).thenReturn(List.of(a));
+
+        mockMvc.perform(get("/api/afa/fetching-fams/1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void famsFetching_returns404WhenEmpty() throws Exception {
+        when(afaRepository.findByENT(1)).thenReturn(List.of());
+
+        mockMvc.perform(get("/api/afa/fetching-fams/1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void famsFetching_returns400OnDataAccessException() throws Exception {
+        when(afaRepository.findByENT(anyInt()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/afa/fetching-fams/1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error")));
+    }
 }

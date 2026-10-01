@@ -14,7 +14,9 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
@@ -368,5 +370,132 @@ public class AsuControllerTest {
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void getByEntAndAfacodOrAsucod_returnsCombinedDistinctList() throws Exception {
+        Asu a1 = new Asu();
+        a1.setASUCOD("A1");
+        a1.setASUDES("Description 1");
+
+        Asu a2 = new Asu();
+        a2.setASUCOD("A2");
+        a2.setASUDES("Description 2");
+
+        // Same object in both lists so Stream.distinct() removes the duplicate
+        when(asuRepository.findByENTAndAFACOD(1, "AF"))
+            .thenReturn(List.of(a1, a2));
+
+        when(asuRepository.findByENTAndASUCOD(1, "A1"))
+            .thenReturn(List.of(a1));
+
+        mockMvc.perform(get("/api/asu/by-ent/1/AF/A1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(2)));
+    }
+
+    @Test
+    void getByEntAndAfacodOrAsucod_returns400OnDataAccessException() throws Exception {
+        when(asuRepository.findByENTAndAFACOD(anyInt(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/asu/by-ent/1/AF/A1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void getByEntAndAsudesLike_returnsList() throws Exception {
+        Asu a = new Asu();
+        a.setASUCOD("S1");
+        a.setASUDES("Test description");
+
+        when(asuRepository.findAllByENTAndASUDESContaining(1, "Test"))
+            .thenReturn(List.of(a));
+
+        mockMvc.perform(get("/api/asu/by-ent-like/1/Test")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void getByEntAndAsudesLike_returns404WhenEmpty() throws Exception {
+        when(asuRepository.findAllByENTAndASUDESContaining(1, "Nothing"))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/asu/by-ent-like/1/Nothing"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void getByEntAndAsudesLike_returns400OnDataAccessException() throws Exception {
+        when(asuRepository.findAllByENTAndASUDESContaining(anyInt(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/asu/by-ent-like/1/Test"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void subsFetching_returnsList() throws Exception {
+        Asu a = new Asu();
+        a.setASUCOD("S1");
+        a.setASUDES("Description");
+
+        when(asuRepository.findByENTAndAFACOD(1, "AF"))
+            .thenReturn(List.of(a));
+
+        mockMvc.perform(get("/api/asu/fetching-subs/1/AF")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void subsFetching_returns404WhenEmpty() throws Exception {
+        when(asuRepository.findByENTAndAFACOD(1, "AF"))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/asu/fetching-subs/1/AF"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void subsFetching_returns400OnDataAccessException() throws Exception {
+        when(asuRepository.findByENTAndAFACOD(anyInt(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/asu/fetching-subs/1/AF"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void subsFetching_returns400WhenEntNull() {
+        ResponseEntity<?> response = new AsuController().subsFetching(null, "AF");
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Faltan datos obligatorios.", response.getBody());
+    }
+
+    @Test
+    void subsFetching_returns400WhenAfacodNull() {
+        ResponseEntity<?> response = new AsuController().subsFetching(1, null);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Faltan datos obligatorios.", response.getBody());
     }
 }

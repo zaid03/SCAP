@@ -5,8 +5,18 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.web.client.RestTemplate;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
+import org.mockito.MockedConstruction;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 import com.example.backend.dto.Tercero;
 import com.example.backend.exception.XmlParsingException;
@@ -1181,5 +1191,82 @@ public class SicalServiceTest {
         Method method = SicalService.class.getDeclaredMethod("parseXmlDocument", String.class);
         method.setAccessible(true);
         return (Document) method.invoke(service, xml);
+    }
+
+    @Test
+    void getTerceros_withValidResponse_returnsParsedTerceros() throws Exception {
+        String responseXml =
+            "<servicioReturn>" +
+            "&lt;data&gt;" +
+            "&lt;tercero&gt;" +
+            "&lt;idenTercero&gt;ID001&lt;/idenTercero&gt;" +
+            "&lt;NIFtercero&gt;12345678A&lt;/NIFtercero&gt;" +
+            "&lt;nomTercero&gt;Juan&lt;/nomTercero&gt;" +
+            "&lt;/tercero&gt;" +
+            "&lt;/data&gt;" +
+            "</servicioReturn>";
+
+        try (MockedConstruction<RestTemplate> mocked = mockConstruction(
+                RestTemplate.class,
+                (mock, context) -> {
+                    when(mock.postForObject(
+                            anyString(),
+                            any(HttpEntity.class),
+                            eq(String.class)
+                    )).thenReturn(responseXml);
+                })) {
+
+            List<Tercero> result = service.getTerceros(
+                "12345678A",
+                null,
+                null,
+                ORG_CODE,
+                ENTIDAD,
+                EJE
+            );
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals("ID001", result.get(0).getIdenTercero());
+            assertEquals("12345678A", result.get(0).getNIFtercero());
+            assertEquals("Juan", result.get(0).getNomTercero());
+        }
+    }
+
+    @Test
+    void parseTerceros_withBankAccounts_parsesCuentaBancaria() throws Exception {
+        String xml =
+            "<?xml version=\"1.0\"?>" +
+            "<data>" +
+                "<tercero>" +
+                    "<idenTercero>ID001</idenTercero>" +
+                    "<nomTercero>Juan</nomTercero>" +
+                "</tercero>" +
+                "<detbco>AAA-@-ORD001-@-CCC-@-DDD-@-EEE-@-FFF-@-GGG-@-ACTIVA</detbco>" +
+            "</data>";
+
+        Method method = SicalService.class.getDeclaredMethod(
+            "parseTerceros",
+            String.class
+        );
+        method.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        List<Tercero> result =
+            (List<Tercero>) method.invoke(service, xml);
+
+        assertEquals(1, result.size());
+        assertNotNull(result.get(0).getCuentasBancarias());
+        assertEquals(1, result.get(0).getCuentasBancarias().size());
+
+        assertEquals(
+            "ORD001",
+            result.get(0).getCuentasBancarias().get(0).TDB_ORD()
+        );
+
+        assertEquals(
+            "ACTIVA",
+            result.get(0).getCuentasBancarias().get(0).TDB_SIT()
+        );
     }
 }

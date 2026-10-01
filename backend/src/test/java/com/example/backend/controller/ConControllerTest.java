@@ -1,38 +1,42 @@
 package com.example.backend.controller;
 
-import com.example.backend.config.TestSecurityConfig;
-import com.example.backend.config.TestExceptionHandler;
-import com.example.backend.dto.ContratoDto;
-import com.example.backend.service.CotContratoProjection;
-import com.example.backend.service.ContratosSearch;
-import com.example.backend.sqlserver2.repository.CotRepository;
-import com.example.backend.sqlserver2.repository.ConRepository;
-import com.example.backend.sqlserver2.model.Cot;
-import com.example.backend.sqlserver2.model.Conn;
-import com.example.backend.sqlserver2.model.ConId;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataAccessException;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.backend.config.TestExceptionHandler;
+import com.example.backend.config.TestSecurityConfig;
+import com.example.backend.dto.CambiarADProjection;
+import com.example.backend.dto.ContratoDto;
+import com.example.backend.service.ContratosSearch;
+import com.example.backend.service.CotContratoProjection;
+import com.example.backend.sqlserver2.model.ConId;
+import com.example.backend.sqlserver2.model.Conn;
+import com.example.backend.sqlserver2.model.Cot;
+import com.example.backend.sqlserver2.repository.ConRepository;
+import com.example.backend.sqlserver2.repository.CotRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ConController.class)
 @ActiveProfiles("test")
@@ -813,5 +817,53 @@ public class ConControllerTest {
             .tercod(200)
             .ternom("Supplier Name")
             .build();
+    }
+
+    @Test
+    void contratosCambio_returns404WhenEmpty() throws Exception {
+        when(cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void contratosCambio_returns500OnException() throws Exception {
+        when(cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenThrow(new DataAccessResourceFailureException("Database error"));
+
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Error :")));
+    }
+
+    @Test
+    void quickCheck_returns200WithCount() throws Exception {
+        when(cotRepository.countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(5);
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(content().string("5"));
+    }
+
+    @Test
+    void quickCheck_returns500OnException() throws Exception {
+        when(cotRepository.countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenThrow(new DataAccessResourceFailureException("Database error"));
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Error :")));
     }
 }

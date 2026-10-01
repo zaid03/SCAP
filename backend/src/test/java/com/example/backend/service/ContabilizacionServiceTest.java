@@ -3,6 +3,20 @@ package com.example.backend.service;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import java.util.Optional;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.lenient;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import com.example.backend.sqlserver2.model.Cog;
+import com.example.backend.sqlserver2.repository.CogRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -28,14 +42,23 @@ public class ContabilizacionServiceTest {
 
     @Mock
     private com.example.backend.service.OperacionesService operacionesService;
+    @Mock
+    private GbsRepository gbsRepository;
+
+    @Mock
+    private CogRepository cogRepository;
 
     private ContabilizacionService service;
 
     @BeforeEach
     void setUp() throws Exception {
         service = new ContabilizacionService();
+
         ReflectionTestUtils.setField(service, "operacionesService", operacionesService);
+        ReflectionTestUtils.setField(service, "gbsRepository", gbsRepository);
+        ReflectionTestUtils.setField(service, "cogRepository", cogRepository);
         ReflectionTestUtils.setField(service, "sicalWsUrl", "http://test-sical-ws:8080/services/Ci");
+
         mockOperacionesSingleLine();
     }
 
@@ -883,8 +906,6 @@ public class ContabilizacionServiceTest {
         assertTrue(result.contains("<linea>"));
     }
 
-    // NOTE: needs a matching Fde line included so the dto entries (all sharing the
-    // same org/fun/eco clave) are not filtered out by the new "orphan dto" guard.
     @Test
     void buildSmlInput_withFdtMultipleEntries_includesAllDtos() throws Exception {
         ContabilizacionRequestDto req = createValidRequest();
@@ -1070,4 +1091,409 @@ public class ContabilizacionServiceTest {
       op.setLineaList(List.of(linea));
       return op;
     }
+
+@Test
+void prepararLineasContrato_withEnoughSaldo_returnsPreparedLines() throws Exception {
+    Operaciones op = createOperacionWithSingleLinea();
+    op.getLineaList().get(0).setSaldo(150.0);
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+
+    Fde principal = createValidFde();
+    principal.setFDEIMP(100.0);
+    principal.setFDEDIF(0.0);
+    principal.setFDEECO("ECO001");
+
+    Fde reserva = createValidFde();
+    reserva.setFDEIMP(0.0);
+    reserva.setFDEDIF(0.0);
+    reserva.setFDEECO(null);
+
+    ContabilizacionService.ContratoPreparado result =
+        service.prepararLineasContrato(req, List.of(principal, reserva));
+
+    assertNotNull(result);
+    assertEquals(100.0, result.kImporteTotal());
+    assertEquals(2, result.lineas().size());
+
+    // Verify that original FDE objects were copied
+    assertFalse(result.lineas().get(0) == principal);
+    assertFalse(result.lineas().get(1) == reserva);
+}
+
+@Test
+void prepararLineasContrato_withoutReserve_throwsException() {
+    ContabilizacionRequestDto req = createValidRequest();
+
+    Fde principal = createValidFde();
+    principal.setFDEIMP(100.0);
+    principal.setFDEDIF(0.0);
+    principal.setFDEECO("ECO001");
+
+    assertThrows(
+        SmlBuildingException.class,
+        () -> service.prepararLineasContrato(req, List.of(principal))
+    );
+}
+
+@Test
+void prepararLineasContrato_whenShortfallFitsDifference_updatesDifference() throws Exception {
+    Operaciones op = createOperacionWithSingleLinea();
+    op.getLineaList().get(0).setSaldo(80.0);
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+
+    Fde principal = createValidFde();
+    principal.setFDEIMP(50.0);
+    principal.setFDEDIF(50.0);
+    principal.setFDEECO("ECO001");
+
+    Fde reserva = createValidFde();
+    reserva.setFDEIMP(0.0);
+    reserva.setFDEDIF(0.0);
+    reserva.setFDEECO(null);
+
+    ContabilizacionService.ContratoPreparado result =
+        service.prepararLineasContrato(req, List.of(principal, reserva));
+
+    Fde resultPrincipal = result.lineas().get(0);
+    Fde resultReserva = result.lineas().get(1);
+
+    assertEquals(50.0, resultPrincipal.getFDEIMP());
+    assertEquals(30.0, resultPrincipal.getFDEDIF());
+
+    assertEquals(0.0, resultReserva.getFDEIMP());
+    assertEquals(20.0, resultReserva.getFDEDIF());
+
+    assertEquals("ECO001", resultReserva.getFDEECO());
+}
+
+@Test
+void prepararLineasContrato_whenShortfallExceedsDifference_movesAmountToReserve() throws Exception {
+    Operaciones op = createOperacionWithSingleLinea();
+    op.getLineaList().get(0).setSaldo(50.0);
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+
+    Fde principal = createValidFde();
+    principal.setFDEIMP(100.0);
+    principal.setFDEDIF(10.0);
+    principal.setFDEECO("ECO001");
+
+    Fde reserva = createValidFde();
+    reserva.setFDEIMP(0.0);
+    reserva.setFDEDIF(0.0);
+    reserva.setFDEECO(null);
+
+    ContabilizacionService.ContratoPreparado result =
+        service.prepararLineasContrato(req, List.of(principal, reserva));
+
+    Fde resultPrincipal = result.lineas().get(0);
+    Fde resultReserva = result.lineas().get(1);
+
+    // total = 110, saldo = 50, falta = 60
+    // dif = 10, so resto = 50
+    assertEquals(50.0, resultPrincipal.getFDEIMP());
+    assertEquals(0.0, resultPrincipal.getFDEDIF());
+
+    assertEquals(50.0, resultReserva.getFDEIMP());
+    assertEquals(10.0, resultReserva.getFDEDIF());
+
+    assertEquals("ECO001", resultReserva.getFDEECO());
+}
+
+@Test
+void prepararLineasContrato_withNullSaldo_throwsException() throws Exception {
+    Operaciones op = createOperacionWithSingleLinea();
+    op.getLineaList().get(0).setSaldo(null);
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+
+    Fde principal = createValidFde();
+    principal.setFDEIMP(100.0);
+    principal.setFDEDIF(0.0);
+    principal.setFDEECO("ECO001");
+
+    Fde reserva = createValidFde();
+
+    assertThrows(
+        SmlBuildingException.class,
+        () -> service.prepararLineasContrato(req, List.of(principal, reserva))
+    );
+}
+
+@Test
+void actualizarAcumulados_whenContratoWithoutConcod_throwsException() {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(null);
+
+    assertThrows(
+        IllegalStateException.class,
+        () -> service.actualizarAcumulados(
+            req,
+            fac,
+            List.of(createValidFde()),
+            100.0
+        )
+    );
+}
+
+@Test
+void actualizarAcumulados_whenContratoCogDoesNotExist_throwsException() {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(123);
+
+    when(cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+        any(), any(), any(), any()
+    )).thenReturn(Optional.empty());
+
+    assertThrows(
+        IllegalStateException.class,
+        () -> service.actualizarAcumulados(
+            req,
+            fac,
+            List.of(createValidFde()),
+            100.0
+        )
+    );
+}
+
+
+@Test
+void actualizarAcumulados_whenContratoHasNoEconomicLine_returnsAfterPendingUpdate() {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(123);
+
+    Cog cog = mock(Cog.class);
+
+    when(cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+        any(), any(), any(), any()
+    )).thenReturn(Optional.of(cog));
+
+    Fde fde = createValidFde();
+    fde.setFDEECO(null);
+
+    service.actualizarAcumulados(
+        req,
+        fac,
+        List.of(fde),
+        100.0
+    );
+
+    verify(cogRepository).restarPedidosPendientes(
+        anyDouble(), any(), any(), any(), any()
+    );
+}
+
+@Test
+void actualizarAcumulados_whenCogOperationsAreBlank_doesNotUpdateBalances() {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(123);
+
+    Cog cog = mock(Cog.class);
+
+    when(cog.getCOGOPD()).thenReturn("");
+    when(cog.getCOGOP2()).thenReturn("   ");
+
+    when(cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+        any(), any(), any(), any()
+    )).thenReturn(Optional.of(cog));
+
+    Fde fde = createValidFde();
+    fde.setFDEECO("ECO001");
+
+    service.actualizarAcumulados(
+        req,
+        fac,
+        List.of(fde),
+        100.0
+    );
+
+    verify(cogRepository).restarPedidosPendientes(
+        anyDouble(), any(), any(), any(), any()
+    );
+
+    verify(cogRepository, times(0)).actualizarSaldoPrincipal(
+        anyDouble(), any(), any(), any(), any()
+    );
+
+    verify(cogRepository, times(0)).actualizarSaldoSecundario(
+        anyDouble(), any(), any(), any(), any()
+    );
+}
+
+@Test
+void actualizarAcumulados_whenSaldoOperationHasNoLines_doesNotUpdatePrincipal() throws Exception {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(123);
+
+    Cog cog = mock(Cog.class);
+    when(cog.getCOGOPD()).thenReturn("OPD001");
+    when(cog.getCOGRFD()).thenReturn("REFD");
+    when(cog.getCOGOP2()).thenReturn(null);
+
+    when(cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+        any(), any(), any(), any()
+    )).thenReturn(Optional.of(cog));
+
+    Operaciones op = new Operaciones();
+    op.setLineaList(List.of());
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    service.actualizarAcumulados(
+        req,
+        fac,
+        List.of(createValidFde()),
+        100.0
+    );
+
+    verify(cogRepository, times(0)).actualizarSaldoPrincipal(
+        anyDouble(), any(), any(), any(), any()
+    );
+}
+
+@Test
+void actualizarAcumulados_whenSaldoOperationThrowsException_doesNotUpdatePrincipal() throws Exception {
+    ContabilizacionRequestDto req = createValidRequest();
+    req.setEsContrato(true);
+
+    Fac fac = createValidFac();
+    fac.setCONCOD(123);
+
+    Cog cog = mock(Cog.class);
+    when(cog.getCOGOPD()).thenReturn("OPD001");
+    when(cog.getCOGRFD()).thenReturn("REFD");
+    when(cog.getCOGOP2()).thenReturn(null);
+
+    when(cogRepository.findCogByENTAndEJEAndCONCODAndCGECOD(
+        any(), any(), any(), any()
+    )).thenReturn(Optional.of(cog));
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenThrow(new RuntimeException("WS failure"));
+
+    service.actualizarAcumulados(
+        req,
+        fac,
+        List.of(createValidFde()),
+        100.0
+    );
+
+    verify(cogRepository, times(0)).actualizarSaldoPrincipal(
+        anyDouble(), any(), any(), any(), any()
+    );
+}
+
+@Test
+void buildSmlInput_withWsOperationWithoutLines_skipsFdeLine() throws Exception {
+    Operaciones op = new Operaciones();
+    op.setLineaList(List.of());
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+    Fac fac = createValidFac();
+    Fde fde = createValidFde();
+
+    String result = service.buildSmlInput(
+        req, fac, List.of(fde), List.of(), "NIF"
+    );
+
+    assertNotNull(result);
+    assertFalse(result.contains("<linea>"));
+}
+
+@Test
+void buildSmlInput_withWsOperationMultipleLines_skipsFdeLine() throws Exception {
+    Operaciones op = new Operaciones();
+
+    Operaciones.Linea linea1 = new Operaciones.Linea();
+    linea1.setNlinea(1);
+    linea1.setSaldo(100.0);
+
+    Operaciones.Linea linea2 = new Operaciones.Linea();
+    linea2.setNlinea(2);
+    linea2.setSaldo(200.0);
+
+    op.setLineaList(List.of(linea1, linea2));
+
+    when(operacionesService.getOperaciones(
+        any(), any(), any(), any(), any(), any(), any(), any(),
+        any(), any(), any(), any(), any()
+    )).thenReturn(List.of(op));
+
+    ContabilizacionRequestDto req = createValidRequest();
+    Fac fac = createValidFac();
+    Fde fde = createValidFde();
+
+    String result = service.buildSmlInput(
+        req, fac, List.of(fde), List.of(), "NIF"
+    );
+
+    assertNotNull(result);
+    assertFalse(result.contains("<linea>"));
+}
+
+@Test
+void decodeIfBase64_withNullAndEmptyValues_returnsOriginalValue() {
+    String nullResult = ReflectionTestUtils.invokeMethod(
+        service,
+        "decodeIfBase64",
+        (String) null
+    );
+
+    assertEquals((String) null, nullResult);
+
+    String emptyResult = ReflectionTestUtils.invokeMethod(
+        service,
+        "decodeIfBase64",
+        ""
+    );
+
+    assertEquals("", emptyResult);
+}
 }

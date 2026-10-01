@@ -3,6 +3,7 @@ package com.example.backend.service;
 import com.example.backend.dto.Operaciones;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.MockedConstruction;
 import org.springframework.http.HttpEntity;
 import org.springframework.test.util.ReflectionTestUtils;
@@ -415,6 +416,78 @@ class OperacionesServiceTest {
                     null,
                     null,
                     ""));
+    }
+
+    @Test
+    void getOperaciones_shouldIncludeAllOptionalFiltersInRequest() throws Exception {
+
+        String responseXml = """
+                <respuesta>
+                    <operacion>
+                        <numope>15</numope>
+                    </operacion>
+                </respuesta>
+                """;
+
+        try (MockedConstruction<RestTemplate> mockedRestTemplate =
+                     mockConstruction(RestTemplate.class, (mock, context) ->
+                             when(mock.postForObject(anyString(), any(HttpEntity.class), eq(String.class)))
+                                     .thenReturn(responseXml))) {
+
+            service.getOperaciones(
+                    "ORG",
+                    "ENT",
+                    "10",
+                    "20",
+                    "CODIGO",
+                    "ORGANICA",
+                    "FUNCIONAL",
+                    "ECONOMICA",
+                    "REFERENCIA",
+                    "EXPEDIENTE",
+                    "GRUPO",
+                    "OFICINA",
+                    "INDICE",
+                    "NUMREG",
+                    "2025");
+
+            RestTemplate restTemplate = mockedRestTemplate.constructed().getFirst();
+            ArgumentCaptor<HttpEntity> captor = ArgumentCaptor.forClass(HttpEntity.class);
+
+            verify(restTemplate).postForObject(
+                    eq("http://localhost/service"),
+                    captor.capture(),
+                    eq(String.class));
+
+            String requestXml = (String) captor.getValue().getBody();
+
+            assertTrue(requestXml.contains("<numeroOperDesde>10</numeroOperDesde>"));
+            assertTrue(requestXml.contains("<numeroOperHasta>20</numeroOperHasta>"));
+            assertTrue(requestXml.contains("<codigoOperacion>"
+                    + Base64.getEncoder().encodeToString("CODIGO".getBytes(StandardCharsets.UTF_8))
+                    + "</codigoOperacion>"));
+            assertTrue(requestXml.contains("<organica>"
+                    + Base64.getEncoder().encodeToString("ORGANICA".getBytes(StandardCharsets.UTF_8))
+                    + "</organica>"));
+            assertTrue(requestXml.contains("<funcional>"
+                    + Base64.getEncoder().encodeToString("FUNCIONAL".getBytes(StandardCharsets.UTF_8))
+                    + "</funcional>"));
+            assertTrue(requestXml.contains("<economica>"
+                    + Base64.getEncoder().encodeToString("ECONOMICA".getBytes(StandardCharsets.UTF_8))
+                    + "</economica>"));
+            assertTrue(requestXml.contains("<referencia>REFERENCIA</referencia>"));
+            assertTrue(requestXml.contains("<expediente>"
+                    + Base64.getEncoder().encodeToString("EXPEDIENTE".getBytes(StandardCharsets.UTF_8))
+                    + "</expediente>"));
+            assertTrue(requestXml.contains("<grupoApunte>"
+                    + Base64.getEncoder().encodeToString("GRUPO".getBytes(StandardCharsets.UTF_8))
+                    + "</grupoApunte>"));
+            assertTrue(requestXml.contains("<oficina>"
+                    + Base64.getEncoder().encodeToString("OFICINA".getBytes(StandardCharsets.UTF_8))
+                    + "</oficina>"));
+            assertTrue(requestXml.contains("<indice>INDICE</indice>"));
+            assertTrue(requestXml.contains("<NumRegDev>NUMREG</NumRegDev>"));
+        }
     }
 
     @Test

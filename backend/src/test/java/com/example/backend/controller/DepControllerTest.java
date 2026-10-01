@@ -2,6 +2,8 @@ package com.example.backend.controller;
 
 import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.config.TestExceptionHandler;
+import com.example.backend.dto.AlmacenbyDep;
+import com.example.backend.dto.ConsultaAlmacenes;
 import com.example.backend.dto.DepWithCgeView;
 import com.example.backend.sqlserver2.model.Cco;
 import com.example.backend.sqlserver2.model.CcoId;
@@ -31,6 +33,7 @@ import static org.hamcrest.Matchers.*;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
@@ -983,5 +986,99 @@ public class DepControllerTest {
         assertEquals(1, cap.getValue().getDEPALM());
         assertEquals(1, cap.getValue().getDEPCOM());
         assertEquals(1, cap.getValue().getDEPINT());
+    }
+
+    @Test
+    void search_filterByPeticionario_withNullDepcomAndZeroDepint() throws Exception {
+        Dep d1 = new Dep();
+        d1.setDEPCOD("D1");
+        d1.setDEPALM(0);
+        d1.setDEPCOM(null);
+        d1.setDEPINT(0);
+
+        Dep d2 = new Dep();
+        d2.setDEPCOD("D2");
+        d2.setDEPALM(0);
+        d2.setDEPCOM(1);
+        d2.setDEPINT(0);
+
+        when(depRepository.findByENTAndEJE(1, "E1"))
+            .thenReturn(List.of(d1, d2));
+
+        mockMvc.perform(get("/api/dep/search")
+                .param("ent", "1")
+                .param("eje", "E1")
+                .param("perfil", "peticionario"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)))
+            .andExpect(jsonPath("$[0].depcod", is("D1")));
+    }
+
+   @Test
+    void fetchConsultaAlmacenes_returns200WithList() throws Exception {
+        ConsultaAlmacenes almacen = mock(ConsultaAlmacenes.class);
+
+        when(almacen.getEJE()).thenReturn("E1");
+        when(almacen.getDEPCOD()).thenReturn("D001");
+        when(almacen.getDEPDES()).thenReturn("Almacen principal");
+        when(almacen.getCGECOD()).thenReturn("C001");
+
+        when(depRepository.findByENTAndEJEAndDEPALM(1, "E1", 1))
+            .thenReturn(List.of(almacen));
+
+        mockMvc.perform(get("/api/dep/fetch-consulta-almacenes/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print());
+    }
+
+    @Test
+    void fetchConsultaAlmacenes_returns404WhenEmpty() throws Exception {
+        when(depRepository.findByENTAndEJEAndDEPALM(1, "E1", 1))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/dep/fetch-consulta-almacenes/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchConsultaAlmacenes_returns500OnDataAccessException() throws Exception {
+        when(depRepository.findByENTAndEJEAndDEPALM(anyInt(), anyString(), eq(1)))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/dep/fetch-consulta-almacenes/1/E1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchAlmacenesNombre_returns404WhenEmpty() throws Exception {
+        when(depRepository.findByENTAndEJEAndDEPALMAndDpes_PERCODAndCge_CGECOD(
+                1, "E1", 1, "U1", "G1"))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/dep/fetch-almacenes-nombre/1/E1/U1/G1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchAlmacenesNombre_returns500OnDataAccessException() throws Exception {
+        when(depRepository.findByENTAndEJEAndDEPALMAndDpes_PERCODAndCge_CGECOD(
+                anyInt(), anyString(), eq(1), anyString(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/dep/fetch-almacenes-nombre/1/E1/U1/G1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
     }
 }

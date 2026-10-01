@@ -5,6 +5,7 @@ import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.dto.COGAIPOnlyDto;
 import com.example.backend.dto.CogCgeProjection;
 import com.example.backend.dto.CogSaveDto;
+import com.example.backend.dto.SaldoContrato;
 import com.example.backend.sqlserver2.model.Cog;
 import com.example.backend.sqlserver2.model.CogId;
 import com.example.backend.sqlserver2.repository.CogRepository;
@@ -55,6 +56,53 @@ public class CogControllerTest {
 
     @MockitoBean
     private HistoricaADContratoSearch historicaADContratoSearch;
+
+    SaldoContrato contrato = new SaldoContrato() {
+        @Override
+        public Integer getCONCOD() {
+            return 1;
+        }
+
+        @Override
+        public CotProjection getCot() {
+            return null;
+        }
+
+        @Override
+        public CgeProjection getCge() {
+            return null;
+        }
+
+        @Override
+        public String getCGECOD() {
+            return "CGE1";
+        }
+
+        @Override
+        public String getCOGOPD() {
+            return null;
+        }
+
+        @Override
+        public String getCOGOP2() {
+            return null;
+        }
+
+        @Override
+        public Double getCOGIMP() {
+            return null;
+        }
+
+        @Override
+        public Double getCOGIM2() {
+            return null;
+        }
+
+        @Override
+        public Double getCOGIAP() {
+            return null;
+        }
+    };
 
     @Test
     void fetchCentroGestores_returns404WhenEmpty() throws Exception {
@@ -437,5 +485,175 @@ public class CogControllerTest {
                 .content("{}"))
             .andExpect(status().isBadRequest())
             .andExpect(content().string("COGIM2 is required."));
+    }
+
+    @Test
+    void fetchSaldoContrato_returns200WithContracts() throws Exception {
+
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONot(
+                1, "2026", 3, 1))
+            .thenReturn(List.of(contrato));
+
+        mockMvc.perform(get("/api/cog/Saldo-contrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void fetchSaldoContrato_returns404WhenEmpty() throws Exception {
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONot(
+                1, "2026", 3, 1))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/cog/Saldo-contrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchSaldoContrato_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONot(
+                anyInt(), anyString(), anyInt(), anyInt()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/cog/Saldo-contrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchSaldoContrato_returns400WhenNoFiltersProvided() throws Exception {
+        mockMvc.perform(get("/api/cog/search-saldo-contrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("Faltan datos obligatorios"));
+    }
+
+    @Test
+    void searchSaldoContrato_returns200WithResults() throws Exception {
+
+        when(saldoContratoSearch.searchSaldoContratos(
+                1, "2026", "CGE1", null, null))
+            .thenReturn(List.of(contrato));
+
+        mockMvc.perform(get("/api/cog/search-saldo-contrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchSaldoContrato_returns404WhenNoResults() throws Exception {
+        when(saldoContratoSearch.searchSaldoContratos(
+                1, "2026", "CGE1", null, null))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/cog/search-saldo-contrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchSaldoContrato_returns500OnDataAccessException() throws Exception {
+        when(saldoContratoSearch.searchSaldoContratos(
+                anyInt(), anyString(), anyString(), any(), any()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/cog/search-saldo-contrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchHistoriaADContrato_returns200WithContracts() throws Exception {
+
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIP(
+                1, "2026", 3))
+            .thenReturn(List.of(contrato));
+
+        mockMvc.perform(get("/api/cog/historia-ADcontrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void fetchHistoriaADContrato_returns404WhenEmpty() throws Exception {
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIP(
+                1, "2026", 3))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/cog/historia-ADcontrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchHistoriaADContrato_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findByENTAndEJEAndCot_conn_CONTIP(
+                anyInt(), anyString(), anyInt()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/cog/historia-ADcontrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchHistoriaContrato_returns400WhenNoFiltersProvided() throws Exception {
+        mockMvc.perform(get("/api/cog/search-historia-ADcontrato/1/2026"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("Faltan datos obligatorios"));
+    }
+
+    @Test
+    void searchHistoriaContrato_returns200WithResults() throws Exception {
+
+        when(historicaADContratoSearch.historicaADContratoSearch(
+                1, "2026", "CGE1", null, null))
+            .thenReturn(List.of(contrato));
+
+        mockMvc.perform(get("/api/cog/search-historia-ADcontrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchHistoriaContrato_returns404WhenNoResults() throws Exception {
+        when(historicaADContratoSearch.historicaADContratoSearch(
+                1, "2026", "CGE1", null, null))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/cog/search-historia-ADcontrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchHistoriaContrato_returns500OnDataAccessException() throws Exception {
+        when(historicaADContratoSearch.historicaADContratoSearch(
+                anyInt(), anyString(), anyString(), any(), any()))
+            .thenThrow(new DataAccessResourceFailureException("DB down"));
+
+        mockMvc.perform(get("/api/cog/search-historia-ADcontrato/1/2026")
+                .param("cge", "CGE1"))
+            .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
     }
 }

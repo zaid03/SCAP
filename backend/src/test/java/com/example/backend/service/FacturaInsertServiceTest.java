@@ -15,6 +15,9 @@ import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.TerRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.dto.CuentaBancaria;
+import com.example.backend.dto.Tercero;
+import com.example.backend.exception.XmlParsingException;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -373,5 +376,106 @@ class FacturaInsertServiceTest {
         gbs.setGBSECO("ECO001");
         gbs.setGBSSUB("SUB001");
         return gbs;
+    }
+
+    @Test
+    void insertFacturas_withValidBankAccount_setsFacoct() throws Exception {
+        Ter ter = createTer(1, "PROV001");
+        Cfg cfg = createCfg("CFG001", "TPG001", "OPG001", "FPG001");
+
+        CuentaBancaria cuenta = mock(CuentaBancaria.class);
+        when(cuenta.TDB_SIT()).thenReturn("A");
+        when(cuenta.TDB_ORD()).thenReturn("7");
+
+        Tercero tercero = mock(Tercero.class);
+        when(tercero.getCuentasBancarias()).thenReturn(List.of(cuenta));
+
+        when(terRepository.findByENTAndTERNIF(1, "PROV001")).thenReturn(ter);
+        when(facRepository.findByFACTDCAndFACANNAndFACFAC("F", 2024, 1))
+            .thenReturn(new ArrayList<>());
+        when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
+        when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
+        when(sicalService.getTerceros(
+            isNull(), isNull(), eq("1"), any(), any(), any()))
+            .thenReturn(List.of(tercero));
+        when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
+            .thenReturn(new ArrayList<>());
+        when(cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(
+            1, "2024", 1, 0, 3))
+            .thenReturn(new ArrayList<>());
+        when(facRepository.save(any(Fac.class)))
+            .thenAnswer(i -> i.getArgument(0));
+
+        service.insertFacturas(List.of(createValidFacturaDto("PROV001")));
+
+        ArgumentCaptor<Fac> captor = ArgumentCaptor.forClass(Fac.class);
+        verify(facRepository).save(captor.capture());
+
+        assertEquals(7, captor.getValue().getFACOCT());
+    }
+
+    @Test
+    void insertFacturas_withXmlParsingException_setsFacoctToZero() throws Exception {
+        Ter ter = createTer(1, "PROV001");
+        Cfg cfg = createCfg("CFG001", "TPG001", "OPG001", "FPG001");
+
+        when(terRepository.findByENTAndTERNIF(1, "PROV001")).thenReturn(ter);
+        when(facRepository.findByFACTDCAndFACANNAndFACFAC("F", 2024, 1))
+            .thenReturn(new ArrayList<>());
+        when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
+        when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
+        when(sicalService.getTerceros(
+            isNull(), isNull(), eq("1"), any(), any(), any()))
+            .thenThrow(new XmlParsingException("Invalid XML"));
+        when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
+            .thenReturn(new ArrayList<>());
+        when(cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(
+            1, "2024", 1, 0, 3))
+            .thenReturn(new ArrayList<>());
+        when(facRepository.save(any(Fac.class)))
+            .thenAnswer(i -> i.getArgument(0));
+
+        service.insertFacturas(List.of(createValidFacturaDto("PROV001")));
+
+        ArgumentCaptor<Fac> captor = ArgumentCaptor.forClass(Fac.class);
+        verify(facRepository).save(captor.capture());
+
+        assertEquals(0, captor.getValue().getFACOCT());
+    }
+
+    @Test
+    void insertFacturas_withInvalidBankAccountOrder_setsFacoctToZero() throws Exception {
+        Ter ter = createTer(1, "PROV001");
+        Cfg cfg = createCfg("CFG001", "TPG001", "OPG001", "FPG001");
+
+        CuentaBancaria cuenta = mock(CuentaBancaria.class);
+        when(cuenta.TDB_SIT()).thenReturn("A");
+        when(cuenta.TDB_ORD()).thenReturn("NOT_A_NUMBER");
+
+        Tercero tercero = mock(Tercero.class);
+        when(tercero.getCuentasBancarias()).thenReturn(List.of(cuenta));
+
+        when(terRepository.findByENTAndTERNIF(1, "PROV001")).thenReturn(ter);
+        when(facRepository.findByFACTDCAndFACANNAndFACFAC("F", 2024, 1))
+            .thenReturn(new ArrayList<>());
+        when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
+        when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
+        when(sicalService.getTerceros(
+            isNull(), isNull(), eq("1"), any(), any(), any()))
+            .thenReturn(List.of(tercero));
+        when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
+            .thenReturn(new ArrayList<>());
+        when(cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(
+            1, "2024", 1, 0, 3))
+            .thenReturn(new ArrayList<>());
+        when(facRepository.save(any(Fac.class)))
+            .thenAnswer(i -> i.getArgument(0));
+
+        service.insertFacturas(List.of(createValidFacturaDto("PROV001")));
+
+        ArgumentCaptor<Fac> captor = ArgumentCaptor.forClass(Fac.class);
+        verify(facRepository).save(captor.capture());
+
+        assertEquals(0, captor.getValue().getFACOCT());
     }
 }

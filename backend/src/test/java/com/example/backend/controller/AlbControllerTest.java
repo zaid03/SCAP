@@ -65,6 +65,58 @@ public class AlbControllerTest {
     @Autowired
     private ObjectMapper objectMapper;
 
+    albFacturaDto dto = new albFacturaDto() {
+        @Override
+        public String getALBREF() {
+            return "REF123";
+        }
+
+        @Override
+        public LocalDateTime getALBDAT() {
+            return LocalDateTime.of(2024, 1, 15, 10, 30);
+        }
+
+        @Override
+        public Double getALBBIM() {
+            return 100.0;
+        }
+
+        @Override
+        public Integer getALBNUM() {
+            return 1;
+        }
+
+        @Override
+        public LocalDateTime getALBFRE() {
+            return LocalDateTime.of(2024, 1, 16, 10, 30);
+        }
+
+        @Override
+        public String getDEPCOD() {
+            return "DEP01";
+        }
+
+        @Override
+        public String getALBCOM() {
+            return "Test albaran";
+        }
+
+        @Override
+        public String getCONCTP() {
+            return "TP";
+        }
+
+        @Override
+        public String getCONCPR() {
+            return "PR";
+        }
+
+        @Override
+        public String getCONCCR() {
+            return "CR";
+        }
+    };
+
     @Test
     void getAlbaranesByFactura_returns200WithList() throws Exception {
         Alb a = new Alb();
@@ -99,27 +151,6 @@ public class AlbControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Error :")));
     }
-
-    // @Test
-    // void fetchAlbaranesByServices_returnsResults() throws Exception {
-    //     when(albRepository.findAlbFactura(anyInt(), anyInt(), anyString(), anyString(), anyInt()))
-    //         .thenReturn(List.of());
-
-    //     mockMvc.perform(get("/api/alb/albaranes-factura/1/100/E1/C1")
-    //             .accept(MediaType.APPLICATION_JSON))
-    //         .andDo(print())
-    //         .andExpect(status().isNotFound());
-    // }
-
-    // @Test
-    // void fetchAlbaranesByServices_returnsNotFoundWhenEmpty() throws Exception {
-    //     when(albRepository.findAlbFactura(anyInt(), anyInt(), anyString(), anyString(), anyInt()))
-    //         .thenReturn(List.of());
-
-    //     mockMvc.perform(get("/api/alb/albaranes-factura/1/100/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isNotFound());
-    // }
 
     @Test
     void addingAlbaranes_returnsNoContentOnSuccess() throws Exception {
@@ -240,120 +271,6 @@ public class AlbControllerTest {
             .andExpect(content().string(containsString("Error :")));
     }
 
-    // @Test
-    // void searchAlbaranesByDesde_returnsResultsWhenFound() throws Exception {
-    //     albFacturaDto dto = new albFacturaDto() {
-    //         @Override
-    //         public String getALBREF() { return "REF123"; }
-    //         @Override
-    //         public LocalDateTime getALBDAT() { return LocalDateTime.now(); }
-    //         @Override
-    //         public Double getALBBIM() { return 100.0; }
-    //         @Override
-    //         public Integer getALBNUM() { return 1; }
-    //         @Override
-    //         public LocalDateTime getALBFRE() { return LocalDateTime.now(); }
-    //         @Override
-    //         public String getCONCTP() { return "TP"; }
-    //         @Override
-    //         public String getCONCPR() { return "PR"; }
-    //         @Override
-    //         public String getCONCCR() { return "CR"; }
-    //         @Override
-    //         public String getDEPCOD() { return "1"; }
-    //         @Override
-    //         public String getALBCOM() { return "ALB"; }
-    //     };
-
-    //     when(albRepository.findAlbFacturaGreaterThanEqual(anyInt(), anyInt(), anyInt(), any(LocalDateTime.class), anyString(), anyString()))
-    //         .thenReturn(List.of(dto));
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Desde/1/100/" + LocalDateTime.now() + "/E1/C1")
-    //             .accept(MediaType.APPLICATION_JSON))
-    //         .andDo(print())
-    //         .andExpect(status().isOk())
-    //         .andExpect(jsonPath("$", hasSize(1)));
-    // }
-
-    // @Test
-    // void searchAlbaranesByDesde_returns404WhenEmpty() throws Exception {
-    //     when(albRepository.findAlbFacturaGreaterThanEqual(anyInt(), anyInt(), anyInt(), any(), anyString(), anyString()))
-    //         .thenReturn(List.of());
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Desde/1/100/" + LocalDateTime.now() + "/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isNotFound())
-    //         .andExpect(content().string("Sin resultado"));
-    // }
-
-    // @Test
-    // void searchAlbaranesByDesde_returnsBadRequestOnException() throws Exception {
-    //     when(albRepository.findAlbFacturaGreaterThanEqual(anyInt(), anyInt(), anyInt(), any(), anyString(), anyString()))
-    //         .thenThrow(new DataAccessResourceFailureException("DB error"));
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Desde/1/100/" + LocalDateTime.now() + "/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isBadRequest())
-    //         .andExpect(content().string(containsString("Error :")));
-    // }
-
-    // @Test
-    // void searchAlbaranesByHasta_returnsResultsWhenFound() throws Exception {
-    //     albFacturaDto dto = new albFacturaDto() {
-    //         @Override
-    //         public String getALBREF() { return "REF456"; }
-    //         @Override
-    //         public LocalDateTime getALBDAT() { return LocalDateTime.now(); }
-    //         @Override
-    //         public Double getALBBIM() { return 200.0; }
-    //         @Override
-    //         public Integer getALBNUM() { return 2; }
-    //         @Override
-    //         public LocalDateTime getALBFRE() { return LocalDateTime.now(); }
-    //         @Override
-    //         public String getCONCTP() { return "TP"; }
-    //         @Override
-    //         public String getCONCPR() { return "PR"; }
-    //         @Override
-    //         public String getCONCCR() { return "CR"; }
-    //         @Override
-    //         public String getDEPCOD() { return "2"; }
-    //         @Override
-    //         public String getALBCOM() { return "ALB"; }
-    //     };
-
-    //     when(albRepository.findAlbFacturaLessThanEqual(anyInt(), anyInt(), anyInt(), any(LocalDateTime.class), anyString(), anyString()))
-    //         .thenReturn(List.of(dto));
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Hasta/1/100/" + LocalDateTime.now() + "/E1/C1")
-    //             .accept(MediaType.APPLICATION_JSON))
-    //         .andDo(print())
-    //         .andExpect(status().isOk())
-    //         .andExpect(jsonPath("$", hasSize(1)));
-    // }
-
-    // @Test
-    // void searchAlbaranesByHasta_returns404WhenEmpty() throws Exception {
-    //     when(albRepository.findAlbFacturaLessThanEqual(anyInt(), anyInt(), anyInt(), any(), anyString(), anyString()))
-    //         .thenReturn(List.of());
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Hasta/1/100/" + LocalDateTime.now() + "/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isNotFound())
-    //         .andExpect(content().string("Sin resultado"));
-    // }
-
-    // @Test
-    // void searchAlbaranesByHasta_returnsBadRequestOnException() throws Exception {
-    //     when(albRepository.findAlbFacturaLessThanEqual(anyInt(), anyInt(), anyInt(), any(), anyString(), anyString()))
-    //         .thenThrow(new DataAccessResourceFailureException("DB error"));
-
-    //     mockMvc.perform(get("/api/alb/search-albaranes-Hasta/1/100/" + LocalDateTime.now() + "/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isBadRequest())
-    //         .andExpect(content().string(containsString("Error :")));
-    // }
-
     @Test
     void addingAlbaranes_withAsuEcoImpProjection_updatesFdeSuccessfully() throws Exception {
         Alb alb = new Alb();
@@ -449,17 +366,6 @@ public class AlbControllerTest {
             .andExpect(status().isNoContent());
     }
 
-    // @Test
-    // void fetchAlbaranesByServices_onException_returnsBadRequest() throws Exception {
-    //     when(albRepository.findAlbFactura(anyInt(), anyInt(), anyInt(), anyString(), anyString()))
-    //         .thenThrow(new DataAccessResourceFailureException("DB error"));
-
-    //     mockMvc.perform(get("/api/alb/albaranes-factura/1/100/E1/C1"))
-    //         .andDo(print())
-    //         .andExpect(status().isBadRequest())
-    //         .andExpect(content().string(containsString("Error :")));
-    // }
-
     @Test
     void quitarAlbaranes_missingALBNUM_returnsBadRequest() throws Exception {
         Map<String, Object> payload = new HashMap<>();
@@ -473,5 +379,140 @@ public class AlbControllerTest {
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Faltan datos obligatorios")));
+    }
+
+    @Test
+    void fetchAlbaranesByServices_returns200WithResults() throws Exception {
+        when(albRepository.findAlbFactura(1, 100, "E1", "C1", 200))
+            .thenReturn(List.of(dto));
+
+        mockMvc.perform(get("/api/alb/albaranes-factura/1/100/200/E1/C1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void fetchAlbaranesByServices_returns404WhenEmpty() throws Exception {
+        when(albRepository.findAlbFactura(1, 100, "E1", "C1", 200))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/alb/albaranes-factura/1/100/200/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void fetchAlbaranesByServices_returns400OnDataAccessException() throws Exception {
+        when(albRepository.findAlbFactura(
+                anyInt(), anyInt(), anyString(), anyString(), anyInt()))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get("/api/alb/albaranes-factura/1/100/200/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchAlbaranesByDesde_returns200WithResults() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaGreaterThanEqual(
+                1, 100, "E1", "C1", 200, date))
+            .thenReturn(List.of(dto));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Desde/1/100/200/"
+                + date + "/E1/C1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchAlbaranesByDesde_returns404WhenEmpty() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaGreaterThanEqual(
+                1, 100, "E1", "C1", 200, date))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Desde/1/100/200/"
+                + date + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchAlbaranesByDesde_returns400OnDataAccessException() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaGreaterThanEqual(
+                anyInt(), anyInt(), anyString(), anyString(),
+                anyInt(), any(LocalDateTime.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Desde/1/100/200/"
+                + date + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchAlbaranesByHasta_returns200WithResults() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaLessThanEqual(
+                1, 100, "E1", "C1", 200, date))
+            .thenReturn(List.of(dto));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Hasta/1/100/200/"
+                + date + "/E1/C1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchAlbaranesByHasta_returns404WhenEmpty() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaLessThanEqual(
+                1, 100, "E1", "C1", 200, date))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Hasta/1/100/200/"
+                + date + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchAlbaranesByHasta_returns400OnDataAccessException() throws Exception {
+        LocalDateTime date = LocalDateTime.of(2024, 1, 15, 10, 30);
+
+        when(albRepository.findAlbFacturaLessThanEqual(
+                anyInt(), anyInt(), anyString(), anyString(),
+                anyInt(), any(LocalDateTime.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-Hasta/1/100/200/"
+                + date + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
     }
 }

@@ -3,6 +3,15 @@ package com.example.backend.service;
 import java.lang.reflect.Method;
 import java.util.List;
 
+import org.mockito.MockedConstruction;
+import org.springframework.http.HttpEntity;
+import org.springframework.web.client.RestTemplate;
+
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.mockConstruction;
+import static org.mockito.Mockito.when;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -1348,5 +1357,117 @@ public class PartidasServiceTest {
         assertNull(criteria.orgCode);
         assertNull(criteria.entidad);
         assertNull(criteria.eje);
+    }
+
+    @Test
+    void getPartidas_withValidResponse_returnsParsedPartidas() throws Exception {
+        PartidasService.SearchCriteria criteria =
+            new PartidasService.SearchCriteria.Builder()
+                .cenges("CG001")
+                .alias("ALIAS001")
+                .clorg("ORG001")
+                .clfun("FUN001")
+                .cleco("ECO001")
+                .clcte("CTE001")
+                .clpam("PAM001")
+                .usucenges("USER001")
+                .orgCode("ORG001")
+                .entidad("1")
+                .eje("2024")
+                .build();
+
+        String responseXml =
+            "<servicioReturn>" +
+                "&lt;root&gt;" +
+                    "&lt;exito&gt;1&lt;/exito&gt;" +
+                    "&lt;partida&gt;" +
+                        "&lt;desc&gt;VGVzdCBkZXNjcmlwdGlvbg==&lt;/desc&gt;" +
+                    "&lt;/partida&gt;" +
+                "&lt;/root&gt;" +
+            "</servicioReturn>";
+
+        try (MockedConstruction<RestTemplate> mocked =
+                mockConstruction(RestTemplate.class, (mock, context) -> {
+                    when(mock.postForObject(
+                        anyString(),
+                        any(HttpEntity.class),
+                        eq(String.class)
+                    )).thenReturn(responseXml);
+                })) {
+
+            List<Partida> result = service.getPartidas(criteria);
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+            assertEquals("Test description", result.get(0).getDesc());
+        }
+    }
+
+    @Test
+    void getPartidas_withUrlWithoutQueryString_usesUrlAsIs() throws Exception {
+        ReflectionTestUtils.setField(
+            service,
+            "wsUrl",
+            "http://test-sical-ws:8080/services/Ci"
+        );
+
+        PartidasService.SearchCriteria criteria =
+            new PartidasService.SearchCriteria.Builder()
+                .orgCode("ORG001")
+                .entidad("1")
+                .eje("2024")
+                .build();
+
+        String responseXml =
+            "<root>" +
+                "<exito>1</exito>" +
+                "<partida>" +
+                    "<desc>VGVzdA==</desc>" +
+                "</partida>" +
+            "</root>";
+
+        try (MockedConstruction<RestTemplate> mocked =
+                mockConstruction(RestTemplate.class, (mock, context) -> {
+                    when(mock.postForObject(
+                        anyString(),
+                        any(HttpEntity.class),
+                        eq(String.class)
+                    )).thenReturn(responseXml);
+                })) {
+
+            List<Partida> result = service.getPartidas(criteria);
+
+            assertNotNull(result);
+            assertEquals(1, result.size());
+        }
+    }
+
+    @Test
+    void getPartidas_withPartialCriteria_coversNullOptionalFields() throws Exception {
+        PartidasService.SearchCriteria criteria =
+            new PartidasService.SearchCriteria.Builder()
+                .cenges("CG001")
+                .orgCode("ORG001")
+                .entidad("1")
+                .eje("2024")
+                .build();
+
+        String responseXml =
+            "<root><exito>1</exito></root>";
+
+        try (MockedConstruction<RestTemplate> mocked =
+                mockConstruction(RestTemplate.class, (mock, context) -> {
+                    when(mock.postForObject(
+                        anyString(),
+                        any(HttpEntity.class),
+                        eq(String.class)
+                    )).thenReturn(responseXml);
+                })) {
+
+            List<Partida> result = service.getPartidas(criteria);
+
+            assertNotNull(result);
+            assertTrue(result.isEmpty());
+        }
     }
 }
