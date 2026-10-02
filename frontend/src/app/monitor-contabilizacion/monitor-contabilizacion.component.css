@@ -20,7 +20,8 @@
 .detail-grid .alb tbody td:nth-child(4),
 .app tbody td:nth-child(3),
 .desc tbody td:nth-child(5),
-.desc tbody td:nth-child(7) { text-align: right; }
+.desc tbody td:nth-child(7),
+.app tbody td:nth-child(4) { text-align: right; }
 .Taab {margin-top: 10px;}
 /* table style */
 /* main-detail grid */

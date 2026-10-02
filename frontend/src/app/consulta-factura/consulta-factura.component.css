@@ -14,7 +14,8 @@
 .abl tbody td:nth-child(4),
 .app tbody td:nth-child(3),
 .desc tbody td:nth-child(5),
-.desc tbody td:nth-child(7) {text-align: right;}
+.desc tbody td:nth-child(7),
+.app tbody td:nth-child(4) {text-align: right;}
 .ft thead th:last-child {width: 75px;}
 .ft thead th:nth-child(14) {width: 50px;}
 /* table style */
