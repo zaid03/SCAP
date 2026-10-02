@@ -637,6 +637,7 @@
                 <button 
                     class="purple-btn" 
                     (click)="searchArticuloAdd()"
+                    [disabled]="isSearchDisabled" 
                     [ngClass]="{ 'disabled-btn': isSearchDisabled }" 
                 >Buscar</button>
                 <button class="purple-btn" (click)="limpiarArticulosAdd()">Limpiar</button>

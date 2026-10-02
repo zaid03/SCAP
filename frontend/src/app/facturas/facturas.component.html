@@ -230,7 +230,7 @@
                         <button 
                             class="red-btn" 
                             [disabled]="isUpdate" 
-	                        [ngClass]="{ 'disabled-btn': isUpdate }" 
+	                        [ngClass]="{'disabled-btn': isUpdate || isUpdateSecond}" 
                             (click)="closeDetails()"
                         >✖</button>
                     </div>
@@ -673,8 +673,19 @@
                                                             (input)="onPriceTyping($event, a)"
                                                             />
                                                         </td>
-                                                        <td>
-                                                            <button class="purple-btn" (click)="updateApplicaciones(a)">✔</button>
+                                                        <td class="g-c-btns">
+                                                            <button 
+                                                                class="purple-btn" 
+                                                                (click)="updateApplicaciones(a)"
+                                                                title="Guardar"
+                                                            >✔</button>
+                                                            <button
+                                                                class="red-btn" 
+                                                                [disabled]="!a.hasPriceChanges"
+                                                                [ngClass]="{'disabled-btn': !a.hasPriceChanges}"
+                                                                (click)="cancelarEditng(a)"
+                                                                title="Cancelar"
+                                                            >✖</button>
                                                         </td>
                                                     </tr>
                                                 </tbody>
@@ -773,6 +784,7 @@
         <button 
             class="purple-btn" 
             (click)="addingFacturas()"
+            [disabled]="caughtFacturas.length === 0"
             [ngClass]="{'disabled-btn': caughtFacturas.length === 0}"
         >+ Cargar
         </button>

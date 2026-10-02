@@ -230,7 +230,7 @@
                         >Añadir servicios</button>
                         <button 
                             class="purple-btn" 
-                            [disabled]="isUpdate" 
+                            [disabled]="isUpdate || personServicesOrigin.length == 0" 
                             [ngClass]="{ 'disabled-btn': isUpdate }" 
                             [ngClass]="{ 'disabled-btn': personServicesOrigin.length == 0}"
                             (click)="showCopiar(selectedPersona.percod)"
@@ -410,6 +410,7 @@
         <button 
             class="purple-btn" 
             (click)="addServicePersona(linesSelected)"
+            [disabled]="linesSelected.length === 0"
             [ngClass]="{'disabled-btn': linesSelected.length === 0}"
         >+ Cargar
         </button>

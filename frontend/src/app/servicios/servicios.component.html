@@ -647,6 +647,7 @@
         <button 
             class="purple-btn" 
             (click)="addPersonasToService(linesSelected)"
+            [disabled]="linesSelected.length === 0"
             [ngClass]="{'disabled-btn': linesSelected.length === 0}"
         >+ Cargar
         </button>

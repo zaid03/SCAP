@@ -750,6 +750,7 @@
         <button 
             class="purple-btn" 
             (click)="saveProveedorees()" 
+            [disabled]="isUpdate || selectedProveediresFromResults.length === 0" 
             [ngClass]="{ 'disabled-btn': selectedProveediresFromResults.length === 0 }"
         >+ Cargar
         </button>

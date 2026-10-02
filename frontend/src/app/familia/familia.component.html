@@ -126,6 +126,7 @@
                     <div class="btns">
                         <button 
                             class="purple-btn" 
+                            [disabled]="isUpdate" 
                             [ngClass]="{ 'disabled-btn': isUpdate }"
                             (click)="launchAddSubFamilia()"
                         >Añadir subfamilia</button>
