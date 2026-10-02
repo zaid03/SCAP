@@ -430,7 +430,9 @@ export class FacturasComponent {
 
   isBlockedCheck: boolean = false;
   isBlocked(facado: string) {
-    if (this.estadogc != 1 && facado === null) {
+    if (this.estadogc != 1 && (facado === null || facado === '')) {
+      this.isBlockedCheck = false;
+    } else {
       this.isBlockedCheck = true;
     }
 

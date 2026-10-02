@@ -466,8 +466,8 @@
                     <div class="btns">
                         <button 
                             class="purple-btn" 
-                            [disabled]="!albaranes.length" 
-	                        [class.disabled-btn]="!albaranes.length"
+                            [disabled]="albaranes.length" 
+	                        [class.disabled-btn]="albaranes.length"
                             (click)="openChangeAD()"
                         >Cambiar Contrato AD</button>
                         <button 
@@ -483,7 +483,8 @@
                         >Cancelar</button>
                         <button 
                             class="purple-btn"
-                            [disabled]="isUpdate" 
+                            [disabled]="isUpdate || isBlockedCheck" 
+                            [class.disabled-btn]="isUpdate || isBlockedCheck"
                             *ngIf="!isUpdate" 
                             (click)="modificar()"
                         >Modificar</button>
