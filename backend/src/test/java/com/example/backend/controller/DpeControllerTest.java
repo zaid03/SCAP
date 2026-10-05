@@ -1,5 +1,6 @@
 package com.example.backend.controller;
 
+import java.lang.reflect.Method;
 import java.util.List;
 
 import static org.hamcrest.Matchers.anyOf;
@@ -38,6 +39,7 @@ import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.dto.PersonaServiceRequest;
 import com.example.backend.dto.ServicePersonaRequest;
+import com.example.backend.dto.personasPorServiciosProjection;
 import com.example.backend.service.DpePersonasForService;
 import com.example.backend.service.DpeService;
 import com.example.backend.sqlserver2.model.Dep;
@@ -73,6 +75,93 @@ public class DpeControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    private personasPorServiciosProjection projection(
+        String percod,
+        String pernom,
+        String depcod,
+        String depdes,
+        Integer depalm,
+        Integer depcom,
+        Integer depint,
+        String cgecod
+    ) {
+        return new personasPorServiciosProjection() {
+            @Override
+            public String getPERCOD() {
+                return percod;
+            }
+
+            @Override
+            public PerInfo getPer() {
+                return () -> pernom;
+            }
+
+            @Override
+            public String getDEPCOD() {
+                return depcod;
+            }
+
+            @Override
+            public DepInfo getDep() {
+                return new DepInfo() {
+                    @Override
+                    public String getDEPDES() {
+                        return depdes;
+                    }
+
+                    @Override
+                    public Integer getDEPALM() {
+                        return depalm;
+                    }
+
+                    @Override
+                    public Integer getDEPCOM() {
+                        return depcom;
+                    }
+
+                    @Override
+                    public Integer getDEPINT() {
+                        return depint;
+                    }
+
+                    @Override
+                    public CgeInfo getCge() {
+                        return new CgeInfo() {
+                            @Override
+                            public String getCGECOD() {
+                                return cgecod;
+                            }
+
+                            @Override
+                            public String getCGEDES() {
+                                return "Centro gestor";
+                            }
+                        };
+                    }
+                };
+            }
+        };
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<personasPorServiciosProjection> invokeFilter(
+        String methodName,
+        Class<?>[] parameterTypes,
+        Object... arguments
+    ) throws Exception {
+        Method method = DpeController.class.getDeclaredMethod(methodName, parameterTypes);
+        method.setAccessible(true);
+        DpeController controller = new DpeController(dpeService, dpePersonasForService);
+        return (List<personasPorServiciosProjection>) method.invoke(controller, arguments);
+    }
+
+    private boolean invokeBoolean(String methodName, Integer value) throws Exception {
+        Method method = DpeController.class.getDeclaredMethod(methodName, Integer.class);
+        method.setAccessible(true);
+        DpeController controller = new DpeController(dpeService, dpePersonasForService);
+        return (boolean) method.invoke(controller, value);
+    }
 
     @Test
     void fetchServicePersonas_returnsList() throws Exception {

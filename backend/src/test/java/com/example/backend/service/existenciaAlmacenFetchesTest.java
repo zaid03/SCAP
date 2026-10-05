@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.lang.reflect.Method;
 import com.example.backend.dto.ServiceMagsProjection;
 import com.example.backend.dto.existenciasProjection;
 import com.example.backend.dto.magcodOnly;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.domain.PageRequest;
 
 import java.util.List;
 import java.util.Optional;
@@ -707,5 +709,85 @@ class existenciaAlmacenFetchesTest {
 
         assertEquals(1, result.existencias().size());
         assertSame(matching, result.existencias().get(0));
+    }
+
+    @Test
+    void existenciasService_rejectsBlankRequiredValues() {
+        assertThrows(IllegalArgumentException.class, () -> service.existenciasService(
+            1, " ", "PER01", "2026", null, null, null, null, 0));
+        assertThrows(IllegalArgumentException.class, () -> service.existenciasService(
+            1, "CG01", " ", "2026", null, null, null, null, 0));
+        assertThrows(IllegalArgumentException.class, () -> service.existenciasService(
+            1, "CG01", "PER01", " ", null, null, null, null, 0));
+    }
+
+    @Test
+    void existenciasService_usesFallbackQueryWhenSearchHasNoArticleFilters() {
+        magcodOnly warehouse = mock(magcodOnly.class);
+        existenciasProjection existence = mock(existenciasProjection.class);
+
+        when(warehouse.getMAGCOD()).thenReturn(10);
+        when(magRepository.findByENTAndDEPCOD(1, "MAG01"))
+            .thenReturn(Optional.of(warehouse));
+        when(meaRepository.findByENTAndMAGCODAndArt_ARTBLONot(
+                eq(1), eq(10), eq(0), any()))
+            .thenReturn(List.of(existence));
+
+        existenciaAlmacenFetches.NamesResponse result = service.existenciasService(
+            1, "CG01", "PER01", "2026", "MAG01", "   ", " ", " ", 0);
+
+        assertEquals(List.of(existence), result.existencias());
+        verify(meaRepository).findByENTAndMAGCODAndArt_ARTBLONot(
+            eq(1), eq(10), eq(0), eq(PageRequest.of(0, 20)));
+    }
+
+    @Test
+    void existenciasService_allowsSearchToReturnNoMatches() {
+        magcodOnly warehouse = mock(magcodOnly.class);
+        existenciasProjection existence = mock(existenciasProjection.class);
+
+        when(warehouse.getMAGCOD()).thenReturn(10);
+        when(existence.getArt_ARTCOD()).thenReturn("OTHER");
+        when(magRepository.findByENTAndDEPCOD(1, "MAG01"))
+            .thenReturn(Optional.of(warehouse));
+        when(meaRepository.findAllByENTAndMAGCODAndArt_ARTBLONot(1, 10, 0))
+            .thenReturn(List.of(existence));
+
+        existenciaAlmacenFetches.NamesResponse result = service.existenciasService(
+            1, "CG01", "PER01", "2026", "MAG01", "MISSING", null, null, 0);
+
+        assertTrue(result.existencias().isEmpty());
+    }
+
+    @Test
+    void privateSearchHelpers_handleLongSearchAndNullFields() throws Exception {
+        existenciasProjection matching = mock(existenciasProjection.class);
+        existenciasProjection excluded = mock(existenciasProjection.class);
+        when(matching.getArt_ARTREF()).thenReturn("REF-1234567890");
+        when(excluded.getArt_ARTREF()).thenReturn(null);
+
+        Method helper = existenciaAlmacenFetches.class.getDeclaredMethod(
+            "filterByArtRefDes", List.class, String.class);
+        helper.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        List<existenciasProjection> result = (List<existenciasProjection>) helper.invoke(
+            service, List.of(matching, excluded), " ref-1234567890 ");
+
+        assertEquals(List.of(matching), result);
+    }
+
+    @Test
+    void privateApplyMainSearch_returnsInputForBlankAndUsesShortThreshold() throws Exception {
+        existenciasProjection existence = mock(existenciasProjection.class);
+        Method helper = existenciaAlmacenFetches.class.getDeclaredMethod(
+            "applyMainSearch", List.class, String.class);
+        helper.setAccessible(true);
+
+        @SuppressWarnings("unchecked")
+        List<existenciasProjection> blankResult = (List<existenciasProjection>) helper.invoke(
+            service, List.of(existence), "   ");
+
+        assertEquals(List.of(existence), blankResult);
     }
 }

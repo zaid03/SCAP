@@ -1,12 +1,25 @@
 package com.example.backend.config;
 
-import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
+import java.util.Map;
+
+import static org.junit.jupiter.api.Assertions.assertArrayEquals;
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertInstanceOf;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.Mockito.mock;
 
 import javax.sql.DataSource;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.orm.jpa.EntityManagerFactoryBuilder;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Primary;
+import org.springframework.context.annotation.Profile;
+import org.springframework.data.jpa.repository.config.EnableJpaRepositories;
+import org.springframework.orm.jpa.JpaVendorAdapter;
 import org.springframework.orm.jpa.JpaTransactionManager;
 import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.transaction.PlatformTransactionManager;
@@ -15,113 +28,111 @@ import jakarta.persistence.EntityManagerFactory;
 
 class DatabaseConfigTest {
 
-    private LocalContainerEntityManagerFactoryBean sqlServer1EntityManagerFactory;
-    private LocalContainerEntityManagerFactoryBean sqlServer2EntityManagerFactory;
-    private DataSource sqlServer1DataSource;
-    private DataSource sqlServer2DataSource;
-    private PlatformTransactionManager sqlServer1TransactionManager;
-    private PlatformTransactionManager sqlServer2TransactionManager;
+    private DatabaseConfig databaseConfig;
+    private EntityManagerFactoryBuilder builder;
 
     @BeforeEach
     void setUp() {
-        sqlServer1DataSource = mock(DataSource.class);
-        sqlServer2DataSource = mock(DataSource.class);
-        sqlServer1EntityManagerFactory = mock(LocalContainerEntityManagerFactoryBean.class);
-        sqlServer2EntityManagerFactory = mock(LocalContainerEntityManagerFactoryBean.class);
-        sqlServer1TransactionManager = mock(JpaTransactionManager.class);
-        sqlServer2TransactionManager = mock(JpaTransactionManager.class);
-        
-        when(sqlServer1EntityManagerFactory.getDataSource()).thenReturn(sqlServer1DataSource);
-        when(sqlServer2EntityManagerFactory.getDataSource()).thenReturn(sqlServer2DataSource);
-        when(sqlServer1EntityManagerFactory.getPersistenceUnitName()).thenReturn("sqlserver1");
-        when(sqlServer2EntityManagerFactory.getPersistenceUnitName()).thenReturn("sqlserver2");
+        databaseConfig = new DatabaseConfig();
+        builder = new EntityManagerFactoryBuilder(mock(JpaVendorAdapter.class), Map.of(), null);
     }
 
     @Test
     void sqlServer1DataSource_is_created() {
-        assertNotNull(sqlServer1DataSource, "SQL Server 1 DataSource should be created");
+        assertNotNull(databaseConfig.sqlServer1DataSource());
     }
 
     @Test
     void sqlServer2DataSource_is_created() {
-        assertNotNull(sqlServer2DataSource, "SQL Server 2 DataSource should be created");
+        assertNotNull(databaseConfig.sqlServer2DataSource());
     }
 
     @Test
-    void sqlServer1EntityManagerFactory_is_created() {
-        assertNotNull(sqlServer1EntityManagerFactory, "SQL Server 1 EntityManagerFactory should be created");
+    void sqlServer1EntityManagerFactory_is_configured() {
+        DataSource dataSource = mock(DataSource.class);
+
+        LocalContainerEntityManagerFactoryBean factory = databaseConfig
+            .sqlServer1EntityManagerFactory(builder, dataSource);
+
+        assertNotNull(factory);
+        assertSame(dataSource, factory.getDataSource());
+        assertEquals("sqlserver1", factory.getPersistenceUnitName());
+        assertEquals("org.hibernate.dialect.SQLServerDialect", factory.getJpaPropertyMap().get("hibernate.dialect"));
+        assertEquals("validate", factory.getJpaPropertyMap().get("hibernate.hbm2ddl.auto"));
+        assertEquals(true, factory.getJpaPropertyMap().get("hibernate.show_sql"));
     }
 
     @Test
-    void sqlServer2EntityManagerFactory_is_created() {
-        assertNotNull(sqlServer2EntityManagerFactory, "SQL Server 2 EntityManagerFactory should be created");
+    void sqlServer2EntityManagerFactory_is_configured() {
+        DataSource dataSource = mock(DataSource.class);
+
+        LocalContainerEntityManagerFactoryBean factory = databaseConfig
+            .sqlServer2EntityManagerFactory(builder, dataSource);
+
+        assertNotNull(factory);
+        assertSame(dataSource, factory.getDataSource());
+        assertEquals("sqlserver2", factory.getPersistenceUnitName());
+        assertEquals("org.hibernate.dialect.SQLServerDialect", factory.getJpaPropertyMap().get("hibernate.dialect"));
+        assertEquals("validate", factory.getJpaPropertyMap().get("hibernate.hbm2ddl.auto"));
+        assertEquals(true, factory.getJpaPropertyMap().get("hibernate.show_sql"));
     }
 
     @Test
-    void sqlServer1TransactionManager_is_created() {
-        assertNotNull(sqlServer1TransactionManager, "SQL Server 1 TransactionManager should be created");
-        assertInstanceOf(JpaTransactionManager.class, sqlServer1TransactionManager,
-            "SQL Server 1 TransactionManager should be JpaTransactionManager");
+    void sqlServer1TransactionManager_is_created_for_entityManagerFactory() {
+        EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+
+        PlatformTransactionManager transactionManager = databaseConfig
+            .sqlServer1TransactionManager(entityManagerFactory);
+
+        assertInstanceOf(JpaTransactionManager.class, transactionManager);
+        assertSame(entityManagerFactory, ((JpaTransactionManager) transactionManager).getEntityManagerFactory());
     }
 
     @Test
-    void sqlServer2TransactionManager_is_created() {
-        assertNotNull(sqlServer2TransactionManager, "SQL Server 2 TransactionManager should be created");
-        assertInstanceOf(JpaTransactionManager.class, sqlServer2TransactionManager,
-            "SQL Server 2 TransactionManager should be JpaTransactionManager");
+    void sqlServer2TransactionManager_is_created_for_entityManagerFactory() {
+        EntityManagerFactory entityManagerFactory = mock(EntityManagerFactory.class);
+
+        PlatformTransactionManager transactionManager = databaseConfig
+            .sqlServer2TransactionManager(entityManagerFactory);
+
+        assertInstanceOf(JpaTransactionManager.class, transactionManager);
+        assertSame(entityManagerFactory, ((JpaTransactionManager) transactionManager).getEntityManagerFactory());
     }
 
     @Test
-    void sqlServer1EntityManagerFactory_has_correct_persistence_unit_name() {
-        assertNotNull(sqlServer1EntityManagerFactory, "SQL Server 1 EntityManagerFactory should not be null");
-        assertEquals("sqlserver1", sqlServer1EntityManagerFactory.getPersistenceUnitName(),
-            "SQL Server 1 persistence unit name should be 'sqlserver1'");
+    void databaseConfig_has_expected_annotations() {
+        assertNotNull(DatabaseConfig.class.getAnnotation(Configuration.class));
+        assertArrayEquals(new String[] {"!test"}, DatabaseConfig.class.getAnnotation(Profile.class).value());
+        assertNotNull(DatabaseConfig.class.getAnnotation(org.springframework.transaction.annotation.EnableTransactionManagement.class));
     }
 
     @Test
-    void sqlServer2EntityManagerFactory_has_correct_persistence_unit_name() {
-        assertNotNull(sqlServer2EntityManagerFactory, "SQL Server 2 EntityManagerFactory should not be null");
-        assertEquals("sqlserver2", sqlServer2EntityManagerFactory.getPersistenceUnitName(),
-            "SQL Server 2 persistence unit name should be 'sqlserver2'");
+    void dataSources_have_expected_bean_annotations() throws NoSuchMethodException {
+        assertNotNull(DatabaseConfig.class.getMethod("sqlServer1DataSource").getAnnotation(Primary.class));
+        assertNotNull(DatabaseConfig.class.getMethod("sqlServer1DataSource")
+            .getAnnotation(org.springframework.boot.context.properties.ConfigurationProperties.class));
+        assertNotNull(DatabaseConfig.class.getMethod("sqlServer2DataSource")
+            .getAnnotation(org.springframework.boot.context.properties.ConfigurationProperties.class));
     }
 
     @Test
-    void sqlServer1EntityManagerFactory_uses_correct_datasource() {
-        assertNotNull(sqlServer1EntityManagerFactory, "SQL Server 1 EntityManagerFactory should not be null");
-        assertEquals(sqlServer1DataSource, sqlServer1EntityManagerFactory.getDataSource(),
-            "SQL Server 1 EntityManagerFactory should use sqlServer1DataSource");
+    void entityManagerFactory_methods_have_primary_only_on_server1() throws NoSuchMethodException {
+        assertNotNull(DatabaseConfig.class.getMethod("sqlServer1EntityManagerFactory", EntityManagerFactoryBuilder.class,
+            DataSource.class).getAnnotation(Primary.class));
+        assertEquals(null, DatabaseConfig.class.getMethod("sqlServer2EntityManagerFactory", EntityManagerFactoryBuilder.class,
+            DataSource.class).getAnnotation(Primary.class));
     }
 
     @Test
-    void sqlServer2EntityManagerFactory_uses_correct_datasource() {
-        assertNotNull(sqlServer2EntityManagerFactory, "SQL Server 2 EntityManagerFactory should not be null");
-        assertEquals(sqlServer2DataSource, sqlServer2EntityManagerFactory.getDataSource(),
-            "SQL Server 2 EntityManagerFactory should use sqlServer2DataSource");
-    }
+    void repository_configs_have_expected_packages_and_references() {
+        EnableJpaRepositories server1 = SQLServer1RepositoryConfig.class.getAnnotation(EnableJpaRepositories.class);
+        EnableJpaRepositories server2 = SQLServer2RepositoryConfig.class.getAnnotation(EnableJpaRepositories.class);
 
-    @Test
-    void sqlServer1EntityManagerFactory_is_not_null_and_has_dataSource() {
-        assertNotNull(sqlServer1EntityManagerFactory, "SQL Server 1 EntityManagerFactory should not be null");
-        assertNotNull(sqlServer1EntityManagerFactory.getDataSource(), 
-            "SQL Server 1 EntityManagerFactory should have a DataSource");
-    }
-
-    @Test
-    void sqlServer2EntityManagerFactory_is_not_null_and_has_dataSource() {
-        assertNotNull(sqlServer2EntityManagerFactory, "SQL Server 2 EntityManagerFactory should not be null");
-        assertNotNull(sqlServer2EntityManagerFactory.getDataSource(), 
-            "SQL Server 2 EntityManagerFactory should have a DataSource");
-    }
-
-    @Test
-    void sqlServer1TransactionManager_delegates_to_entity_manager_factory() {
-        assertNotNull(sqlServer1TransactionManager, "SQL Server 1 TransactionManager should not be null");
-        assertNotNull(sqlServer1EntityManagerFactory, "SQL Server 1 EntityManagerFactory should not be null");
-    }
-
-    @Test
-    void sqlServer2TransactionManager_delegates_to_entity_manager_factory() {
-        assertNotNull(sqlServer2TransactionManager, "SQL Server 2 TransactionManager should not be null");
-        assertNotNull(sqlServer2EntityManagerFactory, "SQL Server 2 EntityManagerFactory should not be null");
+        assertEquals("com.example.backend.sqlserver1.repository", server1.basePackages()[0]);
+        assertEquals("sqlServer1EntityManagerFactory", server1.entityManagerFactoryRef());
+        assertEquals("sqlServer1TransactionManager", server1.transactionManagerRef());
+        assertEquals("com.example.backend.sqlserver2.repository", server2.basePackages()[0]);
+        assertEquals("sqlServer2EntityManagerFactory", server2.entityManagerFactoryRef());
+        assertEquals("sqlServer2TransactionManager", server2.transactionManagerRef());
     }
 }

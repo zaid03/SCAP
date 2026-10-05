@@ -19,7 +19,7 @@ public class SolId implements Serializable{
     public void setENT(Integer ENT) {this.ENT = ENT;}
 
     public Integer getSOLNUM() {return SOLNUM;}
-    public void setSOLNUM(Integer SOLSUB) {this.SOLNUM = SOLNUM;}
+    public void setSOLNUM(Integer SOLNUM) {this.SOLNUM = SOLNUM;}
 
     public Integer getSOLSUB() {return SOLSUB;}
     public void setSOLSUB(Integer SOLSUB) {this.SOLSUB = SOLSUB;}

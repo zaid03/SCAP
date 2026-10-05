@@ -116,6 +116,29 @@ public class CogControllerTest {
     }
 
     @Test
+    void fetchCentroGestores_returns200WithResults() throws Exception {
+        CogCgeProjection projection = new CogCgeProjection() {
+            @Override public String getCGECOD() { return "C1"; }
+            @Override public CogCge getCge() { return null; }
+            @Override public String getCOGOPD() { return "D1"; }
+            @Override public String getCOGRFD() { return "REF1"; }
+            @Override public Double getCOGIMP() { return 100.0; }
+            @Override public String getCOGOP2() { return "D2"; }
+            @Override public String getCOGRF2() { return "REF2"; }
+            @Override public Double getCOGIM2() { return 50.0; }
+            @Override public Double getCOGIAP() { return 0.0; }
+        };
+
+        when(cogRepository.findAllByENTAndEJEAndCONCOD(1, "E1", 100))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/cog/fetch-centros/1/E1/100"))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
     void fetchCentroGestores_returns500OnDataAccessException() throws Exception {
         when(cogRepository.findAllByENTAndEJEAndCONCOD(anyInt(), anyString(), anyInt()))
             .thenThrow(new DataAccessResourceFailureException("DB down"));
@@ -417,6 +440,18 @@ public class CogControllerTest {
             .andExpect(content().string("Sin resultado"));
     }
 
+            @Test
+            void addDCentro2_returns500OnDataAccessException() throws Exception {
+            CogId id = new CogId(1, "E1", 100, "C1");
+            when(cogRepository.findById(id)).thenThrow(new DataAccessResourceFailureException("DB error"));
+
+            mockMvc.perform(patch("/api/cog/update-centro-D2/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"COGIM2\":250.0,\"COGOP2\":\"D2\",\"COGRF2\":\"REF2\"}"))
+                .andExpect(status().isInternalServerError())
+                .andExpect(content().string(containsString("Error :")));
+            }
+
     @Test
     void deleteD_returns204AndSavesClearedFirstD() throws Exception {
         Cog cog = new Cog();
@@ -439,6 +474,44 @@ public class CogControllerTest {
             .andExpect(status().isNoContent());
 
         verify(cogRepository).save(cog);
+    }
+
+    @Test
+    void deleteD_returns404WhenNotFound() throws Exception {
+        when(cogRepository.findById(any(CogId.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/api/cog/delete-D/1/E1/100/C1"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void deleteD_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findById(any(CogId.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(delete("/api/cog/delete-D/1/E1/100/C1"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void deleteD2_returns404WhenNotFound() throws Exception {
+        when(cogRepository.findById(any(CogId.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(delete("/api/cog/delete-D2/1/E1/100/C1"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void deleteD2_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findById(any(CogId.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(delete("/api/cog/delete-D2/1/E1/100/C1"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
     }
 
     @Test
@@ -465,6 +538,28 @@ public class CogControllerTest {
     }
 
     @Test
+    void updateD1_returns404WhenNotFound() throws Exception {
+        when(cogRepository.findById(any(CogId.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/cog/updateD1/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"COGIMP\":123.45}"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateD1_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findById(any(CogId.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(patch("/api/cog/updateD1/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"COGIMP\":123.45}"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
     void updateD2_returns204AndSavesBalance() throws Exception {
         CogId id = new CogId(1, "E1", 100, "C1");
         Cog cog = new Cog();
@@ -485,6 +580,28 @@ public class CogControllerTest {
                 .content("{}"))
             .andExpect(status().isBadRequest())
             .andExpect(content().string("COGIM2 is required."));
+    }
+
+    @Test
+    void updateD2_returns404WhenNotFound() throws Exception {
+        when(cogRepository.findById(any(CogId.class))).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/cog/updateD2/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"COGIM2\":456.78}"))
+            .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void updateD2_returns500OnDataAccessException() throws Exception {
+        when(cogRepository.findById(any(CogId.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(patch("/api/cog/updateD2/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"COGIM2\":456.78}"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
     }
 
     @Test

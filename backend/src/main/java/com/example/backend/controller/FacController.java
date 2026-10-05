@@ -6,31 +6,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.service.FacContabilizacionSpecification;
-import com.example.backend.service.FacturaInsertService;
-import com.example.backend.service.FacturaSearch;
-import com.example.backend.service.SicalService;
-import com.example.backend.sqlserver2.model.Fde;
-import com.example.backend.sqlserver2.model.Gbs;
-import com.example.backend.sqlserver2.model.Ter;
-import com.example.backend.sqlserver2.model.Fac;
-import com.example.backend.sqlserver2.model.FacId;
-import com.example.backend.sqlserver2.repository.FacRepository;
-import com.example.backend.sqlserver2.repository.FdeRepository;
-import com.example.backend.sqlserver2.repository.GbsRepository;
+import com.example.backend.dto.CuentaBancaria;
 import com.example.backend.dto.FacWithTerProjection;
 import com.example.backend.dto.FacturaInsertDto;
 import com.example.backend.dto.Tercero;
 import com.example.backend.exception.XmlParsingException;
-import com.example.backend.dto.CuentaBancaria;
+import com.example.backend.service.FacContabilizacionSpecification;
+import com.example.backend.service.FacturaInsertService;
+import com.example.backend.service.FacturaSearch;
+import com.example.backend.service.SicalService;
+import com.example.backend.sqlserver2.model.Fac;
+import com.example.backend.sqlserver2.model.FacId;
+import com.example.backend.sqlserver2.model.Fde;
+import com.example.backend.sqlserver2.model.Gbs;
+import com.example.backend.sqlserver2.repository.FacRepository;
+import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
 
 @RestController
 @RequestMapping("/api/fac")
@@ -150,7 +156,7 @@ public class FacController {
         @RequestBody facturaUpdate payload
     ) {
         try {
-            if (payload == null || payload.tercod() == null || payload.tercod() == null || payload.tercod() == null || payload.orgCode() == null || payload.entidad() == null) {
+            if (payload == null || payload.tercod() == null || payload.orgCode() == null || payload.entidad() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Falta un dato obligatorio");
             }
 

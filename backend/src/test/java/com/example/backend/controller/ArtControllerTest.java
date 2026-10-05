@@ -8,6 +8,7 @@ import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.dto.ArtAsuContratoProjection;
 import com.example.backend.dto.ArtNameProjection;
 import com.example.backend.service.ExistenciasSearch;
+import com.example.backend.sqlserver2.model.Art;
 import com.example.backend.sqlserver2.repository.AfaRepository;
 import com.example.backend.sqlserver2.repository.ArtRepository;
 import com.example.backend.sqlserver2.repository.AsuRepository;
@@ -20,11 +21,13 @@ import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
 
 import java.util.List;
 
+import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.ArgumentMatchers.any;
@@ -46,6 +49,29 @@ public class ArtControllerTest {
     @MockitoBean private AsuRepository asuRepository;
     @MockitoBean private MeaRepository meaRepository;             
     @MockitoBean private ExistenciasSearch existenciasSearch;     
+
+    private ArticleProjection articleProjection() {
+        return new ArticleProjection() {
+            @Override public String getAFACOD() { return "AF"; }
+            @Override public String getAfa_AFADES() { return "Family"; }
+            @Override public String getASUCOD() { return "ASU"; }
+            @Override public String getAsu_ASUDES() { return "Subfamily"; }
+            @Override public String getARTCOD() { return "ART"; }
+            @Override public String getARTDES() { return "Article"; }
+            @Override public String getARTREF() { return "REF"; }
+            @Override public Integer getARTBLO() { return 0; }
+            @Override public Double getARTUNI() { return 1.0; }
+            @Override public Double getARTSOL() { return 2.0; }
+            @Override public Double getARTREC() { return 3.0; }
+            @Override public String getAun_AUNDES() { return "Unit"; }
+            @Override public Double getARTUCO() { return 4.0; }
+            @Override public Double getARTUEM() { return 5.0; }
+            @Override public Double getARTPMI() { return 6.0; }
+            @Override public Double getARTPMP() { return 7.0; }
+            @Override public Double getARTMIN() { return 8.0; }
+            @Override public Double getARTOPT() { return 9.0; }
+        };
+    }
 
     @Test
     void getArtName_returnsListOr404() throws Exception {
@@ -569,5 +595,200 @@ public class ArtControllerTest {
             .andDo(print())
             .andExpect(status().isInternalServerError())
             .andExpect(content().string("Error: DB error"));
+    }
+
+    @Test
+    void updateArticle_updatesAllFields() throws Exception {
+        Art article = new Art();
+        article.setENT(1);
+        article.setAFACOD("AF");
+        article.setASUCOD("ASU");
+        article.setARTCOD("ART");
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.of(article));
+
+        mockMvc.perform(patch("/api/art/update-art/1/AF/ASU/ART")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"ARTDES":"Updated","ARTREF":"REF2","ARTBLO":1,"AUNCOD":"U2","ARTUCO":10.5,"ARTUEM":11.5,"ARTMIN":2.5,"ARTOPT":5.5}
+                    """))
+            .andDo(print())
+            .andExpect(status().isNoContent());
+
+        assertThat(article.getARTDES(), is("Updated"));
+        assertThat(article.getARTREF(), is("REF2"));
+        assertThat(article.getARTBLO(), is(1));
+        assertThat(article.getAUNCOD(), is("U2"));
+        assertThat(article.getARTUCO(), is(10.5));
+        assertThat(article.getARTUEM(), is(11.5));
+        assertThat(article.getARTMIN(), is(2.5));
+        assertThat(article.getARTOPT(), is(5.5));
+        verify(artRepository).save(article);
+    }
+
+    @Test
+    void updateArticle_returnsNotFoundWhenArticleDoesNotExist() throws Exception {
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.empty());
+
+        mockMvc.perform(patch("/api/art/update-art/1/AF/ASU/ART")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ARTDES\":\"Updated\"}"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void updateArticle_returnsBadRequestForNullPayload() throws Exception {
+        ResponseEntity<?> response = new ArtController()
+            .updateArticle(1, "AF", "ASU", "ART", null);
+
+        assertThat(response.getStatusCode().value(), is(400));
+        assertThat(response.getBody(), is("Faltan datos obligatorios."));
+
+        verifyNoInteractions(artRepository);
+    }
+
+    @Test
+    void updateArticle_returns500OnException() throws Exception {
+        when(artRepository.findById(any()))
+            .thenThrow(new RuntimeException("Update failed"));
+
+        mockMvc.perform(patch("/api/art/update-art/1/AF/ASU/ART")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ARTDES\":\"Updated\"}"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string("Error: Update failed"));
+    }
+
+    @Test
+    void deleteArticle_marksArticleAsBlocked() throws Exception {
+        Art article = new Art();
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.of(article));
+
+        mockMvc.perform(delete("/api/art/delete-art/1/AF/ASU/ART"))
+            .andExpect(status().isNoContent());
+
+        assertThat(article.getARTBLO(), is(1));
+        verify(artRepository).save(article);
+    }
+
+    @Test
+    void deleteArticle_returnsNotFoundWhenArticleDoesNotExist() throws Exception {
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.empty());
+
+        mockMvc.perform(delete("/api/art/delete-art/1/AF/ASU/ART"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void deleteArticle_returns500OnException() throws Exception {
+        when(artRepository.findById(any()))
+            .thenThrow(new RuntimeException("Delete failed"));
+
+        mockMvc.perform(delete("/api/art/delete-art/1/AF/ASU/ART"))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string("Error: Delete failed"));
+    }
+
+    @Test
+    void addArticle_createsArticleWithoutWarehouseEntries() throws Exception {
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.empty());
+        when(asuRepository.findMagcods(1, "AF", "ASU")).thenReturn(List.of());
+
+        mockMvc.perform(post("/api/art/add-art")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"ENT":1,"AFACOD":"AF","ASUCOD":"ASU","ARTCOD":"ART","ARTDES":"Article","ARTREF":"REF","ARTBLO":0,"ARTUNI":1.0,"ARTSOL":2.0,"ARTREC":3.0,"AUNCOD":"U1","ARTUCO":4.0,"ARTUEM":5.0,"ARTPMP":6.0,"ARTMIN":7.0,"ARTOPT":8.0}
+                    """))
+            .andExpect(status().isNoContent());
+
+        verify(artRepository).save(any(Art.class));
+        verifyNoInteractions(meaRepository);
+    }
+
+    @Test
+    void addArticle_returnsBadRequestForMissingRequiredData() throws Exception {
+        mockMvc.perform(post("/api/art/add-art")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ENT\":1,\"AFACOD\":\"AF\"}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("Faltan datos obligatorios."));
+    }
+
+    @Test
+    void addArticle_returnsNotFoundWhenArticleAlreadyExists() throws Exception {
+        when(artRepository.findById(any())).thenReturn(java.util.Optional.of(new Art()));
+
+        mockMvc.perform(post("/api/art/add-art")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ENT\":1,\"AFACOD\":\"AF\",\"ASUCOD\":\"ASU\",\"ARTCOD\":\"ART\",\"ARTDES\":\"Article\"}"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("El artículo ya existe."));
+    }
+
+    @Test
+    void addArticle_returnsBadRequestOnDataAccessException() throws Exception {
+        when(artRepository.findById(any()))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(post("/api/art/add-art")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{\"ENT\":1,\"AFACOD\":\"AF\",\"ASUCOD\":\"ASU\",\"ARTCOD\":\"ART\",\"ARTDES\":\"Article\"}"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void fetchExistencias_returnsResultsOrNotFound() throws Exception {
+        ArticleProjection projection = articleProjection();
+        when(artRepository.findByENTAndARTBLONot(1, 0)).thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/Existencias/1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+
+        when(artRepository.findByENTAndARTBLONot(2, 0)).thenReturn(List.of());
+        mockMvc.perform(get("/api/art/Existencias/2"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("El artículo ya existe."));
+    }
+
+    @Test
+    void fetchExistencias_returnsBadRequestOnDataAccessException() throws Exception {
+        when(artRepository.findByENTAndARTBLONot(1, 0))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get("/api/art/Existencias/1"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void searchExistencias_returnsResultsOrNotFound() throws Exception {
+        ArticleProjection projection = articleProjection();
+        when(existenciasSearch.searchExistencias(1, "bolt", "AF", "ASU"))
+            .thenReturn(List.of(projection));
+
+        mockMvc.perform(get("/api/art/existencias/1/search")
+                .param("campo", "bolt")
+                .param("afacod", "AF")
+                .param("asucod", "ASU"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+
+        when(existenciasSearch.searchExistencias(2, null, null, null)).thenReturn(List.of());
+        mockMvc.perform(get("/api/art/existencias/2/search"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchExistencias_returnsBadRequestOnDataAccessException() throws Exception {
+        when(existenciasSearch.searchExistencias(1, null, null, null))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get("/api/art/existencias/1/search"))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
     }
 }

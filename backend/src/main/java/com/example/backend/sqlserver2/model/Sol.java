@@ -1,10 +1,11 @@
 package com.example.backend.sqlserver2.model;
 
 import java.time.LocalDateTime;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
-import jakarta.persistence.Table;
 import jakarta.persistence.IdClass;
+import jakarta.persistence.Table;
 
 @Entity
 @IdClass(SolId.class)
@@ -99,7 +100,7 @@ public class Sol {
     public void setENT(Integer ENT) {this.ENT = ENT;}
 
     public Integer getSOLNUM() {return SOLNUM;}
-    public void setSOLNUM(Integer SOLSUB) {this.SOLNUM = SOLNUM;}
+    public void setSOLNUM(Integer SOLNUM) {this.SOLNUM = SOLNUM;}
 
     public Integer getSOLSUB() {return SOLSUB;}
     public void setSOLSUB(Integer SOLSUB) {this.SOLSUB = SOLSUB;}

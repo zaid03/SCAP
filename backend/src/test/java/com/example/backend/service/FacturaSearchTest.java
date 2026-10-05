@@ -1,5 +1,6 @@
 package com.example.backend.service;
 
+import java.lang.reflect.Method;
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
@@ -82,6 +83,18 @@ public class FacturaSearchTest {
 
     @BeforeEach
     void setUp() {
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<FacWithTerProjection> invokeFilter(String methodName, Object... arguments) throws Exception {
+        Method method = FacturaSearch.class.getDeclaredMethod(
+            methodName,
+            java.util.Arrays.stream(arguments)
+                .map(argument -> argument instanceof List ? List.class : argument.getClass())
+                .toArray(Class<?>[]::new)
+        );
+        method.setAccessible(true);
+        return (List<FacWithTerProjection>) method.invoke(facturaSearch, arguments);
     }
 
 
@@ -1431,5 +1444,60 @@ void filterByTernifOrFacado_filterByFacado_returnsMatch() {
 
         assertEquals(1, result.size());
         assertEquals("SupplierX", result.get(0).getTer_TERNOM());
+    }
+
+    @Test
+    void filterByTernifOrTernomOrFacdoc_matchesTernomAndFacdoc() throws Exception {
+        FacProjectionMock ternomMatch = new FacProjectionMock(1, "NIF1", 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, "Acme Supplier");
+        FacProjectionMock facdocMatch = new FacProjectionMock(2, "NIF2", 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, "Other Supplier");
+        facdocMatch.facdoc = "Invoice-ACME-01";
+
+        List<FacWithTerProjection> result = invokeFilter(
+            "filterByTernifOrTernomOrFacdoc",
+            List.of(ternomMatch, facdocMatch),
+            "acme"
+        );
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void filterByTernomOrFacdoc_matchesNameAndDocument_andIgnoresNulls() throws Exception {
+        FacProjectionMock ternomMatch = new FacProjectionMock(1, null, 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, "Acme Supplier");
+        FacProjectionMock facdocMatch = new FacProjectionMock(2, null, 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, "Other Supplier");
+        facdocMatch.facdoc = "Invoice-ACME-01";
+        FacProjectionMock noMatch = new FacProjectionMock(3, null, 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, null);
+
+        List<FacWithTerProjection> result = invokeFilter(
+            "filterByTernomOrFacdoc",
+            List.of(ternomMatch, facdocMatch, noMatch),
+            "acme"
+        );
+
+        assertEquals(2, result.size());
+    }
+
+    @Test
+    void filterByFacann_matchesYear_andIgnoresNullYear() throws Exception {
+        FacProjectionMock matching = new FacProjectionMock(1, null, 1.0, 1.0, 0.0, null,
+            null, null, null, 2024, "Supplier");
+        FacProjectionMock nullYear = new FacProjectionMock(2, null, 1.0, 1.0, 0.0, null,
+            null, null, null, null, "Supplier");
+        FacProjectionMock otherYear = new FacProjectionMock(3, null, 1.0, 1.0, 0.0, null,
+            null, null, null, 2025, "Supplier");
+
+        List<FacWithTerProjection> result = invokeFilter(
+            "filterByFacann",
+            List.of(matching, nullYear, otherYear),
+            2024
+        );
+
+        assertEquals(1, result.size());
+        assertEquals(2024, result.get(0).getFACANN());
     }
 }
