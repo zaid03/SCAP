@@ -221,11 +221,11 @@ export class ConsultaHistoricaAdContratosComponent {
   };
 
   calculateSaldoTotal(cogimp: number, cogim2: number): number {
-    return cogimp + cogim2;
+    return this.parseMoney(cogimp) + this.parseMoney(cogim2);
   }
 
   calculateSaldo(cogimp: number, cogim2: number, cogiap: number): number {
-    return (cogimp + cogim2) - cogiap;
+    return this.calculateSaldoTotal(cogimp, cogim2) - this.parseMoney(cogiap);
   }
 
   private formatCurrency(value: any): string {
@@ -240,6 +240,54 @@ export class ConsultaHistoricaAdContratosComponent {
     return formatted;
   }
 
+  private parseMoney(value: any): number {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+
+    let stringValue = String(value).trim();
+    const isParenthesizedNegative = /^\(.*\)$/.test(stringValue);
+
+    if (isParenthesizedNegative) {
+      stringValue = stringValue.replace(/[()]/g, '');
+    }
+
+    stringValue = stringValue
+      .replace(/\u00A0/g, ' ')
+      .replace(/[^\d.,-]/g, '');
+
+    if (stringValue.includes(',')) {
+      stringValue = stringValue.replace(/\./g, '').replace(',', '.');
+    }
+
+    const numberValue = parseFloat(stringValue);
+    if (isNaN(numberValue)) return 0;
+
+    return isParenthesizedNegative ? -numberValue : numberValue;
+  }
+
+  private applyExcelCurrencyFormat(
+    worksheet: XLSX.WorkSheet,
+    rowCount: number
+  ): void {
+    const currencyFormat = '[$€-es-ES] #,##0.00';
+
+    for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
+      for (let columnIndex = 10; columnIndex <= 12; columnIndex++) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: columnIndex
+        });
+        const cell = worksheet[cellAddress];
+
+        if (!cell) continue;
+
+        cell.v = this.parseMoney(cell.v);
+        cell.t = 'n';
+        cell.z = currencyFormat;
+      }
+    }
+  }
+
   excelDownload() {
     this.limpiarMessages();
     const rows = this.contratos;
@@ -248,7 +296,7 @@ export class ConsultaHistoricaAdContratosComponent {
       return;
     }
   
-    const exportRows = rows.map((row: any, index: number) => ({
+    const exportRows = rows.map((row: any) => ({
       Contrato: row.concod ?? '',
       Económica: row.cot?.conn?.conlot ?? '',
       Descripción: row.cot?.conn?.condes ?? '',
@@ -259,16 +307,32 @@ export class ConsultaHistoricaAdContratosComponent {
       Centro_Gestor: row.cge?.cgedes ?? '',
       AD_principal: row.cogopd ?? '',
       AD_secundaria : row.cogop2 ?? '',
-      Saldo_total_AD : this.formatCurrency(this.calculateSaldoTotal(row?.cogimp, row?.cogim2)),
-      Pedidos_Pte_Contabilizar : this.formatCurrency(row.cogiap),
-      Saldo: this.formatCurrency(this.calculateSaldo(row?.cogimp, row?.cogim2, row?.cogiap))
+      Saldo_total_AD: this.parseMoney(this.calculateSaldoTotal(row?.cogimp, row?.cogim2)),
+      Pedidos_Pte_Contabilizar: this.parseMoney(row.cogiap),
+      Saldo: this.calculateSaldo(row?.cogimp, row?.cogim2, row?.cogiap)
     }));
   
     const worksheet = XLSX.utils.aoa_to_sheet([]);
-    XLSX.utils.sheet_add_aoa(worksheet, [['listas de saldo de contratos']], { origin: 'A1' });
+    XLSX.utils.sheet_add_aoa(worksheet, [['Listado de saldo de contratos']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['Contrato', 'Económica', 'Descripción', 'Cód. Proveedor', 'Proveedor', 'NIF', 'Cód. C. Gestor', 'AD principal', 'AD secundaria', 'Saldo total AD', 'Pedidos Pte. Contabilizar', 'Saldo']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [[
+      'Contrato',
+      'Económica',
+      'Descripción',
+      'Cód. Proveedor',
+      'Proveedor',
+      'NIF',
+      'Cód. C. Gestor',
+      'Centro Gestor',
+      'AD principal',
+      'AD secundaria',
+      'Saldo total AD',
+      'Pedidos Pte. Contabilizar',
+      'Saldo'
+    ]], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
+
+    this.applyExcelCurrencyFormat(worksheet, exportRows.length);
 
     worksheet['!cols'] = [
       { wch: 10 },
@@ -288,7 +352,11 @@ export class ConsultaHistoricaAdContratosComponent {
   
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'contratos');
-    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const buffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+      cellStyles: true
+    });
     saveAs(
       new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
       'Consulta_saldo_contratos.xlsx'
@@ -341,11 +409,16 @@ export class ConsultaHistoricaAdContratosComponent {
     ];
 
     autoTable(doc, {
-      startY: 15,
+      startY: 60,
       head: [columns.map(col => col.header)],
       body: rows.map((row: any) => columns.map(col => row[col.dataKey as keyof typeof row] ?? '')),
       styles: { font: 'helvetica', fontSize: 8 },
-      headStyles: { fillColor: [240, 240, 240], textColor: 33 },
+      headStyles: { fillColor: [240, 240, 240], textColor: 33, fontStyle: 'bold' },
+      didParseCell: (data) => {
+        if (data.section === 'body' && [1, 3, 10, 11, 12].includes(data.column.index)) {
+          data.cell.styles.halign = 'right';
+        }
+      },
       columnStyles: {
         Contrato: { cellWidth: 10 },
         conlot: { cellWidth: 10 },

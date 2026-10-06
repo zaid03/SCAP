@@ -6,5 +6,5 @@
 .group-menu {width: 2%;}
 /* search container and inputs */
 /* table style */
-
+.ft tbody td:nth-child(10) {text-align: right;}
 /* table style */

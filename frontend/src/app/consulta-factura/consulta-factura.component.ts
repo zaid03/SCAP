@@ -250,6 +250,55 @@ export class ConsultaFacturaComponent {
     }).format(Number(value));
   };
 
+  private parseMoney(value: any): number {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+
+    let stringValue = String(value).trim();
+    const isParenthesizedNegative = /^\(.*\)$/.test(stringValue);
+
+    if (isParenthesizedNegative) {
+      stringValue = stringValue.replace(/[()]/g, '');
+    }
+
+    stringValue = stringValue
+      .replace(/\u00A0/g, ' ')
+      .replace(/[^\d.,-]/g, '');
+
+    if (stringValue.includes(',')) {
+      stringValue = stringValue.replace(/\./g, '').replace(',', '.');
+    }
+
+    const numberValue = parseFloat(stringValue);
+    if (isNaN(numberValue)) return 0;
+
+    return isParenthesizedNegative ? -numberValue : numberValue;
+  }
+
+  private applyExcelCurrencyFormat(
+    worksheet: XLSX.WorkSheet,
+    rowCount: number
+  ): void {
+    const currencyFormat = '[$€-es-ES] #,##0.00';
+    const currencyColumns = [5, 13];
+
+    for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
+      for (const columnIndex of currencyColumns) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: columnIndex
+        });
+        const cell = worksheet[cellAddress];
+
+        if (!cell) continue;
+
+        cell.v = this.parseMoney(cell.v);
+        cell.t = 'n';
+        cell.z = currencyFormat;
+      }
+    }
+  }
+
   DownloadPDF() {
     this.limpiarMEssages();
 
@@ -305,13 +354,18 @@ export class ConsultaFacturaComponent {
       startY: 20,
       columns,
       body: rows.map(row => columns.map(c => row[c.dataKey as keyof typeof row] ?? '')),
-      styles: { fontSize: 8 },
+      styles: { font: 'helvetica', fontSize: 8 },
       tableWidth: 'wrap',
       headStyles: {
         fillColor: [240, 240, 240],
         textColor: [33, 53, 71],
         fontStyle: 'bold',
         halign: 'left'
+      },
+      didParseCell: (data) => {
+        if (data.section === 'body' && [1, 5, 13].includes(data.column.index)) {
+          data.cell.styles.halign = 'right';
+        }
       },
       columnStyles: {
         facnum: { cellWidth: 15 },
@@ -354,7 +408,7 @@ export class ConsultaFacturaComponent {
       ternom: row.ter_TERNOM ?? '',
       ternif: row.ter_TERNIF ?? '',
       facfre: row.facfre ?? '',
-      facimp: row.facimp ?? '',
+      facimp: this.parseMoney(row.facimp),
       facdoc: row.facdoc ?? '',
       facann: row.facann ?? '',
       facfac: row.facfac ?? '',
@@ -362,7 +416,7 @@ export class ConsultaFacturaComponent {
       concod: row.concod ?? '',
       facado: row.facado ?? '',
       facfco: row.facfco ?? '',
-      getPendingApply: this.getPendingApply(row) ?? '',
+      getPendingApply: this.parseMoney(this.getPendingApply(row)),
       cgecod: row.cgecod ?? '',
       getStaus: this.getStaus(row.facado, row.facimp, row.faciec, row.facidi) ?? ''
     }));
@@ -370,8 +424,27 @@ export class ConsultaFacturaComponent {
     const worksheet = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, [['Listado de facturas']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['N.Registro', 'Código Prov', 'Nombre Proveedor', 'NIF', 'F.Registro', 'Importe total', 'Num.Factura', 'Año', 'R.C.F', 'F.Factura', 'Contrato AD', 'Ado', 'F.Contable', 'Pte. Aplicar', 'C.gestor', 'Estado']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [[
+      'N.Registro',
+      'Código Prov',
+      'Nombre Proveedor',
+      'NIF',
+      'F.Registro',
+      'Importe total',
+      'Num.Factura',
+      'Año',
+      'R.C.F',
+      'F.Factura',
+      'Contrato AD',
+      'Ado',
+      'F.Contable',
+      'Pte. Aplicar',
+      'C.gestor',
+      'Estado'
+    ]], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
+
+    this.applyExcelCurrencyFormat(worksheet, exportRows.length);
 
     worksheet['!cols'] = [
       { wch: 10 },
@@ -388,12 +461,17 @@ export class ConsultaFacturaComponent {
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 30 }
+      { wch: 30 },
+      { wch: 20 }
     ];
   
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Facturas');
-    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const buffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+      cellStyles: true
+    });
     saveAs(
       new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
       'Facturas.xlsx'

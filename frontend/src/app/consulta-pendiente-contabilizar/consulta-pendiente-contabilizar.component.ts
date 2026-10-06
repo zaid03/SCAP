@@ -92,9 +92,55 @@ export class ConsultaPendienteContabilizarComponent {
   nextPage(): void {if (this.page < this.totalPages - 1) this.page++;}
   goToPage(event: any): void {const inputPage = Number(event.target.value); if (inputPage >= 1 && inputPage <= this.totalPages) {this.page = inputPage - 1;}}
 
+  private parseMoney(value: any): number {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+
+    let stringValue = String(value).trim();
+    const isParenthesizedNegative = /^\(.*\)$/.test(stringValue);
+
+    if (isParenthesizedNegative) {
+      stringValue = stringValue.replace(/[()]/g, '');
+    }
+
+    stringValue = stringValue
+      .replace(/\u00A0/g, ' ')
+      .replace(/[^\d.,-]/g, '');
+
+    if (stringValue.includes(',')) {
+      stringValue = stringValue.replace(/\./g, '').replace(',', '.');
+    }
+
+    const numberValue = parseFloat(stringValue);
+    if (isNaN(numberValue)) return 0;
+
+    return isParenthesizedNegative ? -numberValue : numberValue;
+  }
+
   importe(fdeimp: number, fdedif: number) {
-    if (!fdeimp && !fdedif) {return}
-    return fdeimp + fdedif;
+    if (!fdeimp && !fdedif) return 0;
+    return this.parseMoney(fdeimp) + this.parseMoney(fdedif);
+  }
+
+  private applyExcelCurrencyFormat(
+    worksheet: XLSX.WorkSheet,
+    rowCount: number
+  ): void {
+    const currencyFormat = '[$€-es-ES] #,##0.00';
+
+    for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
+      const cellAddress = XLSX.utils.encode_cell({
+        r: rowIndex,
+        c: 8
+      });
+      const cell = worksheet[cellAddress];
+
+      if (!cell) continue;
+
+      cell.v = this.parseMoney(cell.v);
+      cell.t = 'n';
+      cell.z = currencyFormat;
+    }
   }
 
   //main table functions
@@ -225,6 +271,18 @@ export class ConsultaPendienteContabilizarComponent {
     this.fetchFacturas();
   }
 
+  private formatCurrency(value: any): string {
+    if (value === null || value === undefined || value === '') return '';
+    const numberValue = typeof value === 'number' ? value : Number(value);
+    if (isNaN(numberValue)) return '';
+    const formatted = new Intl.NumberFormat('es-ES', {
+      style: 'currency',
+      currency: 'EUR',
+      minimumFractionDigits: 2
+    }).format(numberValue);
+    return formatted;
+  }
+
   DownloadPDF() {
     this.limpiarMEssages();
 
@@ -243,7 +301,7 @@ export class ConsultaPendienteContabilizarComponent {
       fdeorg: row.fdeorg ?? '',
       fdefun: row.fdefun ?? '',
       fdeeco: row.fdeeco ?? '',
-      importe: this.importe(row.fdeimp, row.fdedif),
+      importe: this.formatCurrency(this.importe(row.fdeimp, row.fdedif)),
       ternif: row.ternif,
       ternom: row.ternom,
       cgecod: row.cgecod
@@ -264,17 +322,22 @@ export class ConsultaPendienteContabilizarComponent {
       { header: 'Centro Gestor', dataKey: 'cgecod' }
     ];
 
-    const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
+    const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(14);
-    doc.text('Listado de facturas del contabilizado', 10, 20);
+    doc.text('Listado de facturas del contabilizado', 40, 40);
 
     autoTable(doc, {
-      startY: 30,
+      startY: 60,
       head: [columns.map(c => c.header)],
       body: rows.map(row => columns.map(c => row[c.dataKey as keyof typeof row] ?? '')),
-      styles: { font: 'helvetica', fontSize: 8, cellPadding: 4 },
+      styles: { font: 'helvetica', fontSize: 8 },
       headStyles: { fillColor: [240, 240, 240], textColor: 33, fontStyle: 'bold' },
+      didParseCell: (data) => {
+        if (data.section === 'body' && data.column.index === 8) {
+          data.cell.styles.halign = 'right';
+        }
+      },
       columnStyles: {
         facnum: { cellWidth: 10 },
         facann: { cellWidth: 10 },
@@ -310,7 +373,7 @@ export class ConsultaPendienteContabilizarComponent {
       fdeorg: row.fdeorg ?? '',
       fdefun: row.fdefun ?? '',
       fdeeco: row.fdeeco ?? '',
-      importe: this.importe(row.fdeimp, row.fdedif),
+      importe: this.parseMoney(this.importe(row.fdeimp, row.fdedif)),
       ternif: row.ternif,
       ternom: row.ternom,
       cgecod: row.cgecod
@@ -319,8 +382,23 @@ export class ConsultaPendienteContabilizarComponent {
     const worksheet = XLSX.utils.aoa_to_sheet([]);
     XLSX.utils.sheet_add_aoa(worksheet, [['Consulta del contabilizado']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
-    XLSX.utils.sheet_add_aoa(worksheet, [['Número', 'Año Factura', 'Nº Registro C.F', 'Referencia Fact', 'Fecha Factura', 'Orgánica', 'Programa', 'Económica', 'Importe', 'NIF', 'Nombre', 'Centro Gestor']], { origin: 'A2' });
+    XLSX.utils.sheet_add_aoa(worksheet, [[
+      'Número',
+      'Año Factura',
+      'Nº Registro C.F',
+      'Referencia Fact',
+      'Fecha Factura',
+      'Orgánica',
+      'Programa',
+      'Económica',
+      'Importe',
+      'NIF',
+      'Nombre',
+      'Centro Gestor'
+    ]], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
+
+    this.applyExcelCurrencyFormat(worksheet, exportRows.length);
 
     worksheet['!cols'] = [
       { wch: 10 },
@@ -334,13 +412,16 @@ export class ConsultaPendienteContabilizarComponent {
       { wch: 15 },
       { wch: 15 },
       { wch: 15 },
-      { wch: 15 },
       { wch: 25 }
     ];
   
     const workbook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(workbook, worksheet, 'Facturas');
-    const buffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
+    const buffer = XLSX.write(workbook, {
+      bookType: 'xlsx',
+      type: 'array',
+      cellStyles: true
+    });
     saveAs(
       new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
       'consulta_del_contabilizado.xlsx'

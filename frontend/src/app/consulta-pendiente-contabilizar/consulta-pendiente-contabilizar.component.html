@@ -145,7 +145,7 @@
                         <td>{{p.fdeorg}}</td>
                         <td>{{p.fdefun}}</td>
                         <td>{{p.fdeeco}}</td>
-                        <td>{{importe(p.fdeimp, p.fdedif)}}</td>
+                        <td>{{importe(p.fdeimp, p.fdedif) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                         <td>{{p.ternif}}</td>
                         <td>{{p.ternom}}</td>
                         <td>{{p.cgecod}}</td>              
