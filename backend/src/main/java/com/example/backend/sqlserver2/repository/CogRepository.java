@@ -37,7 +37,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONotAndCge_CGECODAndCot_conn_CONDESContaining(Integer ent, String eje, Integer contip, Integer conblo, String cgecod, String condes);
 
   //main fetch for historica de ad
-  List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIP(Integer ent, String eje, Integer contip);
+  // List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIP(Integer ent, String eje, Integer contip);
 
   //filtering for historica de ad
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCge_CGECOD(Integer ent, String eje, Integer contip, String cgecod);

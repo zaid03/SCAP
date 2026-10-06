@@ -351,46 +351,29 @@ public class CogController {
         }  
     }
 
-    //main fetch for historica de ad
-    @GetMapping("/historia-ADcontrato/{ent}/{eje}")
-    public ResponseEntity<?> fetchHistoriaADContrato (
-        @PathVariable Integer ent,
-        @PathVariable String eje
-    ) {
-        try {
-            List<SaldoContrato> contratos = cogRepository.findByENTAndEJEAndCot_conn_CONTIP(ent, eje, 3);
-            if (contratos.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
-            }
-
-            return ResponseEntity.ok(contratos);
-        } catch (DataAccessException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
-        }
-    }
 
     //filtering for historica de ad
-    @GetMapping("/search-historia-ADcontrato/{ent}/{eje}")
-    public ResponseEntity<?> searchHistoriaContrato (
-        @PathVariable Integer ent,
-        @PathVariable String eje,
-        @RequestParam(required = false) String cge,
-        @RequestParam(required = false) String contrato,
-        @RequestParam(required = false) String proveedor
-    ) {
-        try {
-            if (cge == null && contrato == null && proveedor == null) {
-            return ResponseEntity.badRequest().body("Faltan datos obligatorios");
-            }
+    // @GetMapping("/search-historia-ADcontrato/{ent}/{eje}")
+    // public ResponseEntity<?> searchHistoriaContrato (
+    //     @PathVariable Integer ent,
+    //     @PathVariable String eje,
+    //     @RequestParam(required = false) String cge,
+    //     @RequestParam(required = false) String contrato,
+    //     @RequestParam(required = false) String proveedor
+    // ) {
+    //     try {
+    //         if (cge == null && contrato == null && proveedor == null) {
+    //         return ResponseEntity.badRequest().body("Faltan datos obligatorios");
+    //         }
 
-            List<SaldoContrato> contratos = historicaADContratoSearch.historicaADContratoSearch(ent, eje, cge, contrato, proveedor);
-            if (contratos.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
-            }
+    //         List<SaldoContrato> contratos = historicaADContratoSearch.historicaADContratoSearch(ent, eje, cge, contrato, proveedor);
+    //         if (contratos.isEmpty()) {
+    //             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+    //         }
 
-            return ResponseEntity.ok(contratos);
-        } catch (DataAccessException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
-        }  
-    }
+    //         return ResponseEntity.ok(contratos);
+    //     } catch (DataAccessException ex) {
+    //         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
+    //     }  
+    // }
 }
