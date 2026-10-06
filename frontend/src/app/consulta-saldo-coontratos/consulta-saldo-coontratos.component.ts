@@ -63,7 +63,7 @@ export class ConsultaSaldoCoontratosComponent {
 
   fetchContratos() {
     this.isLoading = true;
-    this.http.get(`${environment.backendUrl}/api/cog/Saldo-contrato/${this.entcod}/${this.eje}`).subscribe({
+    this.http.get(`${environment.backendUrl}/api/coh/Saldo-contrato/${this.entcod}/${this.eje}`).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.contratos = res;
@@ -106,7 +106,7 @@ export class ConsultaSaldoCoontratosComponent {
       params = params.set('proveedor', this.proveedor?.trim());
     }
     this.isLoading = true;
-    this.http.get(`${environment.backendUrl}/api/cog/search-saldo-contrato/${this.entcod}/${this.eje}`, {params}).subscribe({
+    this.http.get(`${environment.backendUrl}/api/coh/search-saldo-contrato/${this.entcod}/${this.eje}`, {params}).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.contratos = res;

@@ -1172,7 +1172,7 @@ export class ContratosComponent {
     const oficina = 'AL';
     this.isLoadingD = true;
 
-    this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&codigoOperacion=${codigoOperacion}&organica=${this.organica}&funcional=${this.programa}&economica=${this.economica}&oficina=${oficina}&eje=${this.eje}`).subscribe({
+    this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&codigoOperacion=${codigoOperacion}&organica=${this.organica}&funcional=${this.programa}&economica=${this.economica}&eje=${this.eje}`).subscribe({
       next: (res) => {
         this.isLoadingD = false;
         if (!Array.isArray(res) || res.length === 0) {

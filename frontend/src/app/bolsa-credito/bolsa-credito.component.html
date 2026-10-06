@@ -555,8 +555,6 @@
                 <th>Importe</th>
                 <th>Saldo</th>
                 <th>Descripción</th>
-                <th>Signo</th>
-                <th>Saldo Previo</th>
             </tr>
         </thead>
         <tbody>
@@ -575,8 +573,6 @@
                 <td>{{d.lineaList[0].limporte | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{d.lineaList[0].saldo | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{d.texto}}</td>
-                <td>{{d.signo}}</td>
-                <td>{{d.lineaList[0].saldop | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
             </tr>
         </tbody>
     </table>

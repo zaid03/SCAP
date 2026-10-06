@@ -49,7 +49,6 @@ public class Conn {
     @OneToMany(mappedBy = "conn")
     @JsonIgnore
     private List<Cot> cots;
-
     public List<Cot> getCots() { return cots; }
     public void setCots(List<Cot> cots) { this.cots = cots; }
     

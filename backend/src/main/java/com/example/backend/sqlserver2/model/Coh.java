@@ -38,63 +38,23 @@ public class Coh {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-        @JoinColumn(
-            name = "ENT",
-            referencedColumnName = "ENT",
-            insertable = false,
-            updatable = false
-        ),
-        @JoinColumn(
-            name = "EJE",
-            referencedColumnName = "EJE",
-            insertable = false,
-            updatable = false
-        ),
-        @JoinColumn(
-            name = "CONCOD",
-            referencedColumnName = "CONCOD",
-            insertable = false,
-            updatable = false
-        )
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "EJE", referencedColumnName = "EJE", insertable = false, updatable = false),
+        @JoinColumn(name = "CONCOD", referencedColumnName = "CONCOD", insertable = false, updatable = false)
     })
     private Conn con;
-        public Conn getCon() {
-        return con;
-    }
-
-    public void setCon(Conn con) {
-        this.con = con;
-    }
+    public Conn getCon() {return con;}
+    public void setCon(Conn con) {this.con = con;}
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumns({
-        @JoinColumn(
-            name = "ENT",
-            referencedColumnName = "ENT",
-            insertable = false,
-            updatable = false
-        ),
-        @JoinColumn(
-            name = "EJE",
-            referencedColumnName = "EJE",
-            insertable = false,
-            updatable = false
-        ),
-        @JoinColumn(
-            name = "CGECOD",
-            referencedColumnName = "CGECOD",
-            insertable = false,
-            updatable = false
-        )
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "EJE", referencedColumnName = "EJE", insertable = false, updatable = false),
+        @JoinColumn(name = "CGECOD", referencedColumnName = "CGECOD", insertable = false, updatable = false)
     })
     private Cge cge;
-        public Cge getCge() {
-        return cge;
-    }
-
-    public void setCge(Cge cge) {
-        this.cge = cge;
-    }
+    public Cge getCge() {return cge;}
+    public void setCge(Cge cge) {this.cge = cge;}
 
     public Integer getENT() {return ENT;}
     public void setENT(Integer ENT) {this.ENT = ENT;}
