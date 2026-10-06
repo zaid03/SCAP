@@ -666,12 +666,12 @@
                                                         <td>{{ a.FDEIMP | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                                                         <td>
                                                             <input
-                                                            type="text"
-                                                            class="textArea-style applicacionesTextarea"
-                                                            [value]="a.editingPrice ? a.editingValue : formatPrice(a.FDEDIF)"
-                                                            (focus)="startEditingPrice(a)"
-                                                            (blur)="stopEditingPrice(a)"
-                                                            (input)="onPriceTyping($event, a)"
+                                                                type="text"
+                                                                class="textArea-style applicacionesTextarea"
+                                                                [value]="a.editingPrice ? a.editingValue : formatPrice(a.FDEDIF)"
+                                                                (focus)="startEditingPrice(a)"
+                                                                (blur)="stopEditingPrice(a); updateApplicaciones(a)"
+                                                                (input)="onPriceTyping($event, a)"
                                                             />
                                                         </td>
                                                         <td class="g-c-btns">
