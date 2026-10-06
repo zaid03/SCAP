@@ -14,29 +14,13 @@ public interface CohRepository extends JpaRepository<Coh, CohId> {
 
     //search for historica de ad por contrato
     List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECOD(Integer ent, String eje, Integer contip, String cgecod);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONCOD(Integer ent, String eje, Integer contip, String cgecod, Integer concod);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONDES(Integer ent, String eje, Integer contip, String cgecod, String condes);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONDESContaining(Integer ent, String eje, Integer contip, String cgecod, String condes);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_CONCOD(Integer ent, String eje, Integer contip, Integer concod);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_CONDES(Integer ent, String eje, Integer contip, String condes);
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_CONDESContaining(Integer ent, String eje, Integer contip, String condes);
-
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERCOD(
-        Integer ent,
-        String eje,
-        Integer contip,
-        Integer tercod
-    );
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
-        Integer ent,
-        String eje,
-        Integer contip,
-        String ternif
-    );
-    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNOMContaining(
-        Integer ent,
-        String eje,
-        Integer contip,
-        String ternom
-    );
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONCOD(Integer ent, String eje, Integer contip, String cgecod, Integer concod);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONDES(Integer ent, String eje, Integer contip, String cgecod, String condes);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONDESContaining(Integer ent, String eje, Integer contip, String cgecod, String condes);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_CONCOD(Integer ent, String eje, Integer contip, Integer concod);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_CONDES(Integer ent, String eje, Integer contip, String condes);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_CONDESContaining(Integer ent, String eje, Integer contip, String condes);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERCOD(Integer ent, String eje, Integer contip, Integer tercod);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(Integer ent, String eje, Integer contip, String ternif);
+    List<HistoricaContratos> findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNOMContaining(Integer ent, String eje, Integer contip, String ternom);
 }

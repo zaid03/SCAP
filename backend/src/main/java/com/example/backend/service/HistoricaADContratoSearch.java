@@ -30,11 +30,11 @@ public class HistoricaADContratoSearch {
         if (cge != null && !cge.isBlank()) {
             if (contrato != null && !contrato.isBlank()) {
                 if (isNumbersOnly(contrato)) {
-                    contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONCOD(
+                    contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONCOD(
                         ent, eje, 3, cge, Integer.parseInt(contrato)
                     );
                 } else {
-                    contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONDESContaining(
+                    contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONDESContaining(
                         ent, eje, 3, cge, contrato
                     );
                 }
@@ -53,7 +53,7 @@ public class HistoricaADContratoSearch {
 
         if ((contrato != null && !contrato.isBlank()) && (cge == null || cge.isBlank())) {
             if (isNumbersOnly(contrato)) {
-                contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_CONCOD(
+                contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_CONCOD(
                     ent, eje, 3, Integer.parseInt(contrato)
                 );
                 if (proveedor != null && !proveedor.isBlank()) {
@@ -61,7 +61,7 @@ public class HistoricaADContratoSearch {
                 }
                 return contratos;
             } else {
-                contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_CONDESContaining(
+                contratos = cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_CONDESContaining(
                     ent, eje, 3, contrato
                 );
                 if (proveedor != null && !proveedor.isBlank()) {
@@ -92,17 +92,17 @@ public class HistoricaADContratoSearch {
         List<HistoricaContratos> matches = new ArrayList<>();
 
         if (isNumbersOnly(term)) {
-            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERCOD(
+            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERCOD(
                 ent, eje, 3, Integer.parseInt(term)
             ));
-            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
+            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(
                 ent, eje, 3, term
             ));
         } else {
-            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNOMContaining(
+            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNOMContaining(
                 ent, eje, 3, term
             ));
-            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
+            matches.addAll(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(
                 ent, eje, 3, term
             ));
         }

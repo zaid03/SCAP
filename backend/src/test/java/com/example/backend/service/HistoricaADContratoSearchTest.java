@@ -35,28 +35,28 @@ class HistoricaADContratoSearchTest {
 
     @Test
     void searchesProviderByNumericTercodAndTernifAndRemovesDuplicates() {
-        HistoricaContratos matching = projectionWithProvider(123, "123 ABC", "Proveedor");
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERCOD(
+        HistoricaContratos matching = mock(HistoricaContratos.class);
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERCOD(
             ENT, EJE, CONTIP, 123)).thenReturn(List.of(matching));
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(
             ENT, EJE, CONTIP, "123")).thenReturn(List.of(matching));
 
         List<HistoricaContratos> result =
             service.historicaADContratoSearch(ENT, EJE, null, null, "123");
 
         assertEquals(List.of(matching), result);
-        verify(cohRepository).findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERCOD(
+        verify(cohRepository).findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERCOD(
             ENT, EJE, CONTIP, 123);
-        verify(cohRepository).findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
+        verify(cohRepository).findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(
             ENT, EJE, CONTIP, "123");
     }
 
     @Test
     void searchesProviderByTextTernomAndTernif() {
         HistoricaContratos matching = mock(HistoricaContratos.class);
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNOMContaining(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNOMContaining(
             ENT, EJE, CONTIP, "Proveedor")).thenReturn(List.of(matching));
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_Cots_Ter_TERNIFContaining(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_Cots_Ter_TERNIFContaining(
             ENT, EJE, CONTIP, "Proveedor")).thenReturn(List.of());
 
         assertEquals(List.of(matching),
@@ -66,7 +66,7 @@ class HistoricaADContratoSearchTest {
     @Test
     void searchesByCgeAndNumericContract() {
         HistoricaContratos result = mock(HistoricaContratos.class);
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONCOD(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONCOD(
             ENT, EJE, CONTIP, "CG01", 10)).thenReturn(List.of(result));
 
         assertEquals(List.of(result),
@@ -76,7 +76,7 @@ class HistoricaADContratoSearchTest {
     @Test
     void searchesByCgeAndTextContract() {
         HistoricaContratos result = mock(HistoricaContratos.class);
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONDESContaining(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONDESContaining(
             ENT, EJE, CONTIP, "CG01", "Contrato")).thenReturn(List.of(result));
 
         assertEquals(List.of(result),
@@ -97,7 +97,7 @@ class HistoricaADContratoSearchTest {
     void searchesByCgeAndContractThenFiltersNumericProvider() {
         HistoricaContratos matching = projectionWithProvider(123, null, null);
         HistoricaContratos nonMatching = projectionWithProvider(999, null, null);
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONCOD(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONCOD(
             ENT, EJE, CONTIP, "CG01", 10)).thenReturn(List.of(matching, nonMatching));
 
         assertEquals(List.of(matching),
@@ -108,7 +108,7 @@ class HistoricaADContratoSearchTest {
     void searchesByCgeAndContractThenFiltersTextProvider() {
         HistoricaContratos matching = projectionWithProvider(null, null, "Proveedor ABC");
         HistoricaContratos nonMatching = projectionWithProvider(null, null, "Proveedor XYZ");
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndConn_CONCOD(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECODAndCon_CONCOD(
             ENT, EJE, CONTIP, "CG01", 10)).thenReturn(List.of(matching, nonMatching));
 
         assertEquals(List.of(matching),
@@ -130,7 +130,7 @@ class HistoricaADContratoSearchTest {
     void searchesNumericContractThenFiltersProvider() {
         HistoricaContratos matching = projectionWithProvider(null, "123 456", null);
         HistoricaContratos nonMatching = projectionWithProvider(null, "999", null);
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_CONCOD(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_CONCOD(
             ENT, EJE, CONTIP, 10)).thenReturn(List.of(matching, nonMatching));
 
         assertEquals(List.of(matching),
@@ -141,7 +141,7 @@ class HistoricaADContratoSearchTest {
     void searchesTextContractThenFiltersProvider() {
         HistoricaContratos matching = projectionWithProvider(null, null, "Proveedor ABC");
         HistoricaContratos nonMatching = projectionWithProvider(null, null, "Proveedor XYZ");
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_CONDESContaining(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_CONDESContaining(
             ENT, EJE, CONTIP, "Contrato")).thenReturn(List.of(matching, nonMatching));
 
         assertEquals(List.of(matching),
@@ -152,8 +152,9 @@ class HistoricaADContratoSearchTest {
     void providerFiltersIgnoreMissingRelationships() {
         HistoricaContratos noConn = mock(HistoricaContratos.class);
         HistoricaContratos noCots = mock(HistoricaContratos.class);
-        when(noCots.getCon()).thenReturn(mock(HistoricaContratos.ConnProjection.class));
-        when(noCots.getCon().getCots()).thenReturn(null);
+        HistoricaContratos.ConnProjection conn = mock(HistoricaContratos.ConnProjection.class);
+        when(noCots.getCon()).thenReturn(conn);
+        when(conn.getCots()).thenReturn(null);
         when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCge_CGECOD(
             ENT, EJE, CONTIP, "CG01")).thenReturn(List.of(noConn, noCots));
 
@@ -172,13 +173,18 @@ class HistoricaADContratoSearchTest {
         when(conn.getCots()).thenReturn(List.of(cot));
         when(cot.getTer()).thenReturn(null);
 
-        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndConn_CONCOD(
+        when(cohRepository.findByENTAndEJEAndCon_CONTIPAndCon_CONCOD(
             ENT, EJE, CONTIP, 10)).thenReturn(List.of(matching, missingTer, noTerProjection));
 
         assertEquals(List.of(matching),
             service.historicaADContratoSearch(ENT, EJE, null, "10", " abc   def "));
     }
 
+    /**
+     * Shared builder: each test exercises a different subset of these stubs
+     * (numeric vs text provider filters), so they are lenient on purpose.
+     * Repository stubs in the tests stay strict.
+     */
     private HistoricaContratos projectionWithProvider(
         Integer tercod,
         String ternif,
