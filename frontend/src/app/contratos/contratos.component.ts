@@ -41,7 +41,6 @@ export class ContratosComponent {
   //global variables
   entcod: string | null = null;
   eje: number | null = null;
-  cge: string = '';
   orgCode: string | null = null;
   entidad: string | null = null;
   isLoading: boolean = false;
@@ -57,17 +56,15 @@ export class ContratosComponent {
     this.limpiarMessages();
     const ent = sessionStorage.getItem('Entidad');
     const session = sessionStorage.getItem('EJERCICIO');
-    const cge = sessionStorage.getItem('CENTROGESTOR');
     const orgnizacion = sessionStorage.getItem('WSORG');
     const entcod = sessionStorage.getItem('WSENT');
    
     if (ent) { const parsed = JSON.parse(ent); this.entcod = parsed.ENTCOD;}
     if (session) { const parsed = JSON.parse(session); this.eje = parsed.eje;}
-    if (cge) {const parsed = JSON.parse(cge); this.cge = parsed.value;}
     if (orgnizacion) {const parsed = JSON.parse(orgnizacion); this.orgCode = parsed.WSORG;}
     if (entcod) {const parsed = JSON.parse(entcod); this.entidad = parsed.WSENT};
 
-    if (this.entcod == null || !this.eje || this.orgCode === '' || this.entidad === '' || this.cge === '') {
+    if (this.entcod == null || !this.eje || this.orgCode === '' || this.entidad === '') {
       alert('Missing session data. reiniciar el flujo.');
       this.router.navigate(['/login']);
       return;
@@ -1603,12 +1600,13 @@ export class ContratosComponent {
     let COGIM2 = this.dataForHistorica.cogim2;
     let COGOP2 = this.dataForHistorica.cogop2;
     let COGRF2 = this.dataForHistorica.cogrf2;
+    const cgecod = this.dataForHistorica.cgecod;
     const payload = {
       "ENT": this.entcod,
       "EJE": this.eje,
       "CONCOD": this.selectedContrato.concod,
       "COGIMP": COGIMP,
-      "CGECOD": this.cge,
+      "CGECOD": cgecod,
       "COGOPD": COGOPD,
       "COGRFD": COGRFD,
       "COGIM2": COGIM2,
@@ -1645,6 +1643,7 @@ export class ContratosComponent {
     this.limpiarMessages();
     this.historicoGridMessages = false;
     this.closeHistoricoGrid();
+    this.fetchCentroGestor(this.selectedContrato.concod);
   }
 
   //misc

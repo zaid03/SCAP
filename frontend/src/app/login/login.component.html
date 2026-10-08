@@ -5,9 +5,9 @@
     <div class="login-status" *ngIf="isValidating && !validationFailed">
         {{ loadingMessage }}
     </div>
-    <p class="error" *ngIf="errormessage">{{ errormessage }}</p>
+    <p class="errorBtn" *ngIf="errormessage">{{ errormessage }}</p>
     <button 
-        class="purple-tbn" 
+        class="purple-btn" 
         *ngIf="showLoginButton" 
         (click)="login()">
         Iniciar sesión

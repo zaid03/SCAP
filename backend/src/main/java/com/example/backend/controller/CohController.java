@@ -94,13 +94,6 @@ public class CohController {
                 return ResponseEntity.badRequest().body("Faltan datos obligatorios");
             }
 
-            // Optional<Coh> historica = cohRepository.findTopByOrderByCOHCODDesc();
-            // Integer cohcod;
-            // if (historica.isEmpty() || historica.get().getCOHCOD() == null) {
-            //     cohcod = 1;
-            // } else {
-            //     cohcod = historica.get().getCOHCOD() + 1;
-            // }
             Integer cohcod = cohRepository.getNextCohcod();
             LocalDateTime date = LocalDateTime.now();
             Coh newHistorica = new Coh();
@@ -115,19 +108,12 @@ public class CohController {
             cohRepository.save(newHistorica);
 
             CogId id = new CogId(payload.ENT(), payload.EJE(), payload.CONCOD(), payload.CGECOD());
-            Optional<Cog> cog = cogRepository.findOneByENTAndEJEAndCONCODAndCGECOD(payload.ENT(), payload.EJE(), payload.CONCOD(), payload.CGECOD());
+            Optional<Cog> cog = cogRepository.findById(id);
             if (cog.isEmpty()) {
                 return ResponseEntity.notFound().build();
             }
-            
-            Cog cogUpdate = cog.get();
 
-System.out.println("COGIMP: " + cogUpdate.getCOGIMP() + " -> " + payload.COGIM2());
-System.out.println("COGOPD: " + cogUpdate.getCOGOPD() + " -> " + payload.COGOP2());
-System.out.println("COGRFD: " + cogUpdate.getCOGRFD() + " -> " + payload.COGRFD());
-System.out.println("COGIM2: " + cogUpdate.getCOGIM2() + " -> 0.00");
-System.out.println("COGOP2: " + cogUpdate.getCOGOP2() + " -> null");
-System.out.println("COGRF2: " + cogUpdate.getCOGRF2() + " -> null");
+            Cog cogUpdate = cog.get();
             cogUpdate.setCOGIMP(payload.COGIM2());
             cogUpdate.setCOGOPD(payload.COGOP2());
             cogUpdate.setCOGRFD(payload.COGRF2());
@@ -135,7 +121,6 @@ System.out.println("COGRF2: " + cogUpdate.getCOGRF2() + " -> null");
             cogUpdate.setCOGOP2("");
             cogUpdate.setCOGRF2("");
             cogRepository.saveAndFlush(cogUpdate);
-            System.out.println("COG flushed successfully");
 
             return ResponseEntity.noContent().build();
         } catch (DataAccessException ex) {
