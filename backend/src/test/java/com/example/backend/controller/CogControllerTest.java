@@ -305,7 +305,8 @@ public class CogControllerTest {
 
         Map<String, Object> payload = Map.of(
             "COGIMP", 150.0,
-            "COGOPD", "D"
+            "COGOPD", "D",
+            "COGRFD", "REF"
         );
 
         mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
@@ -360,7 +361,8 @@ public class CogControllerTest {
 
         Map<String, Object> payload = Map.of(
             "COGIMP", 150.0,
-            "COGOPD", "D"
+            "COGOPD", "D",
+            "COGRFD", "REF"
         );
 
         mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
@@ -378,7 +380,8 @@ public class CogControllerTest {
 
         Map<String, Object> payload = Map.of(
             "COGIMP", 150.0,
-            "COGOPD", "D"
+            "COGOPD", "D",
+            "COGRFD", "REF"
         );
 
         mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
