@@ -887,6 +887,15 @@
     <button class="red-btn" (click)="closeUpdateSure()">No</button>
 </div>
 
+<div class="modal-backdrop force" *ngIf="cantAddGrid"></div>
+<div class="delete-confirm-modal adj update-D" *ngIf="cantAddGrid">
+    <div class="btns">
+        <button class="red-btn" (click)="closeCantAdd()">✖</button>
+    </div>
+    <p class="errorBtn" *ngIf="cantAddMessage">{{cantAddMessage}}</p>
+    <p class="errorBtn" *ngIf="DError">{{DError}}</p>
+</div>
+
 <div class="modal-backdrop force" *ngIf="deleteDSureGrid"></div>
 <div class="delete-confirm-modal adj update-D" *ngIf="deleteDSureGrid">
     <p class="p-style" *ngIf="deleteDGridMessage">{{deleteDGridMessage}}</p>

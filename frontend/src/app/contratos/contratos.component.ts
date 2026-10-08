@@ -6,7 +6,7 @@ import { CommonModule } from '@angular/common';
 import { SidebarComponent } from '../sidebar/sidebar.component';
 import { environment } from '../../environments/environment';
 import { CurrencyPipe } from '@angular/common';
-import { forkJoin, of } from 'rxjs';
+import { forkJoin, Observable, of } from 'rxjs';
 import { catchError, finalize, switchMap, tap } from 'rxjs/operators';
 
 import * as XLSX from 'xlsx';
@@ -1114,6 +1114,7 @@ export class ContratosComponent {
   //D related functions
   COGOPD: string = '';
   COGOP2: string = '';
+  COGRFD: string = '';
   organica: string = '';
   programa: string = '';
   economica: string = '';
@@ -1123,18 +1124,25 @@ export class ContratosComponent {
   checkBeforeAdd(centro: any) {
     this.limpiarMessages();
 
+    console.log("Centro: ", centro);
+    console.log("centro.cogopd ?? ''; :", centro.cogopd ?? '');
     this.COGOPD = centro.cogopd ?? '';
     this.COGOP2 = centro.cogop2 ?? '';
     this.referencia = centro.cogopd ?? '';
+    this.COGRFD = centro.cogrfd ?? '';
 
+    console.log("this.COGOPD before: ", this.COGOPD);
     if (this.COGOPD.trim() != '' && this.COGOP2.trim() != '') {
+      this.openCantAdd();
       this.DError = 'Ya tiene dos “D” para este Centro Gestor'
+      return;
     } else {
       this.cgecod = centro.cgecod;
       this.organica = centro.cge.cgeorg;
       this.programa = centro.cge.cgefun;
       this.economica = this.selectedContrato.conlot;
       this.openAddD();
+      console.log("this.cogopd after", this.COGOPD)
     }
   }
 
@@ -1160,13 +1168,21 @@ export class ContratosComponent {
     this.cogimp = null;
     this.cogopd = '';
     this.cgecod = '';
+    this.cogrfd = '';
+    this.cogrfd = '';
   }
 
   cogimp: number | null = null;
   cogopd: string = '';
   cogim2: number | null = null;
   cogop2: string = '';
+  cogrfd: string = '';
   cogrf2: string = '';
+
+  private normalizeComparisonValue(value: unknown): string {
+    return String(value ?? '').trim();
+  }
+
   fetchD() {
     let codigoOperacion = 220;
     const oficina = 'AL';
@@ -1198,19 +1214,21 @@ export class ContratosComponent {
     if (this.COGOPD.trim() === '') {
       this.updateD(D);
     } else if (this.COGOP2.trim() === '') {
-      this.updateD2(D);
+      this.updateD2(D); //to be revised
     }
   }
   updateD(D: any) {
     this.limpiarMessages();
 
-    this.cogimp = D.lineaList[0].limporte;
-    this.cogopd = D.lineaList[0].referencia;
+    this.cogimp = D.lineaList[0].saldo;
+    this.cogopd = D.numope;
+    this.cogrfd = D.lineaList[0].referencia;
     const concod = this.selectedContrato.concod;
 
     const payload = {
       "COGIMP": this.cogimp,
-      "COGOPD": this.cogopd
+      "COGOPD": this.cogopd,
+      "COGRFD": this.cogrfd
     }
 
     this.isAddingD = true;
@@ -1231,10 +1249,25 @@ export class ContratosComponent {
   updateD2(D: any) {
     this.limpiarMessages();
 
-    this.cogim2 = D.lineaList[0].limporte;
+    this.cogim2 = D.lineaList[0].saldo;
     this.cogop2 = D.numope;
     this.cogrf2 = D.lineaList[0].referencia;
     const concod = this.selectedContrato.concod;
+
+    console.log("this.cogopd", this.COGOPD)
+    console.log("this.cogop2", this.cogop2)
+    console.log("this.cogrfd", this.COGRFD)
+    console.log("this.cogrf2", this.cogrf2)
+    const sameOperation =
+      this.normalizeComparisonValue(this.COGOPD) === this.normalizeComparisonValue(this.cogop2) &&
+      this.normalizeComparisonValue(this.COGRFD) === this.normalizeComparisonValue(this.cogrf2);
+
+    console.log("test", sameOperation)
+    if (sameOperation) {
+      this.openCantAdd();
+      this.cantAddMessage = 'La D ya está asignada a este contrato';
+      return;
+    }
 
     const payload = {
       "COGIM2": this.cogim2,
@@ -1275,6 +1308,19 @@ export class ContratosComponent {
     this.updateSure = false;
     this.toUpdate = [];
     this.referencia = '';
+  }
+
+  cantAddGrid: boolean = false;
+  cantAddMessage: string = '';
+  openCantAdd() {
+    this.cantAddGrid = true;
+  }
+
+  closeCantAdd() {
+    this.limpiarMessages(); 
+    this.cantAddGrid = false;
+    this.closeAddD();
+    this.closeUpdateSure();
   }
 
   deleteDSureGrid: boolean = false;
@@ -1426,97 +1472,89 @@ export class ContratosComponent {
   update() {
     this.isActualizar = true;
 
+    const hasOperations = this.centroGestor.some(item =>
+      (item?.cogopd ?? '').trim() !== '' ||
+      (item?.cogop2 ?? '').trim() !== ''
+    );
+
+    if (!hasOperations) {
+      this.isActualizar = false;
+      this.actualizarGrid = false;
+      this.DError = 'Todas las operaciones están vacías';
+      return;
+    }
+
     const requests = this.centroGestor.flatMap(item => {
-      const requests = [];
+      const requests: Observable<unknown>[] = [];
 
       const cogopd = (item?.cogopd ?? '').trim();
       const cogop2 = (item?.cogop2 ?? '').trim();
+      console.log("cogopd: ", cogopd)
+      console.log("cogop2: ", cogop2)
+
       if (cogopd === '' && cogop2 === '') {
-        this.isActualizar = false;
-        this.actualizarGrid = false;
-        this.DError = 'Todas las operaciones están vacías';
-        return;
+        return requests;
       }
 
       if (cogopd !== '') {
-        requests.push(
-          this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones`, {
-            params: {
-              orgCode: this.orgCode ?? '',
-              entidad: this.entidad ?? '',
-              numeroOperDesde: item.cogopd,
-              numeroOperHasta: item.cogopd,
-              referencia: item.cogrfd ?? '',
-              organica: item?.cge?.cgeorg ?? '',
-              funcional: item?.cge?.cgefun ?? '',
-              economica: this.selectedContrato?.conlot ?? '',
-              eje: this.eje ?? '',
-              numRegDev: 1
-            }
-          }).pipe(
-            switchMap(res => {
-              const operation = Array.isArray(res) ? res[0] : res;
-              const line = Array.isArray(operation?.l_linea)
-                ? operation.l_linea[0]
-                : operation?.l_linea;
-
-              if (line?.saldo == null) {
-                return of(null);
-              }
-
-              item.cogimp = Number(line.saldo);
-
-              return this.http.patch(
-                `${environment.backendUrl}/api/cog/updateD1/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`,
-                { COGIMP: item.cogimp }
-              );
-            })
-          )
-        );
+        requests.push(this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones`, { params: {
+          orgCode: this.orgCode ?? '',
+          entidad: this.entidad ?? '',
+          numeroOperDesde: item.cogopd,
+          numeroOperHasta: item.cogopd,
+          referencia: item.cogrfd ?? '',
+          organica: item?.cge?.cgeorg ?? '',
+          funcional: item?.cge?.cgefun ?? '',
+          economica: this.selectedContrato?.conlot ?? '',
+          eje: this.eje ?? '',
+          numRegDev: 1
+        }}).pipe(switchMap(res => {
+          const operation = Array.isArray(res) ? res[0] : res;
+          const line = Array.isArray(operation?.lineaList)
+            ? operation.lineaList.find((candidate: any) => candidate?.saldo != null)
+            : undefined;
+          if (line?.saldo == null) {
+            console.log("hhere baby girl")
+            return of(null);
+            
+          }
+          item.cogimp = Number(line.saldo);
+          return this.http.patch(
+            `${environment.backendUrl}/api/cog/updateD1/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`,
+            { COGIMP: item.cogimp }
+          );
+        })));
       }
 
       if (cogop2 !== '') {
-        requests.push(
-          this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones`, {
-            params: {
-              orgCode: this.orgCode ?? '',
-              entidad: this.entidad ?? '',
-              numeroOperDesde: item.cogop2,
-              numeroOperHasta: item.cogop2,
-              referencia: item.cogrf2 ?? '',
-              organica: item?.cge?.cgeorg ?? '',
-              funcional: item?.cge?.cgefun ?? '',
-              economica: this.selectedContrato?.conlot ?? '',
-              eje: this.eje ?? '',
-              numRegDev: 1
-            }
-          }).pipe(
-            switchMap(res => {
-              const operation = Array.isArray(res) ? res[0] : res;
-              const line = Array.isArray(operation?.l_linea)
-                ? operation.l_linea[0]
-                : operation?.l_linea;
-
-              if (line?.saldo == null) {
-                return of(null);
-              }
-
-              item.cogim2 = Number(line.saldo);
-
-              return this.http.patch(
-                `${environment.backendUrl}/api/cog/updateD2/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`,
-                { COGIM2: item.cogim2 }
-              );
-            })
-          )
-        );
+        requests.push(this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones`, {params: {
+          orgCode: this.orgCode ?? '',
+          entidad: this.entidad ?? '',
+          numeroOperDesde: item.cogop2,
+          numeroOperHasta: item.cogop2,
+          referencia: item.cogrf2 ?? '',
+          organica: item?.cge?.cgeorg ?? '',
+          funcional: item?.cge?.cgefun ?? '',
+          economica: this.selectedContrato?.conlot ?? '',
+          eje: this.eje ?? '',
+          numRegDev: 1
+        }}).pipe(switchMap(res => {
+          const operation = Array.isArray(res) ? res[0] : res;
+          const line = Array.isArray(operation?.lineaList)
+            ? operation.lineaList.find((candidate: any) => candidate?.saldo != null)
+            : undefined;
+          if (line?.saldo == null) {
+            return of(null);
+          }
+          item.cogim2 = Number(line.saldo);
+          return this.http.patch(`${environment.backendUrl}/api/cog/updateD2/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`, { COGIM2: item.cogim2 });
+          })
+        ));
       }
-
-      return requests;
+        return requests;
     });
 
-    forkJoin(requests).pipe(
-      finalize(() => {
+    forkJoin(requests).pipe(finalize(() => {
         this.isActualizar = false;
         this.actualizarGrid = false;
       })
@@ -1553,5 +1591,6 @@ export class ContratosComponent {
     this.deleteDGridMessage = '';
     this.deletingDCgeError = '';
     this.deletingDCgeSuccess = '';
+    this.cantAddMessage = '';
   }
 }

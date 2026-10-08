@@ -63,7 +63,7 @@ export class ConsultaHistoricaAdContratosComponent {
 
   fetchContratos() {
     this.isLoading = true;
-    this.http.get(`${environment.backendUrl}/api/cog/historia-ADcontrato/${this.entcod}/${this.eje}`).subscribe({
+    this.http.get(`${environment.backendUrl}/api/coh/historia-ADcontrato/${this.entcod}/${this.eje}`).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.contratos = res;
@@ -106,7 +106,7 @@ export class ConsultaHistoricaAdContratosComponent {
       params = params.set('proveedor', this.proveedor?.trim());
     }
     this.isLoading = true;
-    this.http.get(`${environment.backendUrl}/api/cog/search-historia-ADcontrato/${this.entcod}/${this.eje}`, {params}).subscribe({
+    this.http.get(`${environment.backendUrl}/api/coh/search-historia-ADcontrato/${this.entcod}/${this.eje}`, {params}).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.contratos = res;

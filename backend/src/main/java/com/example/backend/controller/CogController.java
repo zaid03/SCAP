@@ -119,8 +119,7 @@ public class CogController {
     }
 
     //adding first D to a contrato's centro gestor
-    public record AddD(Double COGIMP, String COGOPD) {}
-
+    public record AddD(Double COGIMP, String COGOPD, String COGRFD) {}
     @PatchMapping("/update-centro-D/{ent}/{eje}/{concod}/{cgecod}")
     public ResponseEntity<?> addDCentro(
         @PathVariable Integer ent,
@@ -130,7 +129,7 @@ public class CogController {
         @RequestBody AddD payload
     ) {
         try {
-            if (payload == null || payload.COGIMP() == null || payload.COGOPD() == null) {
+            if (payload == null || payload.COGIMP() == null || payload.COGOPD() == null || payload.COGRFD == null) {
                 return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
             }
 
@@ -143,12 +142,12 @@ public class CogController {
             Cog updateCentro = centro.get();
             updateCentro.setCOGIMP(payload.COGIMP());
             updateCentro.setCOGOPD(payload.COGOPD());
+            updateCentro.setCOGRFD(payload.COGRFD());
             cogRepository.save(updateCentro);
 
             return ResponseEntity.noContent().build();
         } catch (DataAccessException ex) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                .body(ERROR + ex.getMostSpecificCause().getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
 
