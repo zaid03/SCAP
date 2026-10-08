@@ -1,8 +1,12 @@
 package com.example.backend.controller;
 
 import com.example.backend.dto.HistoricaContratos;
+import com.example.backend.sqlserver2.model.Cog;
+import com.example.backend.sqlserver2.model.CogId;
+import com.example.backend.sqlserver2.model.Coh;
 import com.example.backend.service.HistoricaADContratoSearch;
 import com.example.backend.sqlserver2.repository.CohRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
 
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +19,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -33,6 +38,9 @@ class CohControllerTest {
 
     @Mock
     private HistoricaADContratoSearch historicaADContratoSearch;
+
+    @Mock
+    private CogRepository cogRepository;
 
     @InjectMocks
     private CohController controller;
@@ -150,6 +158,97 @@ class CohControllerTest {
 
         assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
         assertEquals(EXPECTED_ERROR_BODY, response.getBody());
+    }
+
+    @Test
+    void historicoSetMovesSecondDToFirstAndClearsSecondD() {
+        Integer concod = 55;
+        String cgecod = "1E";
+        Integer cohcod = 12;
+        CogId id = new CogId(ENT, EJE, concod, cgecod);
+        Cog cog = new Cog();
+        CohController.historico payload = new CohController.historico(
+            ENT,
+            EJE,
+            concod,
+            5000.0,
+            cgecod,
+            "220260016813",
+            "22026006710",
+            10000.0,
+            "220260016811",
+            "22026006711"
+        );
+
+        when(cohRepository.getNextCohcod()).thenReturn(cohcod);
+        when(cogRepository.findById(id)).thenReturn(Optional.of(cog));
+
+        ResponseEntity<?> response = controller.historicoSet(payload);
+
+        assertEquals(HttpStatus.NO_CONTENT, response.getStatusCode());
+        assertEquals(10000.0, cog.getCOGIMP());
+        assertEquals("220260016811", cog.getCOGOPD());
+        assertEquals("22026006711", cog.getCOGRFD());
+        assertEquals(0.0, cog.getCOGIM2());
+        assertEquals("", cog.getCOGOP2());
+        assertEquals("", cog.getCOGRF2());
+        verify(cohRepository).save(argThat(history ->
+            history.getENT().equals(ENT)
+                && history.getEJE().equals(EJE)
+                && history.getCONCOD().equals(concod)
+                && history.getCOHCOD().equals(cohcod)
+                && history.getCGECOD().equals(cgecod)
+                && history.getCOHOPD().equals("220260016813")
+                && history.getCOHRFD().equals("22026006710")
+                && history.getCOHFEC() != null
+        ));
+        verify(cogRepository).saveAndFlush(cog);
+    }
+
+    @Test
+    void historicoSetReturnsBadRequestWhenRequiredPayloadDataIsMissing() {
+        CohController.historico payload = new CohController.historico(
+            ENT, EJE, 55, null, "1E", "OP1", "RF1", 100.0, "OP2", "RF2"
+        );
+
+        ResponseEntity<?> response = controller.historicoSet(payload);
+
+        assertEquals(HttpStatus.BAD_REQUEST, response.getStatusCode());
+        assertEquals("Faltan datos obligatorios", response.getBody());
+        verifyNoInteractions(cohRepository, cogRepository);
+    }
+
+    @Test
+    void historicoSetReturnsNotFoundWhenCogDoesNotExist() {
+        Integer concod = 55;
+        String cgecod = "1E";
+        CogId id = new CogId(ENT, EJE, concod, cgecod);
+        CohController.historico payload = new CohController.historico(
+            ENT, EJE, concod, 5000.0, cgecod, "OP1", "RF1", 100.0, "OP2", "RF2"
+        );
+
+        when(cohRepository.getNextCohcod()).thenReturn(12);
+        when(cogRepository.findById(id)).thenReturn(Optional.empty());
+
+        ResponseEntity<?> response = controller.historicoSet(payload);
+
+        assertEquals(HttpStatus.NOT_FOUND, response.getStatusCode());
+        verify(cohRepository).save(any(Coh.class));
+        verify(cogRepository, never()).saveAndFlush(any(Cog.class));
+    }
+
+    @Test
+    void historicoSetReturnsInternalServerErrorOnDataAccessException() {
+        CohController.historico payload = new CohController.historico(
+            ENT, EJE, 55, 5000.0, "1E", "OP1", "RF1", 100.0, "OP2", "RF2"
+        );
+        when(cohRepository.getNextCohcod()).thenThrow(dataAccessException());
+
+        ResponseEntity<?> response = controller.historicoSet(payload);
+
+        assertEquals(HttpStatus.INTERNAL_SERVER_ERROR, response.getStatusCode());
+        assertEquals(EXPECTED_ERROR_BODY, response.getBody());
+        verifyNoInteractions(cogRepository);
     }
 
     private DataAccessException dataAccessException() {
