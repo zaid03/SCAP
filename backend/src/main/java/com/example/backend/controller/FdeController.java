@@ -277,8 +277,7 @@ public class FdeController {
             }
             CogCgeProjection cog = cogs.get(0);
             if (cog.getCOGRFD() == null || cog.getCOGRFD().isBlank()) {
-                return ResponseEntity.badRequest()
-                    .body("Referencia " + SIN_RESULTADO);
+                return ResponseEntity.badRequest().body("Referencia " + SIN_RESULTADO);
             }
 
             Fac fac = factura.get();
