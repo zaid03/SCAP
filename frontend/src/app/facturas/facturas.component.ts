@@ -552,38 +552,6 @@ export class FacturasComponent {
     ) ?? '';
   }
 
-  isEditing: boolean = false;
-  backupFDEDIF: string = '';
-  isUpdateSecond: boolean = false;
-  startEditingPrice(item: any) {
-    this.isEditing = true;
-    item.editingPrice = true;
-    item.editingValue = item.FDEDIF === 0 ? '' : item.FDEDIF.toString().replace('.', ',');
-    this.backupFDEDIF = item.editingValue;
-    item.hasPriceChanges = true;
-    this.isUpdateSecond = true;
-  }
-
-  onPriceTyping(event: Event, item: any) {
-    const input = event.target as HTMLInputElement;
-    item.editingValue = input.value;
-  }
-
-  stopEditingPrice(item: any) {
-    item.editingPrice = false;
-    const value = item.editingValue ?.replace(',', '.');
-    item.FDEDIF = value === '' || value == null ? 0 : Number(value);
-  }
-
-  cancelarEditng(item: any) {
-    item.FDEDIF = this.backupFDEDIF === '' ? 0 : Number(this.backupFDEDIF.replace(',', '.'));
-
-    item.editingValue = this.backupFDEDIF;
-    item.editingPrice = false;
-    item.hasPriceChanges = false;
-    this.isUpdateSecond = false;
-  }
-
   //search functions
   onEjeInput(event: Event) {
     const input = event.target as HTMLInputElement;
@@ -1197,6 +1165,46 @@ export class FacturasComponent {
   }
   
   //updating applicaciones
+  isEditing: boolean = false;
+  backupFDEDIF: string = '';
+  isUpdateSecond: boolean = false;
+  isEditingSecond: boolean = false;
+  startEditingPrice(item: any) {
+    this.isEditing = true;
+    item.editingPrice = true;
+    item.editingValue = item.FDEDIF === 0 ? '' : item.FDEDIF.toString().replace('.', ',');
+    this.backupFDEDIF = item.editingValue;
+    item.hasPriceChanges = true;
+    this.isUpdateSecond = true;
+    if (this.isEditingSecond) {
+      this.updateApplicaciones(this.itemToUpdate);
+    }
+  }
+
+  onPriceTyping(event: Event, item: any) {
+    const input = event.target as HTMLInputElement;
+    item.editingValue = input.value;
+  }
+
+  itemToUpdate: any = [];
+  stopEditingPrice(item: any) {
+    item.editingPrice = false;
+    const value = item.editingValue ?.replace(',', '.');
+    item.FDEDIF = value === '' || value == null ? 0 : Number(value);
+    this.isEditingSecond = true;
+    this.itemToUpdate = item;
+  }
+
+  cancelarEditng(item: any) {
+    item.FDEDIF = this.backupFDEDIF === '' ? 0 : Number(this.backupFDEDIF.replace(',', '.'));
+
+    item.editingValue = this.backupFDEDIF;
+    item.editingPrice = false;
+    item.hasPriceChanges = false;
+    this.isUpdateSecond = false;
+    this.isEditingSecond = false;
+  }
+
   isUpdatingApplicaciones: boolean = false;
   updateApplicaciones(a: any) {
     this.limpiarMEssages();
@@ -1217,9 +1225,12 @@ export class FacturasComponent {
         a.hasPriceChanges = false;
         a.editingPrice = false;
         this.isUpdateSecond = false;
+        this.isEditingSecond = false;
       },
       error: (err) => {
         this.isUpdatingApplicaciones = false;
+        this.isUpdateSecond = false;
+        this.isEditingSecond = false;
         this.moreInfoMessageError = err.error.error ?? err.error;
       }
     })

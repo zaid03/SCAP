@@ -670,7 +670,7 @@
                                                                 class="textArea-style applicacionesTextarea"
                                                                 [value]="a.editingPrice ? a.editingValue : formatPrice(a.FDEDIF)"
                                                                 (focus)="startEditingPrice(a)"
-                                                                (blur)="stopEditingPrice(a); updateApplicaciones(a)"
+                                                                (blur)="stopEditingPrice(a)"
                                                                 (input)="onPriceTyping($event, a)"
                                                             />
                                                         </td>
