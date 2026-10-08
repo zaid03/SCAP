@@ -398,21 +398,30 @@
                                     <td>{{c.cogiap | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{getKdisponible(c.cogimp, c.cogim2, c.cogaip) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td class="borderI">
-                                        <button 
-                                            class="red-btn" 
-                                            (click)="showDeleteCentro(c)"
-                                            title="Quitar centro gestor"
-                                        >-</button>
-                                        <button 
-                                            class="purple-btn" 
-                                            (click)="checkBeforeAdd(c)"
-                                            title="Añadir D"
-                                        >D</button>
-                                        <button 
-                                            class="red-btn" 
-                                            (click)="openDeleteD(c)"
-                                            title="Quitar D"
-                                        >D</button>
+                                        <div class="halfBtns">
+                                            <button 
+                                                class="purple-btn" 
+                                                (click)="checkBeforeAdd(c)"
+                                                title="Añadir D"
+                                            >D</button>
+                                            <button 
+                                                class="red-btn" 
+                                                (click)="openDeleteD(c)"
+                                                title="Quitar D"
+                                            >D</button>
+                                        </div>
+                                        <div class="halfBtns">
+                                            <button 
+                                                class="red-btn" 
+                                                (click)="openHistoricoGrid(c)"
+                                                title="Passar al histórico"
+                                            >H</button>
+                                            <button 
+                                                class="red-btn" 
+                                                (click)="showDeleteCentro(c)"
+                                                title="Quitar centro gestor"
+                                            >-</button>
+                                        </div>
                                     </td>
                                 </tr>
                             </tbody>
@@ -898,7 +907,7 @@
 
 <div class="modal-backdrop force" *ngIf="deleteDSureGrid"></div>
 <div class="delete-confirm-modal adj update-D" *ngIf="deleteDSureGrid">
-    <p class="p-style" *ngIf="deleteDGridMessage">{{deleteDGridMessage}}</p>
+    <p class="errorBtn" *ngIf="deleteDGridMessage">{{deleteDGridMessage}}</p>
     <button class="purple-btn btn-space" (click)="whichDDelete()">Sí</button>
     <button class="red-btn" (click)="closeDeleteDSureGrid()">No</button>
 </div>
@@ -925,4 +934,24 @@
     </div>
     <button class="purple-btn btn-space" (click)="update()">Sí</button>
     <button class="red-btn" (click)="closeActualizar()">No</button>
+</div>
+
+<div class="modal-backdrop force" *ngIf="historicoGrid"></div>
+<div class="delete-confirm-modal adj update-D" *ngIf="historicoGrid">
+    <p class="errorBtn">{{historicoGridMessage}}</p>
+    <div *ngIf="isActualizarHistorico" class="loading-message">
+        <div class="spinner"></div>
+        <span>Actualizando</span>
+    </div>
+    <button class="purple-btn btn-space" (click)="passarHistorico()">Sí</button>
+    <button class="red-btn" (click)="closeHistoricoGrid()">No</button>
+</div>
+
+<div class="modal-backdrop force" *ngIf="historicoGridMessages"></div>
+<div class="delete-confirm-modal adj update-D" *ngIf="historicoGridMessages">
+    <div class="btns">
+        <button class="red-btn" (click)="closeHistoricoGridMessages()">✖</button>
+    </div>
+    <p class="errorBtn">{{historicoErrorMessage}}</p>
+    <p class="successBtn">{{historicoSuccessMessage}}</p>
 </div>

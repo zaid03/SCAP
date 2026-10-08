@@ -47,7 +47,8 @@
 .cg tbody td:nth-child(10),
 .cg tbody td:nth-child(11),
 .cg tbody td:nth-child(12) {text-align: right;}
-.borderI {border-bottom: none;}
+.borderI {border-bottom: none; display: flex; flex-direction: column; gap: 10px;}
+.halfBtns {display: flex; gap: 10px;}
 .currenc {height: 20px; width: 95%; text-align: right;}
 .fix {text-align: center;}
 .adj {top: 20%}
@@ -100,6 +101,8 @@
 .bigger {width: 300px;}
 .sizeTitle {width: 80%;}
 .update-D {top: 30%;}
+/* set historico grids */
+/* set historico grids */
 /* add contrato grid */
 @media (min-width: 1800px) {
     .proveedor-grid-modal {top: 40%;}

@@ -18,8 +18,8 @@ app-sidebar { flex-shrink: 0; z-index: 2000; }
 .sidebar-backdrop { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 1500; }
 /* error messages */
 .errorBtn,
-.sure-msg{ margin-bottom:1%; font-family: inherit; font-size: 15px; text-align: center; color: rgb(221, 66, 66); }
-.successBtn{margin-bottom:1%; color: green; font-size: 15px; text-align: center; }
+.sure-msg{ margin-bottom:1%; font-family: inherit; font-size: 15px; text-align: center; color: rgb(221, 66, 66); font-weight: bold;}
+.successBtn{margin-bottom:1%; color: green; font-size: 15px; text-align: center; font-weight: bold;}
 /* titles and paragraphs and textareas */
 .p-style,
 .h1-style {font-size: 18px; font-weight: bold; color: #38249b;}

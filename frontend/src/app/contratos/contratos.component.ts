@@ -41,6 +41,7 @@ export class ContratosComponent {
   //global variables
   entcod: string | null = null;
   eje: number | null = null;
+  cge: string = '';
   orgCode: string | null = null;
   entidad: string | null = null;
   isLoading: boolean = false;
@@ -56,15 +57,17 @@ export class ContratosComponent {
     this.limpiarMessages();
     const ent = sessionStorage.getItem('Entidad');
     const session = sessionStorage.getItem('EJERCICIO');
+    const cge = sessionStorage.getItem('CENTROGESTOR');
     const orgnizacion = sessionStorage.getItem('WSORG');
     const entcod = sessionStorage.getItem('WSENT');
    
     if (ent) { const parsed = JSON.parse(ent); this.entcod = parsed.ENTCOD;}
     if (session) { const parsed = JSON.parse(session); this.eje = parsed.eje;}
+    if (cge) {const parsed = JSON.parse(cge); this.cge = parsed.value;}
     if (orgnizacion) {const parsed = JSON.parse(orgnizacion); this.orgCode = parsed.WSORG;}
     if (entcod) {const parsed = JSON.parse(entcod); this.entidad = parsed.WSENT};
 
-    if (this.entcod == null || !this.eje || this.orgCode === '' || this.entidad === '') {
+    if (this.entcod == null || !this.eje || this.orgCode === '' || this.entidad === '' || this.cge === '') {
       alert('Missing session data. reiniciar el flujo.');
       this.router.navigate(['/login']);
       return;
@@ -1568,6 +1571,82 @@ export class ContratosComponent {
     });
   }
 
+  //set D to historico
+  historicoGrid: boolean = false;
+  historicoGridMessage: string = '';
+  dataForHistorica: any = [];
+  openHistoricoGrid(centro: any) {
+    this.limpiarMessages();
+    this.historicoGrid = true;
+    this.dataForHistorica = centro;
+    let cogimp = centro.cogimp;
+    if (cogimp == 0) {
+      this.historicoGridMessage = '¿Está seguro de pasar la operación al histórico?';
+      return;
+    } else {
+      this.historicoGridMessage = 'ATENCIÓN LA D TIENE SALDO. ¿está seguro de pasar la operación al histórico?';
+      return;
+    }
+  }
+
+  closeHistoricoGrid() {
+    this.limpiarMessages();
+    this.historicoGrid = false;
+    this.dataForHistorica = [];
+  }
+
+  isActualizarHistorico: boolean = false;
+  passarHistorico() {
+    let COGIMP = this.dataForHistorica.cogimp;
+    const COGOPD = this.dataForHistorica.cogopd;
+    const COGRFD = this.dataForHistorica.cogrfd;
+    let COGIM2 = this.dataForHistorica.cogim2;
+    let COGOP2 = this.dataForHistorica.cogop2;
+    let COGRF2 = this.dataForHistorica.cogrf2;
+    const payload = {
+      "ENT": this.entcod,
+      "EJE": this.eje,
+      "CONCOD": this.selectedContrato.concod,
+      "COGIMP": COGIMP,
+      "CGECOD": this.cge,
+      "COGOPD": COGOPD,
+      "COGRFD": COGRFD,
+      "COGIM2": COGIM2,
+      "COGOP2": COGOP2,
+      "COGRF2": COGRF2
+    }
+
+    console.log("payload: ", payload);
+    this.isActualizarHistorico = true;
+    this.http.patch(`${environment.backendUrl}/api/coh/set-historico`, payload).subscribe({
+      next: (res) => {
+        this.openHistoricoGridMessages();
+        this.isActualizarHistorico = false;
+        this.historicoSuccessMessage = 'La operación pasó a la historia con éxito';
+      },
+      error: (err) => {
+        this.openHistoricoGridMessages();
+        this.isActualizarHistorico = false;
+        this.historicoErrorMessage = err.error.error || err.error;
+      }
+    })
+
+  }
+
+  historicoGridMessages: boolean = false;
+  historicoErrorMessage: string = '';
+  historicoSuccessMessage: string = '';
+  openHistoricoGridMessages() {
+    this.historicoGridMessages = true;
+    
+  }
+  
+  closeHistoricoGridMessages() {
+    this.limpiarMessages();
+    this.historicoGridMessages = false;
+    this.closeHistoricoGrid();
+  }
+
   //misc
   limpiarMessages() {
     this.mainError = '';
@@ -1592,5 +1671,8 @@ export class ContratosComponent {
     this.deletingDCgeError = '';
     this.deletingDCgeSuccess = '';
     this.cantAddMessage = '';
+    this.historicoGridMessage = '';
+    this.historicoErrorMessage = '';
+    this.historicoSuccessMessage = '';
   }
 }
