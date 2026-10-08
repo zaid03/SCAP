@@ -2,6 +2,7 @@ package com.example.backend.controller;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.lang.reflect.Field;
 
 import static org.hamcrest.Matchers.anyOf;
 import static org.hamcrest.Matchers.containsInAnyOrder;
@@ -9,6 +10,9 @@ import static org.hamcrest.Matchers.containsString;
 import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.is;
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.mockito.ArgumentCaptor;
 import static org.mockito.ArgumentMatchers.any;
@@ -161,6 +165,33 @@ public class DpeControllerTest {
         method.setAccessible(true);
         DpeController controller = new DpeController(dpeService, dpePersonasForService);
         return (boolean) method.invoke(controller, value);
+    }
+
+    private String invokeMapPerfilType(String perfil) throws Exception {
+        Method method = DpeController.class.getDeclaredMethod("mapPerfilType", String.class);
+        method.setAccessible(true);
+        DpeController controller = new DpeController(dpeService, dpePersonasForService);
+        return (String) method.invoke(controller, perfil);
+    }
+
+    @SuppressWarnings("unchecked")
+    private List<personasPorServiciosProjection> invokeInitialData(
+        Integer ent,
+        String eje,
+        String persona,
+        String cgecod
+    ) throws Exception {
+        Method method = DpeController.class.getDeclaredMethod(
+            "getInitialData", Integer.class, String.class, String.class, String.class
+        );
+        method.setAccessible(true);
+        DpeController controller = new DpeController(dpeService, dpePersonasForService);
+        Field repositoryField = DpeController.class.getDeclaredField("dpeRepository");
+        repositoryField.setAccessible(true);
+        repositoryField.set(controller, dpeRepository);
+        return (List<personasPorServiciosProjection>) method.invoke(
+            controller, ent, eje, persona, cgecod
+        );
     }
 
     @Test
@@ -2867,5 +2898,126 @@ public class DpeControllerTest {
                 .param("eje", "E1"))
             .andDo(print())
             .andExpect(status().isNotFound());
+    }
+
+    @Test
+    void mapPerfilType_mapsAllSupportedValuesAndRejectsBlankOrUnknown() throws Exception {
+        assertEquals("depalm", invokeMapPerfilType("  ALMACEN "));
+        assertEquals("depcom", invokeMapPerfilType("comprador"));
+        assertEquals("depint", invokeMapPerfilType("CONTABILIDAD"));
+        assertEquals("peticionario", invokeMapPerfilType("peticionario"));
+        assertEquals(null, invokeMapPerfilType(null));
+        assertEquals(null, invokeMapPerfilType("   "));
+        assertEquals(null, invokeMapPerfilType("unknown"));
+    }
+
+    @Test
+    void getInitialData_usesCgeRepositoryWhenCgeIsProvided() throws Exception {
+        List<personasPorServiciosProjection> expected = List.of(projection(
+            "U1", "User One", "D1", "Service", 1, 0, 0, "CGE1"
+        ));
+        when(dpeRepository.findByENTAndEJEAndDep_Cge_CGECOD(1, "E1", "CGE1"))
+            .thenReturn(expected);
+
+        assertSame(expected, invokeInitialData(1, "E1", null, "CGE1"));
+
+        verify(dpeRepository).findByENTAndEJEAndDep_Cge_CGECOD(1, "E1", "CGE1");
+        verify(dpeRepository, never()).findByENTAndEJE(1, "E1");
+    }
+
+    @Test
+    void getInitialData_usesAllDataWhenCgeIsMissingAndConvertsNullToEmpty() throws Exception {
+        when(dpeRepository.findByENTAndEJE(1, "E1")).thenReturn(null);
+
+        List<personasPorServiciosProjection> result =
+            invokeInitialData(1, "E1", null, "");
+
+        assertTrue(result.isEmpty());
+        verify(dpeRepository).findByENTAndEJE(1, "E1");
+    }
+
+    @Test
+    void filterByServicio_filtersShortCodesAndLongDescriptions() throws Exception {
+        personasPorServiciosProjection shortMatch =
+            projection("U1", "User", "SRV01", "Other", 0, 0, 0, "CGE1");
+        personasPorServiciosProjection longMatch =
+            projection("U2", "User", "D2", "Long Service Description", 0, 0, 0, "CGE1");
+        List<personasPorServiciosProjection> data = List.of(shortMatch, longMatch);
+
+        assertEquals(List.of(shortMatch), invokeFilter(
+            "filterByServicio",
+            new Class<?>[] {List.class, String.class},
+            data, "SRV"
+        ));
+        assertEquals(List.of(longMatch), invokeFilter(
+            "filterByServicio",
+            new Class<?>[] {List.class, String.class},
+            data, "Long Service"
+        ));
+    }
+
+    @Test
+    void filterByPersona_matchesCodeAndNameIncludingLongSearch() throws Exception {
+        personasPorServiciosProjection codeMatch =
+            projection("USER01", "Other User", "D1", "Service", 0, 0, 0, "CGE1");
+        personasPorServiciosProjection nameMatch =
+            projection("USER02", "Maria Garcia 12345678901234567890", "D2", "Service", 0, 0, 0, "CGE1");
+        List<personasPorServiciosProjection> data = List.of(codeMatch, nameMatch);
+
+        assertEquals(List.of(codeMatch), invokeFilter(
+            "filterByPersona",
+            new Class<?>[] {List.class, String.class},
+            data, "user01"
+        ));
+        assertEquals(List.of(nameMatch), invokeFilter(
+            "filterByPersona",
+            new Class<?>[] {List.class, String.class},
+            data, "Maria"
+        ));
+        assertEquals(List.of(nameMatch), invokeFilter(
+            "filterByPersona",
+            new Class<?>[] {List.class, String.class},
+            data, "Maria Garcia 12345678901234567890"
+        ));
+    }
+
+    @Test
+    void filterByPerfil_handlesAllProfilesAndFlagValues() throws Exception {
+        personasPorServiciosProjection almacen =
+            projection("A", "Almacen", "D1", "Service", 1, 0, 0, "CGE1");
+        personasPorServiciosProjection comprador =
+            projection("B", "Comprador", "D1", "Service", 0, 1, 0, "CGE1");
+        personasPorServiciosProjection contabilidad =
+            projection("C", "Contabilidad", "D1", "Service", 0, 0, 1, "CGE1");
+        personasPorServiciosProjection peticionario =
+            projection("D", "Peticionario", "D1", "Service", null, 0, 0, "CGE1");
+        List<personasPorServiciosProjection> data =
+            List.of(almacen, comprador, contabilidad, peticionario);
+
+        assertEquals(List.of(almacen), invokeFilter(
+            "filterByPerfil", new Class<?>[] {List.class, String.class}, data, "depalm"
+        ));
+        assertEquals(List.of(comprador), invokeFilter(
+            "filterByPerfil", new Class<?>[] {List.class, String.class}, data, "depcom"
+        ));
+        assertEquals(List.of(contabilidad), invokeFilter(
+            "filterByPerfil", new Class<?>[] {List.class, String.class}, data, "depint"
+        ));
+        assertEquals(List.of(peticionario), invokeFilter(
+            "filterByPerfil", new Class<?>[] {List.class, String.class}, data, "peticionario"
+        ));
+        assertEquals(data, invokeFilter(
+            "filterByPerfil", new Class<?>[] {List.class, String.class}, data, "unknown"
+        ));
+    }
+
+    @Test
+    void helperPredicates_coverOneAndZeroValues() throws Exception {
+        assertTrue(invokeBoolean("isOne", 1));
+        assertFalse(invokeBoolean("isOne", 0));
+        assertFalse(invokeBoolean("isOne", null));
+        assertTrue(invokeBoolean("isZero", 0));
+        assertTrue(invokeBoolean("isZero", null));
+        assertFalse(invokeBoolean("isZero", 1));
     }
 }
