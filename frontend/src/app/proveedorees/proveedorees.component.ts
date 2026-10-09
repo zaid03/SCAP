@@ -518,13 +518,23 @@ export class ProveedoreesComponent {
   }
 
   isUpdating: boolean = false;
-  updatepersonas(tpecod: number, nom: string, telefon: string, movil: string, email: string, obs: string){
-    this.isUpdating = true;
+  updatepersonas(persona: any){
     this.limpiarMessages();
+    let tpecod = persona.tpecod;
+    const nom = persona.tpenom;
+    const telefon = persona.tpetel;
+    const movil = persona.tpetmp;
+    const email = persona.tpecoe;
+    const obs = persona.tpeobs;
+    if (!nom && !telefon && !movil && !email && !obs) {
+      this.deletepersona(persona);
+      return;
+    }
     if (!nom) {
       this.personasContactoErrorMessage = 'El nombre de la persona no debe estar vacío';
       return;
     }
+    
     const updateFields = {
       tpenom : nom,
       tpetel : telefon,
@@ -532,11 +542,8 @@ export class ProveedoreesComponent {
       tpecoe : email,
       tpeobs : obs
     }
-    this.http.put(
-      `${environment.backendUrl}/api/more/modify/${this.entcod}/${this.selectedProveedor.tercod}/${tpecod}`,
-      updateFields,
-      { responseType: 'text' }
-    ).subscribe({
+    this.isUpdating = true;
+    this.http.put(`${environment.backendUrl}/api/more/modify/${this.entcod}/${this.selectedProveedor.tercod}/${tpecod}`, updateFields, { responseType: 'text' }).subscribe({
       next: (res) => {
         this.personasContactoSuccessMessage = 'Persona de contacto actualizada correctamente';
         this.isUpdating = false;
@@ -553,9 +560,7 @@ export class ProveedoreesComponent {
     this.isDeleting = true;
     const tercod = persona.tercod;
     const tpecod = persona.tpecod;
-    this.http.delete(
-      `${environment.backendUrl}/api/more/delete/${this.entcod}/${tercod}/${tpecod}`,
-      { responseType: 'text' }).subscribe({
+    this.http.delete(`${environment.backendUrl}/api/more/delete/${this.entcod}/${tercod}/${tpecod}`, { responseType: 'text' }).subscribe({
       next: (res) => {
         this.personasContactoSuccessMessage = 'Persona de contacto eliminada correctamente';
         this.reloadContactPersons();
