@@ -133,6 +133,11 @@ public class CogController {
                 return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
             }
 
+            boolean exists = cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(ent, payload.COGOPD, payload.COGRFD, ent, payload.COGOPD, payload.COGRFD);
+            if (exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("La operación D está asociada a otro contrato");
+            }
+
             CogId id = new CogId(ent, eje, concod, cgecod);
             Optional<Cog> centro = cogRepository.findById(id);
             if (centro.isEmpty()) {
@@ -165,6 +170,11 @@ public class CogController {
         try {
             if (payload == null || payload.COGIM2() == null || payload.COGOP2() == null || payload.COGRF2() == null) {
                 return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+
+            boolean exists = cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(ent, payload.COGOP2, payload.COGRF2, ent, payload.COGOP2, payload.COGRF2);
+            if (exists) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("La operación D está asociada a otro contrato");
             }
 
             CogId id = new CogId(ent, eje, concod, cgecod);

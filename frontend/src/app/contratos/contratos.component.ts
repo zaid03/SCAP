@@ -1214,7 +1214,7 @@ export class ContratosComponent {
     if (this.COGOPD.trim() === '') {
       this.updateD(D);
     } else if (this.COGOP2.trim() === '') {
-      this.updateD2(D); //to be revised
+      this.updateD2(D); 
     }
   }
   updateD(D: any) {
@@ -1241,6 +1241,7 @@ export class ContratosComponent {
       },
       error: (err) => {
         this.isAddingD = false;
+        this.closeUpdateSure();
         this.DErrorMessage = err.error.error ?? err.error;
       }
     })
@@ -1264,8 +1265,9 @@ export class ContratosComponent {
 
     console.log("test", sameOperation)
     if (sameOperation) {
-      this.openCantAdd();
-      this.cantAddMessage = 'La D ya está asignada a este contrato';
+      // this.openCantAdd();
+      this.closeUpdateSure();
+      this.DErrorMessage = 'La D ya está asignada a este contrato';
       return;
     }
 
@@ -1285,6 +1287,7 @@ export class ContratosComponent {
       },
       error: (err) => {
         this.isAddingD = false;
+        this.closeUpdateSure();
         this.DErrorMessage = err.error.error ?? err.error;
       }
     })

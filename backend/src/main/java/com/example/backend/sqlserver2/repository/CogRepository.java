@@ -53,4 +53,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   @Modifying(flushAutomatically = true, clearAutomatically = true)
   @Query("UPDATE Cog c SET c.COGIM2 = :saldo WHERE c.ENT = :ent AND c.EJE = :eje AND c.CONCOD = :con AND c.CGECOD = :cge")
   int actualizarSaldoSecundario(@Param("saldo") double saldo, @Param("ent") Integer ent, @Param("eje") String eje, @Param("con") Integer con, @Param("cge") String cge);
+
+  //needed for adding a D
+  boolean existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(Integer ent1, String cogopd, String cogrfd, Integer ent2, String cogop2, String cogrf2);
 }
