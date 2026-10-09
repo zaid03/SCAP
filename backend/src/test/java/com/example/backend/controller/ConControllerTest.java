@@ -896,25 +896,89 @@ public class ConControllerTest {
     }
 
     @Test
-    void quickCheck_returns200WithCount() throws Exception {
-        when(cotRepository.countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
-                1, "E1", 0, 3, 200))
-            .thenReturn(5);
+    void quickCheck_returns200WithMatchingCentroGestorCount() throws Exception {
+        Cot matchingContract = new Cot();
+        matchingContract.setCONCOD(10);
+        Conn matchingConn = new Conn();
+        matchingConn.setCONCOD(10);
+        matchingContract.setConn(matchingConn);
+        Cot nonMatchingContract = new Cot();
+        nonMatchingContract.setCONCOD(20);
+        Conn nonMatchingConn = new Conn();
+        nonMatchingConn.setCONCOD(20);
+        nonMatchingContract.setConn(nonMatchingConn);
 
-        mockMvc.perform(get("/api/con/quickCheck/1/E1/200"))
+        when(cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of(matchingContract, nonMatchingContract));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 10, "CGE1"))
+            .thenReturn(true);
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 20, "CGE1"))
+            .thenReturn(false);
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200/CGE1"))
             .andDo(print())
             .andExpect(status().isOk())
-            .andExpect(content().string("5"));
+            .andExpect(content().string("1"));
     }
 
     @Test
-    void quickCheck_returns500OnException() throws Exception {
-        when(cotRepository.countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+    void quickCheck_returns200WithZeroWhenNoContractsMatch() throws Exception {
+        Cot contract = new Cot();
+        contract.setCONCOD(10);
+        Conn conn = new Conn();
+        conn.setCONCOD(10);
+        contract.setConn(conn);
+
+        when(cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of(contract));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 10, "CGE1"))
+            .thenReturn(false);
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200/CGE1"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    void quickCheck_returns200WithZeroWhenNoContractsExist() throws Exception {
+        when(cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200/CGE1"))
+            .andExpect(status().isOk())
+            .andExpect(content().string("0"));
+    }
+
+    @Test
+    void quickCheck_returns500WhenLoadingContractsFails() throws Exception {
+        when(cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
                 1, "E1", 0, 3, 200))
             .thenThrow(new DataAccessResourceFailureException("Database error"));
 
-        mockMvc.perform(get("/api/con/quickCheck/1/E1/200"))
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200/CGE1"))
             .andDo(print())
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(org.hamcrest.Matchers.containsString("Error :")));
+    }
+
+    @Test
+    void quickCheck_returns500WhenCheckingCentroGestorFails() throws Exception {
+        Cot contract = new Cot();
+        contract.setCONCOD(10);
+        Conn conn = new Conn();
+        conn.setCONCOD(10);
+        contract.setConn(conn);
+
+        when(cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of(contract));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 10, "CGE1"))
+            .thenThrow(new DataAccessResourceFailureException("Database error"));
+
+        mockMvc.perform(get("/api/con/quickCheck/1/E1/200/CGE1"))
             .andExpect(status().isInternalServerError())
             .andExpect(content().string(org.hamcrest.Matchers.containsString("Error :")));
     }
