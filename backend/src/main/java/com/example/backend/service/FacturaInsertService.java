@@ -3,22 +3,27 @@ package com.example.backend.service;
 import com.example.backend.dto.CuentaBancaria;
 import com.example.backend.dto.FacturaInsertDto;
 import com.example.backend.dto.Tercero;
+import com.example.backend.dto.bolsaPorContrato;
 import com.example.backend.exception.XmlParsingException;
+import com.example.backend.service.FacturaInsertService.FacturaInfo;
 import com.example.backend.sqlserver2.model.Cfg;
 import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
+import com.example.backend.sqlserver2.model.FdeId;
 import com.example.backend.sqlserver2.model.Ter;
 import com.example.backend.sqlserver2.model.Gbs;
 import com.example.backend.sqlserver2.repository.CfgRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.TerRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.CotRepository;
-
+import com.example.backend.sqlserver2.repository.CogRepository;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -40,6 +45,8 @@ public class FacturaInsertService {
     private SicalService sicalService;
     @Autowired
     private CotRepository cotRepository;
+    @Autowired
+    private CogRepository cogRepositroy;
 
     public NamesResponse insertFacturas(List<FacturaInsertDto> facturas) {
         List<FacturaInfo> savedNames = new ArrayList<>();
@@ -120,25 +127,28 @@ public class FacturaInsertService {
                 facRepository.save(fac);
 
                 String facturaMessage = "";
-                List<Gbs> gbsRows =
-                gbsRepository.findByENTAndEJEAndCGECOD(dto.ENT, dto.EJE, dto.CGECOD);
-                List<Cot> cotRows = cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(dto.ENT, dto.EJE, ter.getTERCOD(), 0, 3);
+                List<Gbs> gbsRows = gbsRepository.findByENTAndEJEAndCGECOD(dto.ENT, dto.EJE, dto.CGECOD);
+                List<Cot> cotRows = cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(dto.ENT, dto.EJE, ter.getTERCOD(), 0, 3);    
+                Integer concod = cotRows.get(0).getCONCOD();            
                 if (cotRows.isEmpty()) {
-                    for (Gbs gbs : gbsRows) {
-                        Fde fde = new Fde();
-                        fde.setENT(dto.ENT);
-                        fde.setEJE(dto.EJE);
-                        fde.setFACNUM(newFacnum);
-                        fde.setFDEREF(gbs.getGBSREF());
-                        fde.setFDEOPE(gbs.getGBSOPE());
-                        fde.setFDEORG(gbs.getGBSORG());
-                        fde.setFDEFUN(gbs.getGBSFUN());
-                        fde.setFDEECO(gbs.getGBSECO());
-                        fde.setFDESUB(gbs.getGBSSUB());
-                        fde.setFDEIMP(0.0);
-                        fde.setFDEDIF(0.0);
+                    boolean cogs = cogRepositroy.existsByENTAndEJEAndCONCODAndCGECOD(dto.ENT, dto.EJE, concod, dto.CGECOD);
+                    if (!cogs) {
+                        for (Gbs gbs : gbsRows) {
+                            Fde fde = new Fde();
+                            fde.setENT(dto.ENT);
+                            fde.setEJE(dto.EJE);
+                            fde.setFACNUM(newFacnum);
+                            fde.setFDEREF(gbs.getGBSREF());
+                            fde.setFDEOPE(gbs.getGBSOPE());
+                            fde.setFDEORG(gbs.getGBSORG());
+                            fde.setFDEFUN(gbs.getGBSFUN());
+                            fde.setFDEECO(gbs.getGBSECO());
+                            fde.setFDESUB(gbs.getGBSSUB());
+                            fde.setFDEIMP(0.0);
+                            fde.setFDEDIF(0.0);
 
-                        fdeRepository.save(fde);
+                            fdeRepository.save(fde);
+                        }
                     }
                 } else {
                     facturaMessage = "PROVEEDOR CON CONTRATO AD";

@@ -4,7 +4,6 @@ import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.dto.COGAIPOnlyDto;
 import com.example.backend.dto.CogCgeProjection;
-import com.example.backend.dto.CogSaveDto;
 import com.example.backend.dto.SaldoContrato;
 import com.example.backend.sqlserver2.model.Cog;
 import com.example.backend.sqlserver2.model.CogId;
@@ -30,11 +29,11 @@ import static org.mockito.ArgumentMatchers.*;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-import com.example.backend.service.HistoricaADContratoSearch;
 import com.example.backend.service.SaldoContratoSearch;
 
 @WebMvcTest(controllers = CogController.class)
@@ -53,9 +52,6 @@ public class CogControllerTest {
 
     @MockitoBean
     private SaldoContratoSearch saldoContratoSearch;             
-
-    @MockitoBean
-    private HistoricaADContratoSearch historicaADContratoSearch;
 
     SaldoContrato contrato = new SaldoContrato() {
         @Override
@@ -355,6 +351,42 @@ public class CogControllerTest {
     }
 
     @Test
+    void addDCentro_returns400WhenCogrfdNull() throws Exception {
+        Map<String, Object> payload = Map.of(
+            "COGIMP", 150.0,
+            "COGOPD", "D"
+        );
+
+        mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Faltan datos obligatorios")));
+    }
+
+    @Test
+    void addDCentro_returns409WhenOperationAlreadyExists() throws Exception {
+        when(cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(
+                1, "D", "REF", 1, "D", "REF"))
+            .thenReturn(true);
+
+        Map<String, Object> payload = Map.of(
+            "COGIMP", 150.0,
+            "COGOPD", "D",
+            "COGRFD", "REF"
+        );
+
+        mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isConflict())
+            .andExpect(content().string("La operación D está asociada a otro contrato"));
+
+        verify(cogRepository, never()).findById(any(CogId.class));
+        verify(cogRepository, never()).save(any(Cog.class));
+    }
+
+    @Test
     void addDCentro_returns404WhenNotFound() throws Exception {
         CogId id = new CogId(1, "E1", 100, "C1");
         when(cogRepository.findById(id)).thenReturn(Optional.empty());
@@ -423,6 +455,28 @@ public class CogControllerTest {
                 .content(objectMapper.writeValueAsString(payload)))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Faltan datos obligatorios")));
+    }
+
+    @Test
+    void addDCentro2_returns409WhenOperationAlreadyExists() throws Exception {
+        when(cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(
+                1, "D2", "REF2", 1, "D2", "REF2"))
+            .thenReturn(true);
+
+        Map<String, Object> payload = Map.of(
+            "COGIM2", 250.0,
+            "COGOP2", "D2",
+            "COGRF2", "REF2"
+        );
+
+        mockMvc.perform(patch("/api/cog/update-centro-D2/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isConflict())
+            .andExpect(content().string("La operación D está asociada a otro contrato"));
+
+        verify(cogRepository, never()).findById(any(CogId.class));
+        verify(cogRepository, never()).save(any(Cog.class));
     }
 
     @Test

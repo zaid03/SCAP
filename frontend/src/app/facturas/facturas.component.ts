@@ -1451,11 +1451,19 @@ export class FacturasComponent {
 
   fetchContatosAd() {
     this.isLoadingContratos = true;
-    this.http.get<any>(`${environment.backendUrl}/api/con/cambio-contratos/${this.entcod}/${this.eje}/${this.selectedFacturas.tercod}`).subscribe({
+    const tercod = this.selectedFacturas.tercod;
+    this.http.get<any>(`${environment.backendUrl}/api/con/cambio-contratos/${this.entcod}/${this.eje}/${tercod}`).subscribe({
       next: (res) => {
-        this.contratosPorAD = res;
-        this.pageContatos = 0;
-        this.isLoadingContratos = false;
+        if (res === "PROVEEDOR CON CONTRATO AD") {
+          this.openADMessages()
+          this.ADMessageSuccess = res;
+          this.pageContatos = 0;
+          this.isLoadingContratos = false;
+        } else {
+          this.contratosPorAD = res;
+          this.pageContatos = 0;
+          this.isLoadingContratos = false;
+        }
       },
       error: (err) => {
         this.isLoadingContratos = false;
@@ -1512,7 +1520,6 @@ export class FacturasComponent {
     })
   }
 
-
   removeContrato() {
     const facnum = this.selectedFacturas.facnum;
     const payload = {
@@ -1546,6 +1553,7 @@ export class FacturasComponent {
   closeADMessages() {
     this.limpiarMEssages();
     this.ADMessagesGrid = false;
+    this.closeChangeAD();
     this.closeChangeAD();
   }
 

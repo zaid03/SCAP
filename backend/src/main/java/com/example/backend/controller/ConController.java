@@ -13,13 +13,19 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.CambiarADProjection;
 import com.example.backend.dto.ContratoDto;
+import com.example.backend.dto.bolsaPorContrato;
 import com.example.backend.service.CotContratoProjection;
 import com.example.backend.service.ContratosSearch;
 import com.example.backend.sqlserver2.repository.CotRepository;
 import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Conn;
+import com.example.backend.sqlserver2.model.Fde;
+import com.example.backend.sqlserver2.model.FdeId;
 import com.example.backend.sqlserver2.model.ConId;
 import com.example.backend.sqlserver2.repository.ConRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
+import com.example.backend.sqlserver2.repository.FdeRepository;
 
 @RestController
 @RequestMapping("/api/con")
@@ -30,6 +36,12 @@ public class ConController {
     private ConRepository conRepository;
     @Autowired
     private ContratosSearch contratosSearch;
+    @Autowired 
+    private CogRepository cogRepositroy;
+    @Autowired
+    private GbsRepository gbsRepository;
+    @Autowired
+    private FdeRepository fdeRepository;
     
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";

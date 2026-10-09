@@ -21,7 +21,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   //needed for deleting a centro gestor from a contrato
   Optional<COGAIPOnlyDto> findByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
-  //needed for adding centro gestor to a contrato
+  //needed for adding centro gestor to a contrato and for cambiar contrato to factura
   Boolean existsByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
   //main fetch for C.saldo de contrato
