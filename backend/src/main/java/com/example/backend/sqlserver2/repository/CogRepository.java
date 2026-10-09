@@ -21,7 +21,7 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   //needed for deleting a centro gestor from a contrato
   Optional<COGAIPOnlyDto> findByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
-  //needed for adding centro gestor to a contrato and for cambiar contrato to factura
+  //needed for adding centro gestor to a contrato and for cambiar contrato to factura all other related facturas apis where concod is used
   Boolean existsByENTAndEJEAndCONCODAndCGECOD(Integer ENT, String EJE, Integer CONCOD, String CGECOD);
 
   //main fetch for C.saldo de contrato
@@ -36,8 +36,8 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONotAndCge_CGECODAndCONCOD(Integer ent, String eje, Integer contip, Integer conblo, String cgecod, Integer concod);
   List<SaldoContrato> findByENTAndEJEAndCot_conn_CONTIPAndCot_conn_CONBLONotAndCge_CGECODAndCot_conn_CONDESContaining(Integer ent, String eje, Integer contip, Integer conblo, String cgecod, String condes);
 
-  //cambiar contrato with a the option of selecting contrato
-  List<CogCgeProjection> findAllByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
+  //cambiar contrato with the option of selecting contrato
+  Optional<CogCgeProjection> findAllByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
 
   //needed for contabilizacion
   Optional<Cog> findOneByENTAndEJEAndCONCODAndCGECOD(Integer ent, String eje, Integer concod, String cgecod);
@@ -54,6 +54,6 @@ public interface CogRepository extends JpaRepository<Cog, CogId> {
   @Query("UPDATE Cog c SET c.COGIM2 = :saldo WHERE c.ENT = :ent AND c.EJE = :eje AND c.CONCOD = :con AND c.CGECOD = :cge")
   int actualizarSaldoSecundario(@Param("saldo") double saldo, @Param("ent") Integer ent, @Param("eje") String eje, @Param("con") Integer con, @Param("cge") String cge);
 
-  //needed for adding a D
+  //needed for cargar facturas
   boolean existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(Integer ent1, String cogopd, String cogrfd, Integer ent2, String cogop2, String cogrf2);
 }

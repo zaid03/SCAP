@@ -271,11 +271,11 @@ public class FdeController {
             if (factura.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
-            List<CogCgeProjection> cogs = cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(payload.ENT(), payload.EJE(), payload.CONCOD(), payload.CGECOD());
+            Optional<CogCgeProjection> cogs = cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(payload.ENT(), payload.EJE(), payload.CONCOD(), payload.CGECOD());
             if (cogs.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registros para llenar la tabla " + SIN_RESULTADO);
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Registros por este contrato " + SIN_RESULTADO);
             }
-            CogCgeProjection cog = cogs.get(0);
+            CogCgeProjection cog = cogs.get();
             if (cog.getCOGRFD() == null || cog.getCOGRFD().isBlank()) {
                 return ResponseEntity.badRequest().body("Referencia " + SIN_RESULTADO);
             }
@@ -285,7 +285,6 @@ public class FdeController {
             facRepository.save(fac);
             fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
             
-
             Fde fde1 = new Fde();
             fde1.setENT(payload.ENT());
             fde1.setEJE(payload.EJE());

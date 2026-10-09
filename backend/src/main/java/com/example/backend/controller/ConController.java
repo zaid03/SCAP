@@ -1,6 +1,7 @@
 package com.example.backend.controller;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -13,19 +14,14 @@ import org.springframework.web.bind.annotation.*;
 
 import com.example.backend.dto.CambiarADProjection;
 import com.example.backend.dto.ContratoDto;
-import com.example.backend.dto.bolsaPorContrato;
 import com.example.backend.service.CotContratoProjection;
 import com.example.backend.service.ContratosSearch;
 import com.example.backend.sqlserver2.repository.CotRepository;
 import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Conn;
-import com.example.backend.sqlserver2.model.Fde;
-import com.example.backend.sqlserver2.model.FdeId;
 import com.example.backend.sqlserver2.model.ConId;
 import com.example.backend.sqlserver2.repository.ConRepository;
 import com.example.backend.sqlserver2.repository.CogRepository;
-import com.example.backend.sqlserver2.repository.GbsRepository;
-import com.example.backend.sqlserver2.repository.FdeRepository;
 
 @RestController
 @RequestMapping("/api/con")
@@ -38,10 +34,6 @@ public class ConController {
     private ContratosSearch contratosSearch;
     @Autowired 
     private CogRepository cogRepositroy;
-    @Autowired
-    private GbsRepository gbsRepository;
-    @Autowired
-    private FdeRepository fdeRepository;
     
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -191,19 +183,31 @@ public class ConController {
     }
 
     //fetching contratos to cambiar AD
-    @GetMapping("/cambio-contratos/{ent}/{eje}/{tercod}")
+    @GetMapping("/cambio-contratos/{ent}/{eje}/{tercod}/{cgecod}")
     public ResponseEntity<?> contratosCambio(
         @PathVariable Integer ent,
         @PathVariable String eje,
-        @PathVariable Integer tercod
+        @PathVariable Integer tercod,
+        @PathVariable String cgecod
     ) {
         try {
-            List<CambiarADProjection> contratos = cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(ent, eje, 0, 3, tercod);
-            if (contratos.isEmpty()) {
+            List<CambiarADProjection> allContratos = new ArrayList<>();
+            List<CambiarADProjection> Contratos = cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(ent, eje, 0, 3, tercod);
+            if (Contratos.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
-            } 
+            }
+            for (CambiarADProjection contrato : Contratos) {
+                boolean cogs = cogRepositroy.existsByENTAndEJEAndCONCODAndCGECOD(ent, eje, contrato.getConn().getCONCOD(), cgecod);
+                if (cogs) {
+                    allContratos.add(contrato);
+                }
 
-            return ResponseEntity.ok(contratos);
+            }
+
+            if (allContratos.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+            return ResponseEntity.ok(allContratos);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }

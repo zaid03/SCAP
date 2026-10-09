@@ -1452,7 +1452,8 @@ export class FacturasComponent {
   fetchContatosAd() {
     this.isLoadingContratos = true;
     const tercod = this.selectedFacturas.tercod;
-    this.http.get<any>(`${environment.backendUrl}/api/con/cambio-contratos/${this.entcod}/${this.eje}/${tercod}`).subscribe({
+    const cgecod = this.selectedFacturas.cgecod;
+    this.http.get<any>(`${environment.backendUrl}/api/con/cambio-contratos/${this.entcod}/${this.eje}/${tercod}/${cgecod}`).subscribe({
       next: (res) => {
         if (res === "PROVEEDOR CON CONTRATO AD") {
           this.openADMessages()
