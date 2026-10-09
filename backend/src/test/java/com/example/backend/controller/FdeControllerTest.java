@@ -654,7 +654,7 @@ public class FdeControllerTest {
 
         when(cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(
                 1, "E1", 10, "CGE1"))
-            .thenReturn(List.of());
+            .thenReturn(Optional.empty());
 
         String payload = objectMapper.writeValueAsString(
             new FdeController.CPatchCon(
@@ -667,7 +667,7 @@ public class FdeControllerTest {
                 .content(payload))
             .andDo(print())
             .andExpect(status().isNotFound())
-            .andExpect(content().string("Registros para llenar la tabla Sin resultado"));
+            .andExpect(content().string("Registros por este contrato Sin resultado"));
     }
 
     @Test
@@ -681,7 +681,7 @@ public class FdeControllerTest {
 
         when(cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(
                 1, "E1", 10, "CGE1"))
-            .thenReturn(List.of(cog));
+            .thenReturn(Optional.of(cog));
 
         when(cog.getCOGRFD()).thenReturn("   ");
 
@@ -711,7 +711,7 @@ public class FdeControllerTest {
 
         when(cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(
                 1, "E1", 10, "CGE1"))
-            .thenReturn(List.of(cog));
+            .thenReturn(Optional.of(cog));
 
         when(cog.getCOGRFD()).thenReturn("REF1");
         when(cog.getCOGOPD()).thenReturn("OPE1");
@@ -751,7 +751,7 @@ public class FdeControllerTest {
 
         when(cogRepository.findAllByENTAndEJEAndCONCODAndCGECOD(
                 1, "E1", 10, "CGE1"))
-            .thenReturn(List.of(cog));
+            .thenReturn(Optional.of(cog));
 
         when(cog.getCOGRFD()).thenReturn("REF1");
         when(cog.getCOGOPD()).thenReturn("OPE1");

@@ -214,15 +214,22 @@ public class ConController {
     }
 
     //needed for adding an alabaran for a factura
-    @GetMapping("/quickCheck/{ent}/{eje}/{tercod}")
+    @GetMapping("/quickCheck/{ent}/{eje}/{tercod}/{cgecod}")
     public ResponseEntity<?> quickCheck(
         @PathVariable Integer ent,
         @PathVariable String eje,
-        @PathVariable Integer tercod
+        @PathVariable Integer tercod,
+        @PathVariable String cgecod
     ) {
         try {
-            int count = cotRepository.countByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(ent, eje, 0, 3, tercod);
-            
+            Integer count = 0;
+            List<Cot> Contratos = cotRepository.findByENTAndEJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(ent, eje, 0, 3, tercod);
+            for (Cot contrato : Contratos) {
+                boolean cog = cogRepositroy.existsByENTAndEJEAndCONCODAndCGECOD(ent, eje, contrato.getConn().getCONCOD(), cgecod);
+                if (cog) {
+                    count ++;
+                }
+            }
             return ResponseEntity.ok(count);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());

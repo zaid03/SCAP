@@ -36,6 +36,7 @@ import com.example.backend.sqlserver2.model.Conn;
 import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.repository.ConRepository;
 import com.example.backend.sqlserver2.repository.CotRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = ConController.class)
@@ -54,6 +55,9 @@ public class ConControllerTest {
 
     @MockitoBean
     private ContratosSearch contratosSearch;
+
+    @MockitoBean
+    private CogRepository cogRepository;
 
     @Autowired
     private ObjectMapper objectMapper;
@@ -825,7 +829,7 @@ public class ConControllerTest {
                 1, "E1", 0, 3, 200))
             .thenReturn(List.of());
 
-        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200"))
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200/CGE1"))
             .andDo(print())
             .andExpect(status().isNotFound())
             .andExpect(content().string("Sin resultado"));
@@ -837,10 +841,58 @@ public class ConControllerTest {
                 1, "E1", 0, 3, 200))
             .thenThrow(new DataAccessResourceFailureException("Database error"));
 
-        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200"))
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200/CGE1"))
             .andDo(print())
             .andExpect(status().isInternalServerError())
             .andExpect(content().string(org.hamcrest.Matchers.containsString("Error :")));
+    }
+
+    @Test
+    void contratosCambio_returns200WhenContractHasCentroGestor() throws Exception {
+        CambiarADProjection contrato = new CambiarADProjection() {
+            @Override
+            public ConnProjection getConn() {
+                return new ConnProjection() {
+                    @Override public Integer getCONCOD() { return 10; }
+                    @Override public String getCONLOT() { return "LOT001"; }
+                    @Override public String getCONDES() { return "Contract Description"; }
+                };
+            }
+        };
+
+        when(cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of(contrato));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 10, "CGE1"))
+            .thenReturn(true);
+
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200/CGE1"))
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", org.hamcrest.Matchers.hasSize(1)));
+    }
+
+    @Test
+    void contratosCambio_returns404WhenNoContractHasCentroGestor() throws Exception {
+        CambiarADProjection contrato = new CambiarADProjection() {
+            @Override
+            public ConnProjection getConn() {
+                return new ConnProjection() {
+                    @Override public Integer getCONCOD() { return 10; }
+                    @Override public String getCONLOT() { return "LOT001"; }
+                    @Override public String getCONDES() { return "Contract Description"; }
+                };
+            }
+        };
+
+        when(cotRepository.findByConn_ENTAndConn_EJEAndConn_CONBLOAndConn_CONTIPAndTERCOD(
+                1, "E1", 0, 3, 200))
+            .thenReturn(List.of(contrato));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "E1", 10, "CGE1"))
+            .thenReturn(false);
+
+        mockMvc.perform(get("/api/con/cambio-contratos/1/E1/200/CGE1"))
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
     }
 
     @Test

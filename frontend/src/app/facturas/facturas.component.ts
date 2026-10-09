@@ -887,7 +887,8 @@ export class FacturasComponent {
   hasData = 0;
   checkAlbaranByCon() {
     console.log("called")
-    this.http.get<any>(`${environment.backendUrl}/api/con/quickCheck/${this.entcod}/${this.eje}/${this.tercod}`).subscribe({
+    const cgecod = this.selectedFacturas.cgecod;
+    this.http.get<any>(`${environment.backendUrl}/api/con/quickCheck/${this.entcod}/${this.eje}/${this.tercod}/${cgecod}`).subscribe({
       next: (res) => {
         this.hasData = res;
         console.log(res)

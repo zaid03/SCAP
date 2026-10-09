@@ -40,7 +40,6 @@ import com.example.backend.service.SaldoContratoSearch;
 @ActiveProfiles("test")
 @Import({TestSecurityConfig.class, TestExceptionHandler.class})
 public class CogControllerTest {
-
     @Autowired
     private MockMvc mockMvc;
 
@@ -387,6 +386,25 @@ public class CogControllerTest {
     }
 
     @Test
+    void addDCentro_returns500WhenCheckingOperationFails() throws Exception {
+        when(cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(
+                anyInt(), anyString(), anyString(), anyInt(), anyString(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        Map<String, Object> payload = Map.of(
+            "COGIMP", 150.0,
+            "COGOPD", "D",
+            "COGRFD", "REF"
+        );
+
+        mockMvc.perform(patch("/api/cog/update-centro-D/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
     void addDCentro_returns404WhenNotFound() throws Exception {
         CogId id = new CogId(1, "E1", 100, "C1");
         when(cogRepository.findById(id)).thenReturn(Optional.empty());
@@ -477,6 +495,25 @@ public class CogControllerTest {
 
         verify(cogRepository, never()).findById(any(CogId.class));
         verify(cogRepository, never()).save(any(Cog.class));
+    }
+
+    @Test
+    void addDCentro2_returns500WhenCheckingOperationFails() throws Exception {
+        when(cogRepository.existsByENTAndCOGOPDAndCOGRFDOrENTAndCOGOP2AndCOGRF2(
+                anyInt(), anyString(), anyString(), anyInt(), anyString(), anyString()))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        Map<String, Object> payload = Map.of(
+            "COGIM2", 250.0,
+            "COGOP2", "D2",
+            "COGRF2", "REF2"
+        );
+
+        mockMvc.perform(patch("/api/cog/update-centro-D2/1/E1/100/C1")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(payload)))
+            .andExpect(status().isInternalServerError())
+            .andExpect(content().string(containsString("Error :")));
     }
 
     @Test

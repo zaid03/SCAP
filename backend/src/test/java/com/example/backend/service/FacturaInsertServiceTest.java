@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 
 import com.example.backend.dto.FacturaInsertDto;
 import com.example.backend.sqlserver2.model.Cfg;
+import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Ter;
@@ -32,6 +33,7 @@ import java.util.List;
 import java.time.LocalDateTime;
 
 import com.example.backend.sqlserver2.repository.CotRepository;
+import com.example.backend.sqlserver2.repository.CogRepository;
 
 @ExtendWith(MockitoExtension.class)
 class FacturaInsertServiceTest {
@@ -53,6 +55,8 @@ class FacturaInsertServiceTest {
     private SicalService sicalService;    
     @Mock
     private CotRepository cotRepository;
+    @Mock
+    private CogRepository cogRepository;
 
     @BeforeEach
     void setUp() {
@@ -64,6 +68,7 @@ class FacturaInsertServiceTest {
         ReflectionTestUtils.setField(service, "fdeRepository", fdeRepository);
         ReflectionTestUtils.setField(service, "sicalService", sicalService);  
         ReflectionTestUtils.setField(service, "cotRepository", cotRepository);
+        ReflectionTestUtils.setField(service, "cogRepositroy", cogRepository);
     }
     
     @Test
@@ -117,6 +122,60 @@ class FacturaInsertServiceTest {
         assertEquals(0, response.missingProviders().size());
         verify(facRepository, times(2)).save(any(Fac.class));
         verify(fdeRepository, times(2 * gbsList.size())).save(any(Fde.class));
+    }
+
+    @Test
+    void insertFacturas_withMatchingContractCge_setsContractMessageWithoutFde() {
+        Ter ter = createTer(1, "PROV001");
+        Cfg cfg = createCfg("CFG001", "TPG001", "OPG001", "FPG001");
+        Cot cot = new Cot();
+        cot.setCONCOD(25);
+
+        when(terRepository.findByENTAndTERNIF(1, "PROV001")).thenReturn(ter);
+        when(facRepository.findByFACTDCAndFACANNAndFACFAC("F", 2024, 1)).thenReturn(new ArrayList<>());
+        when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
+        when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
+        when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
+            .thenReturn(List.of(createGbs("REF001", "OPE001", "ORG001")));
+        when(cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(
+                1, "2024", 1, 0, 3))
+            .thenReturn(List.of(cot));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "2024", 25, "CGE001"))
+            .thenReturn(true);
+        when(facRepository.save(any(Fac.class))).thenAnswer(i -> i.getArgument(0));
+
+        FacturaInsertService.NamesResponse response =
+            service.insertFacturas(List.of(createValidFacturaDto("PROV001")));
+
+        assertEquals("PROVEEDOR CON CONTRATO AD", response.savedNames().get(0).message());
+        verify(fdeRepository, never()).save(any(Fde.class));
+    }
+
+    @Test
+    void insertFacturas_withContractWithoutMatchingCge_createsFde() {
+        Ter ter = createTer(1, "PROV001");
+        Cfg cfg = createCfg("CFG001", "TPG001", "OPG001", "FPG001");
+        Cot cot = new Cot();
+        cot.setCONCOD(25);
+        Gbs gbs = createGbs("REF001", "OPE001", "ORG001");
+
+        when(terRepository.findByENTAndTERNIF(1, "PROV001")).thenReturn(ter);
+        when(facRepository.findByFACTDCAndFACANNAndFACFAC("F", 2024, 1)).thenReturn(new ArrayList<>());
+        when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
+        when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
+        when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001")).thenReturn(List.of(gbs));
+        when(cotRepository.findByENTAndEJEAndTERCODAndConn_CONBLOAndConn_CONTIP(
+                1, "2024", 1, 0, 3))
+            .thenReturn(List.of(cot));
+        when(cogRepository.existsByENTAndEJEAndCONCODAndCGECOD(1, "2024", 25, "CGE001"))
+            .thenReturn(false);
+        when(facRepository.save(any(Fac.class))).thenAnswer(i -> i.getArgument(0));
+
+        FacturaInsertService.NamesResponse response =
+            service.insertFacturas(List.of(createValidFacturaDto("PROV001")));
+
+        assertEquals("", response.savedNames().get(0).message());
+        verify(fdeRepository).save(any(Fde.class));
     }
 
     @Test
