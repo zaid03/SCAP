@@ -1,13 +1,14 @@
 package com.example.backend.controller;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
-import java.time.LocalDateTime;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -15,15 +16,14 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.transaction.annotation.Transactional;
 
 import com.example.backend.dto.HistoricaContratos;
-import com.example.backend.sqlserver2.repository.CohRepository;
-import com.example.backend.sqlserver2.model.CogId;
+import com.example.backend.service.HistoricaADContratoSearch;
 import com.example.backend.sqlserver2.model.Cog;
+import com.example.backend.sqlserver2.model.CogId;
 import com.example.backend.sqlserver2.model.Coh;
 import com.example.backend.sqlserver2.repository.CogRepository;
-import com.example.backend.service.HistoricaADContratoSearch;
+import com.example.backend.sqlserver2.repository.CohRepository;
 
 @RestController
 @RequestMapping("/api/coh")
@@ -39,6 +39,7 @@ public class CohController {
     private static final String ERROR = "Error :";
 
     //main fetch for historica de ad
+    @Transactional("sqlServer2TransactionManager")
     @GetMapping("/historia-ADcontrato/{ent}/{eje}")
     public ResponseEntity<?> fetchHistoriaADContrato (
         @PathVariable Integer ent,
@@ -50,10 +51,25 @@ public class CohController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
+            initializeHistoricaContratos(contratos);
             return ResponseEntity.ok(contratos);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
+    }
+
+    private void initializeHistoricaContratos(List<HistoricaContratos> contratos) {
+        contratos.forEach(contrato -> {
+            HistoricaContratos.ConnProjection con = contrato.getCon();
+            if (con != null && con.getCots() != null) {
+                con.getCots().forEach(cot -> {
+                    if (cot.getTer() != null) {
+                        cot.getTer().getTERNOM();
+                        cot.getTer().getTERNIF();
+                    }
+                });
+            }
+        });
     }
 
     //filtering for historica de ad

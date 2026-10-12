@@ -127,7 +127,7 @@ export class ConsultaHistoricaAdContratosComponent {
     this.fetchContratos();
   }
 
-  toggleSort(field: 'concod' | 'cot.conn.conlot' | 'cot.conn.condes' | 'cot.tercod' | 'cot.ter.ternom' | 'cot.ter.ternif' | 'cgecod' | 'cge.cgedes' | 'cogopd' | 'cogop2' | 'calculateSaldoTotal' | 'cogiap' | 'calculateSaldo'): void {
+  toggleSort(field: 'concod' | 'con.conlot' | 'con.condes' | 'con.cots.0.tercod' | 'con.cots.0.ter.ternom' | 'con.cots.0.ter.ternif' | 'cgecod' | 'cge.cgedes' | 'cohopd' | 'cohrfd' | 'cohfec' | 'bloqueado'): void {
     if (this.sortField !== field) {
       this.sortField = field;
       this.sortDirection = 'asc';
@@ -144,7 +144,7 @@ export class ConsultaHistoricaAdContratosComponent {
     this.applySort();
   }
 
-  sortField: 'concod' | 'cot.conn.conlot' | 'cot.conn.condes' | 'cot.tercod' | 'cot.ter.ternom' | 'cot.ter.ternif' | 'cgecod' | 'cge.cgedes' | 'cogopd' | 'cogop2' | 'calculateSaldoTotal' | 'cogiap' | 'calculateSaldo' | null = null;
+  sortField: 'concod' | 'con.conlot' | 'con.condes' | 'con.cots.0.tercod' | 'con.cots.0.ter.ternom' | 'con.cots.0.ter.ternif' | 'cgecod' | 'cge.cgedes' | 'cohopd' | 'cohrfd' | 'cohfec' | 'bloqueado' | null = null;
   sortDirection: 'asc' | 'desc' = 'asc';
   private applySort(): void {
     if (!this.sortField) {
@@ -155,16 +155,6 @@ export class ConsultaHistoricaAdContratosComponent {
     const direction = this.sortDirection === 'asc' ? 1 : -1;
 
     const getValue = (item: any, path: string): string | number => {
-      if (path === 'calculateSaldoTotal') {
-        return (item?.cogimp ?? 0) + (item?.cogim2 ?? 0);
-      }
-
-      if (path === 'calculateSaldo') {
-        return (item?.cogimp ?? 0)
-          + (item?.cogim2 ?? 0)
-          - (item?.cogiap ?? 0);
-      }
-
       return path
         .split('.')
         .reduce((value, property) => value?.[property], item) ?? '';
@@ -220,73 +210,12 @@ export class ConsultaHistoricaAdContratosComponent {
     this.resizingColIndex = null;
   };
 
-  calculateSaldoTotal(cogimp: number, cogim2: number): number {
-    return this.parseMoney(cogimp) + this.parseMoney(cogim2);
-  }
-
-  calculateSaldo(cogimp: number, cogim2: number, cogiap: number): number {
-    return this.calculateSaldoTotal(cogimp, cogim2) - this.parseMoney(cogiap);
-  }
-
-  private formatCurrency(value: any): string {
-    if (value === null || value === undefined || value === '') return '';
-    const numberValue = typeof value === 'number' ? value : Number(value);
-    if (isNaN(numberValue)) return '';
-    const formatted = new Intl.NumberFormat('es-ES', {
-      style: 'currency',
-      currency: 'EUR',
-      minimumFractionDigits: 2
-    }).format(numberValue);
-    return formatted;
-  }
-
-  private parseMoney(value: any): number {
-    if (value === null || value === undefined || value === '') return 0;
-    if (typeof value === 'number') return value;
-
-    let stringValue = String(value).trim();
-    const isParenthesizedNegative = /^\(.*\)$/.test(stringValue);
-
-    if (isParenthesizedNegative) {
-      stringValue = stringValue.replace(/[()]/g, '');
-    }
-
-    stringValue = stringValue
-      .replace(/\u00A0/g, ' ')
-      .replace(/[^\d.,-]/g, '');
-
-    if (stringValue.includes(',')) {
-      stringValue = stringValue.replace(/\./g, '').replace(',', '.');
-    }
-
-    const numberValue = parseFloat(stringValue);
-    if (isNaN(numberValue)) return 0;
-
-    return isParenthesizedNegative ? -numberValue : numberValue;
-  }
-
-  private applyExcelCurrencyFormat(
-    worksheet: XLSX.WorkSheet,
-    rowCount: number
-  ): void {
-    const currencyFormat = '[$€-es-ES] #,##0.00';
-
-    for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
-      for (let columnIndex = 10; columnIndex <= 12; columnIndex++) {
-        const cellAddress = XLSX.utils.encode_cell({
-          r: rowIndex,
-          c: columnIndex
-        });
-        const cell = worksheet[cellAddress];
-
-        if (!cell) continue;
-
-        cell.v = this.parseMoney(cell.v);
-        cell.t = 'n';
-        cell.z = currencyFormat;
-      }
-    }
-  }
+  formatDate = (v: any) => {
+    if (!v && v !== 0) return '';
+    const s = String(v);
+    const d = new Date(s);
+    return isNaN(d.getTime()) ? s : d.toLocaleDateString('es-ES');
+  };
 
   excelDownload() {
     this.limpiarMessages();
@@ -298,22 +227,21 @@ export class ConsultaHistoricaAdContratosComponent {
   
     const exportRows = rows.map((row: any) => ({
       Contrato: row.concod ?? '',
-      Económica: row.cot?.conn?.conlot ?? '',
-      Descripción: row.cot?.conn?.condes ?? '',
-      Cód_Proveedor : row.cot?.tercod ?? '',
-      Proveedor: row.cot?.ter?.ternom ?? '',
-      NIF: row.cot?.ter?.ternif ?? '',
+      Económica: row.con?.conlot ?? '',
+      Descripción: row.con?.condes ?? '',
+      Cód_Proveedor : row.con?.cots[0]?.tercod ?? '',
+      Proveedor: row.con?.cots[0]?.ter?.ternom ?? '',
+      NIF: row.con?.cots[0]?.ter?.ternif ?? '',
       Cód_C_Gestor: row.cgecod ?? '',
       Centro_Gestor: row.cge?.cgedes ?? '',
-      AD_principal: row.cogopd ?? '',
-      AD_secundaria : row.cogop2 ?? '',
-      Saldo_total_AD: this.parseMoney(this.calculateSaldoTotal(row?.cogimp, row?.cogim2)),
-      Pedidos_Pte_Contabilizar: this.parseMoney(row.cogiap),
-      Saldo: this.calculateSaldo(row?.cogimp, row?.cogim2, row?.cogiap)
+      Operación_AD: row.cohopd ?? '',
+      Referencia_AD : row.cohrfd ?? '',
+      Fecha: this.formatDate(row?.cohfec),
+      Bloqueado: row.bloqueado,
     }));
   
     const worksheet = XLSX.utils.aoa_to_sheet([]);
-    XLSX.utils.sheet_add_aoa(worksheet, [['Listado de saldo de contratos']], { origin: 'A1' });
+    XLSX.utils.sheet_add_aoa(worksheet, [['Listado de hístorica de AD de contratos']], { origin: 'A1' });
     worksheet['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: 3 } }];
     XLSX.utils.sheet_add_aoa(worksheet, [[
       'Contrato',
@@ -324,30 +252,26 @@ export class ConsultaHistoricaAdContratosComponent {
       'NIF',
       'Cód. C. Gestor',
       'Centro Gestor',
-      'AD principal',
-      'AD secundaria',
-      'Saldo total AD',
-      'Pedidos Pte. Contabilizar',
-      'Saldo'
+      'Operación AD',
+      'Referencia AD',
+      'Fecha',
+      'Bloqueado'
     ]], { origin: 'A2' });
     XLSX.utils.sheet_add_json(worksheet, exportRows, { origin: 'A3', skipHeader: true });
 
-    this.applyExcelCurrencyFormat(worksheet, exportRows.length);
-
     worksheet['!cols'] = [
-      { wch: 10 },
-      { wch: 10 },
-      { wch: 40 },
-      { wch: 10 },
+      { wch: 8 },
+      { wch: 8 },
       { wch: 40 },
       { wch: 15 },
+      { wch: 35 },
       { wch: 15 },
-      { wch: 40 },
+      { wch: 5 },
+      { wch: 35 },
       { wch: 20 },
       { wch: 20 },
-      { wch: 25 },
-      { wch: 25 },
-      { wch: 25 },
+      { wch: 15 },
+      { wch: 10 }
     ];
   
     const workbook = XLSX.utils.book_new();
@@ -359,7 +283,7 @@ export class ConsultaHistoricaAdContratosComponent {
     });
     saveAs(
       new Blob([buffer], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' }),
-      'Consulta_saldo_contratos.xlsx'
+      'Consulta_historica_ad_contratos.xlsx'
     );
   }
 
@@ -371,20 +295,19 @@ export class ConsultaHistoricaAdContratosComponent {
       return;
     }
 
-    const rows = source.map((row: any, index: number) => ({
+    const rows = source.map((row: any) => ({
       Contrato: row.concod ?? '',
-      conlot: row.cot?.conn?.conlot ?? '',
-      condes: row.cot?.conn?.condes ?? '',
-      tercod : row.cot?.tercod ?? '',
-      ternom: row.cot?.ter?.ternom ?? '',
-      ternif: row.cot?.ter?.ternif ?? '',
-      cgecod: row.cgecod ?? '',
-      cgedes: row.cge?.cgedes ?? '',
-      cogopd: row.cogopd ?? '',
-      cogop2 : row.cogop2 ?? '',
-      calculateSaldoTotal : this.formatCurrency(this.calculateSaldoTotal(row?.cogimp, row?.cogim2)),
-      cogiap : this.formatCurrency(row.cogiap),
-      calculateSaldo: this.formatCurrency(this.calculateSaldo(row?.cogimp, row?.cogim2, row?.cogiap))
+      Económica: row.con?.conlot ?? '',
+      Descripción: row.con?.condes ?? '',
+      Cód_Proveedor : row.con?.cots[0]?.tercod ?? '',
+      Proveedor: row.con?.cots[0]?.ter?.ternom ?? '',
+      NIF: row.con?.cots[0]?.ter?.ternif ?? '',
+      Cód_C_Gestor: row.cgecod ?? '',
+      Centro_Gestor: row.cge?.cgedes ?? '',
+      Operación_AD: row.cohopd ?? '',
+      Referencia_AD : row.cohrfd ?? '',
+      Fecha: this.formatDate(row?.cohfec),
+      Bloqueado: row.bloqueado,
     }));
 
     const doc = new jsPDF({ orientation: 'landscape', unit: 'pt', format: 'a4' });
@@ -394,18 +317,17 @@ export class ConsultaHistoricaAdContratosComponent {
 
     const columns = [
       { header: 'Contrato', dataKey: 'Contrato' },
-      { header: 'Económica', dataKey: 'conlot' },
-      { header: 'Descripción', dataKey: 'condes' },
-      { header: 'Cód.Proveedor', dataKey: 'tercod' },
-      { header: 'Proveedor', dataKey: 'ternom' },
-      { header: 'NIF', dataKey: 'ternif' },
-      { header: 'Cód.C.Gestor', dataKey: 'cgecod' },
-      { header: 'Centro Gestor', dataKey: 'cgedes' },
-      { header: 'AD principal', dataKey: 'cogopd' },
-      { header: 'AD secundaria', dataKey: 'cogop2' },
-      { header: 'Saldo total AD', dataKey: 'calculateSaldoTotal' },
-      { header: 'Pedidos Pte Contabilizar', dataKey: 'cogiap' },
-      { header: 'Saldo', dataKey: 'calculateSaldo' }
+      { header: 'Económica', dataKey: 'Económica' },
+      { header: 'Descripción', dataKey: 'Descripción' },
+      { header: 'Cód.Proveedor', dataKey: 'Cód_Proveedor' },
+      { header: 'Proveedor', dataKey: 'Proveedor' },
+      { header: 'NIF', dataKey: 'NIF' },
+      { header: 'Cód.C.Gestor', dataKey: 'Cód_C_Gestor' },
+      { header: 'Centro Gestor', dataKey: 'Centro_Gestor' },
+      { header: 'Operación AD', dataKey: 'Operación_AD' },
+      { header: 'Referencia AD', dataKey: 'Referencia_AD' },
+      { header: 'Fecha', dataKey: 'Fecha' },
+      { header: 'Bloqueado', dataKey: 'Bloqueado' }
     ];
 
     autoTable(doc, {
@@ -420,23 +342,22 @@ export class ConsultaHistoricaAdContratosComponent {
         }
       },
       columnStyles: {
-        Contrato: { cellWidth: 10 },
-        conlot: { cellWidth: 10 },
-        condes: { cellWidth: 40 },
-        tercod: { cellWidth: 10 },
-        ternom: { cellWidth: 40 },
-        ternif: { cellWidth: 15 },
-        cgecod: { cellWidth: 15 },
-        cgedes: { cellWidth: 40 },
-        cogopd: { cellWidth: 20 },
-        cogop2: { cellWidth: 20 },
-        calculateSaldoTotal: { cellWidth: 25 },
-        cogiap: { cellWidth: 25 },
-        calculateSaldo: { cellWidth: 25 },
+        Contrato: { cellWidth: 8 },
+        Económica: { cellWidth: 8 },
+        Descripción: { cellWidth: 40 },
+        Cód_Proveedor: { cellWidth: 15 },
+        Proveedor: { cellWidth: 35 },
+        NIF: { cellWidth: 15 },
+        Cód_C_Gestor: { cellWidth: 5 },
+        Centro_Gestor: { cellWidth: 35 },
+        Operación_AD: { cellWidth: 20 },
+        Referencia_AD: { cellWidth: 20 },
+        Fecha: { cellWidth: 15 },
+        Bloqueado: { cellWidth: 10 }
       }
     });
 
-    doc.save('consulta-saldo-contratos.pdf');
+    doc.save('consulta_historica_ad_contratos.pdf');
   }
 
   //misc
