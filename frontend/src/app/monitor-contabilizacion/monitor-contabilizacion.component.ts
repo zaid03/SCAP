@@ -699,7 +699,7 @@ export class MonitorContabilizacionComponent {
   isContabilizando: boolean = false;
   contabilizarFacturaAsync(factura: any): Promise<void> {
     const concod = factura.concod;
-    if (concod === 0) {
+    if (concod == null || concod === 0) {
       this.ESCONTRATO = false;
     } else {
       this.ESCONTRATO = true;
