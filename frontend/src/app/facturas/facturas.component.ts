@@ -983,7 +983,7 @@ export class FacturasComponent {
   searchAlbaranes() {
     this.limpiarMEssages();
     if (this.albaranesDesde === '' && this.albaranesHasta === '') {
-      this.albaranesError = 'Falta un fecha';
+      this.albaranesError = 'Falta una fecha';
     }
     
     if (this.albaranesDesde && !this.albaranesHasta) {
@@ -1055,10 +1055,12 @@ export class FacturasComponent {
   }
 
   adingAlbaranes() {
-    this.limpiarMEssages();
-    this.isAddingAlbaranes = true;
-    const facnum = this.selectedFacturas.facnum;
+    if (this.caughtAlbranaes.length === 0) {
+      return;
+    }
 
+    this.limpiarMEssages();
+    const facnum = this.selectedFacturas.facnum;
     const payload = this.caughtAlbranaes.map(Obj => ({
       "ENT": this.entcod,
       "EJE": this.eje,
@@ -1070,6 +1072,7 @@ export class FacturasComponent {
       "FACNUM": facnum
     }))
 
+    this.isAddingAlbaranes = true;
     this.http.patch(`${environment.backendUrl}/api/alb/add-albaranes`, payload).subscribe({
       next: (res) => {
         this.updateFacturaInfo();

@@ -918,7 +918,12 @@
             <h1 class="art-title">Añadir albaranes</h1>
         </div>
         <p class="p-style center">seleccionado {{caughtAlbranaes.length}} Albaranes</p>
-        <button class="purple-btn" (click)="adingAlbaranes()">+ Cargar</button>
+        <button 
+            class="purple-btn" 
+            (click)="adingAlbaranes()"
+            [disabled]="this.caughtAlbranaes.length === 0"
+            [class.disabled-btn]="this.caughtAlbranaes.length === 0"
+        >+ Cargar</button>
         <button class="red-btn" (click)="closeAlbaranesAdd()">✖</button>
     </div>
     <div class="albaran-search-options">
