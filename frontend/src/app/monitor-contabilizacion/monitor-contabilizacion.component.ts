@@ -698,6 +698,12 @@ export class MonitorContabilizacionComponent {
   newFacado: string = '';
   isContabilizando: boolean = false;
   contabilizarFacturaAsync(factura: any): Promise<void> {
+    const concod = factura.concod;
+    if (concod === 0) {
+      this.ESCONTRATO = false;
+    } else {
+      this.ESCONTRATO = true;
+    }
     return new Promise(async (resolve) => {
       const payload = {
         pwd: ".",
