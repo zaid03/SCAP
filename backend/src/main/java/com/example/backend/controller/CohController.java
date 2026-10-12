@@ -73,6 +73,7 @@ public class CohController {
     }
 
     //filtering for historica de ad
+    @Transactional("sqlServer2TransactionManager")
     @GetMapping("/search-historia-ADcontrato/{ent}/{eje}")
     public ResponseEntity<?> searchHistoriaContrato (
         @PathVariable Integer ent,
@@ -91,6 +92,7 @@ public class CohController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
+            initializeHistoricaContratos(contratos);
             return ResponseEntity.ok(contratos);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ERROR + ex.getMostSpecificCause().getMessage());
