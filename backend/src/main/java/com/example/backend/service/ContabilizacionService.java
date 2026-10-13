@@ -10,6 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.client.SimpleClientHttpRequestFactory;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.client.RestTemplate;
 
 import com.example.backend.dto.ContabilizacionRequestDto;
@@ -23,8 +24,6 @@ import com.example.backend.sqlserver2.model.Fdt;
 import com.example.backend.sqlserver2.repository.CogRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
 import com.example.sical.CryptoSical;
-
-import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class ContabilizacionService {
@@ -266,6 +265,7 @@ public class ContabilizacionService {
 
         sb.append("<par>");
         sb.append("<portal>S</portal>");  
+        sb.append("<imprimir>1</imprimir>");  
         sb.append("<gensinalmacenar>0</gensinalmacenar>");
 
         sb.append("<l_operacion>");

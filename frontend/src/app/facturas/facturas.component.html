@@ -229,7 +229,7 @@
                         </div>
                         <button 
                             class="red-btn" 
-                            [disabled]="isUpdate" 
+                            [disabled]="isUpdate || isUpdateSecond" 
 	                        [ngClass]="{'disabled-btn': isUpdate || isUpdateSecond}" 
                             (click)="closeDetails()"
                         >✖</button>
@@ -656,7 +656,7 @@
                                                         <th>Económica</th>
                                                         <th>Importe</th>
                                                         <th>Diferencias</th>
-                                                        <th>acción</th>
+                                                        <th>Acción</th>
                                                     </tr>
                                                 </thead>
                                                 <tbody>

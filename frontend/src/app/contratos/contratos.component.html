@@ -151,8 +151,8 @@
                         </div>
                         <button 
                             class="red-btn" 
-                            [disabled]="isUpdate" 
-	                        [ngClass]="{ 'disabled-btn': isUpdate }" 
+                            [disabled]="isUpdate || isUpdateSecond" 
+                            [ngClass]="{'disabled-btn': isUpdate || isUpdateSecond}" 
                             (click)="closeDetails()"
                         >✖</button>
                     </div> 
@@ -331,13 +331,28 @@
                                             type="text"
                                             class="textArea-style currenc"
                                             [value]="a.editingPrice ? a.editingValue : formatPrice(a.coapre)"
-                                            (focus)="startEditingPrice(a, $event)"
-                                            (blur)="stopEditingPrice(a, $event)"
+                                            (focus)="startEditingPrice(a)"
+                                            (blur)="stopEditingPrice(a)"
                                             (input)="onPriceTyping($event, a)"
                                         />
-                                    <td>
-                                        <button class="red-btn" (click)="openDeleteArticulo(selectedContrato, a.art)">-</button>
-                                        <button class="purple-btn" (click)="updateArticulo(selectedContrato.concod, a.art.afacod, a.art.asucod, a.art.artcod, a.coapre)">✔</button>
+                                    <td class="g-c-btns">
+                                        <button 
+                                            class="red-btn" 
+                                            (click)="openDeleteArticulo(a.art)"
+                                            title="Eliminar"
+                                        >-</button>
+                                        <button 
+                                            class="purple-btn" 
+                                            (click)="updateArticulo(a)"
+                                            title="Guardar"
+                                        >✔</button>
+                                        <button
+                                            class="red-btn" 
+                                            [disabled]="!a.hasPriceChanges"
+                                            [ngClass]="{'disabled-btn': !a.hasPriceChanges}"
+                                            (click)="cancelarEditng(a)"
+                                            title="Cancelar"
+                                        >✖</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -396,7 +411,7 @@
                                     <td>{{c.cogrf2}}</td>
                                     <td>{{c.cogim2 | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{c.cogiap | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
-                                    <td>{{getKdisponible(c.cogimp, c.cogim2, c.cogaip) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                                    <td>{{getKdisponible(c.cogimp, c.cogim2, c.cogiap) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td class="borderI">
                                         <div class="halfBtns">
                                             <button 
@@ -602,16 +617,16 @@
     <div class="btns">
         <button class="purple-btn" (click)="closeDeleteArticulo()">✖</button>
     </div>
-    <h3>¿Seguro que quieres eliminar este Contrato?</h3>
+    <h3>¿Quiere borrar el artículo del contrato?</h3>
+    <div *ngIf="articuloToDelete">
+        <p class="p-style delete-info">Artículo: {{articuloToDelete.artcod}}</p>
+    </div>
+    <h1 class="errorBtn">{{detallesMessageErrorDelete}}</h1>
     <div *ngIf="isDeleting" class="loading-message">
         <div class="spinner"></div>
         <span>borrando</span>
     </div>
-    <div *ngIf="articuloToDelete">
-        <p class="p-style delete-info">Familia: {{articuloToDelete[0].concod}}</p>
-    </div>
-    <h1 class="errorBtn">{{detallesMessageErrorDelete}}</h1>
-    <button class="red-btn" (click)="deleteArticulo(articuloToDelete[0]?.concod, articuloToDelete[1]?.afacod, articuloToDelete[1]?.asucod, articuloToDelete[1]?.artcod)">Borrar</button>
+    <button class="red-btn" (click)="deleteArticulo()">Borrar</button>
 </div>
 
 <div class="modal-backdrop" *ngIf="articulosAddGrid"></div>

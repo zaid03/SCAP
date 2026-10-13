@@ -755,6 +755,8 @@ export class FacturasComponent {
     this.albaranes = [];
     this.apalicaciones = [];
     this.descuentos = [];
+    this.isUpdateSecond = false;
+    this.isEditingSecond = false;
 
     if ( option === 'albaranes') {this.fetchAlbaranesDEtail(facnum);}
     if ( option === 'aplicaciones') {this.fetchApplicacionesDetails(facnum);}

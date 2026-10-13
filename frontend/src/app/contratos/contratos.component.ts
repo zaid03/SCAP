@@ -592,6 +592,8 @@ export class ContratosComponent {
     this.showCentroGestorGrid = false;
     this.centroGestor = [];
     this.fetchArticulos(numero);
+    this.isUpdateSecond = false;
+    this.isEditingSecond = false;
   }
 
   isLoadingArticulos: boolean = false;
@@ -633,27 +635,33 @@ export class ContratosComponent {
     }
   }
 
-  updateArticulo(numero: number, familia: string, subfamilia: string, articulo: string, precio: any) {
-    this.isUpdating = true;
+  updateArticulo(a: any) {
     this.limpiarMessages();
 
-    const concod = numero;
-    const afacod = familia;
-    const asucod = subfamilia;
-    const artcod = articulo;
+    const concod = this.selectedContrato.concod;
+    const afacod = a.art.afacod;
+    const asucod = a.art.asucod;
+    const artcod = a.art.artcod;
     if (!concod || !afacod || !asucod || !artcod) {return;}
 
     const payload = {
-      "COAPRE": precio
+      "COAPRE": a.coapre
     }
 
+    this.isUpdating = true;
     this.http.patch(`${environment.backendUrl}/api/coa/update-articulo/${this.entcod}/${this.eje}/${concod}/${afacod}/${asucod}/${artcod}`, payload).subscribe({
       next: (res) => {
         this.isUpdating = false;
         this.articulosSuccess = 'Artículo actualizado con éxito';
+        a.hasPriceChanges = false;
+        a.editingPrice = false;
+        this.isUpdateSecond = false;
+        this.isEditingSecond = false;
       },
       error: (err) => {
         this.isUpdating = false;
+        this.isUpdateSecond = false;
+        this.isEditingSecond = false;
         this.articulosError = err.error.error ?? err.error ?? 'wtf';
       }
     })
@@ -663,39 +671,73 @@ export class ContratosComponent {
     return this.currencyPipe.transform(value ?? 0, 'EUR', 'symbol', '1.2-2', 'es-ES') ?? '';
   }
 
-  startEditingPrice(item: any, event: FocusEvent) {
+  isEditing: boolean = false;
+  backupCOAPRE: string = '';
+  isUpdateSecond: boolean = false;
+  isEditingSecond: boolean = false;
+  startEditingPrice(item: any) {
+    this.isEditing = true;
     item.editingPrice = true;
-    item.editingValue = item.coapre != null ? item.coapre.toFixed(2) : '';
-    (event.target as HTMLInputElement).value = item.editingValue;
-  }
-
-  stopEditingPrice(item: any, event: FocusEvent) {
-    item.editingPrice = false;
-    (event.target as HTMLInputElement).value = this.formatPrice(item.coapre);
+    item.editingValue = item.coapre === 0 ? '' : item.coapre.toString().replace('.', ',');
+    this.backupCOAPRE = item.editingValue;
+    item.hasPriceChanges = true;
+    this.isUpdateSecond = true;
+    if (this.isEditingSecond) {
+      this.updateArticulo(this.itemToUpdate);
+    }
   }
 
   onPriceTyping(event: Event, item: any) {
     const input = event.target as HTMLInputElement;
-    const raw = input.value.replace(/[^0-9.,-]/g, '').replace(',', '.');
-    item.editingValue = raw;
-    item.coapre = raw ? Number(raw) : 0;
+    item.editingValue = input.value;
+  }
+
+  itemToUpdate: any = [];
+  stopEditingPrice(item: any) {
+    item.editingPrice = false;
+    const value = item.editingValue ?.replace(',', '.');
+    item.coapre = value === '' || value == null ? 0 : Number(value);
+    this.isEditingSecond = true;
+    this.itemToUpdate = item;
+  }
+
+  cancelarEditng(item: any) {
+    item.coapre = this.backupCOAPRE === '' ? 0 : Number(this.backupCOAPRE.replace(',', '.'));
+
+    item.editingValue = this.backupCOAPRE;
+    item.editingPrice = false;
+    item.hasPriceChanges = false;
+    this.isUpdateSecond = false;
+    this.isEditingSecond = false;
+  }
+
+  deleteArticuloGrid: boolean = false;
+  articuloToDelete: any = {};
+  detallesMessageErrorDelete: string = '';
+  openDeleteArticulo(articulo: any) {
+    this.deleteArticuloGrid = true;
+    this.articuloToDelete = articulo;
+  }
+
+  closeDeleteArticulo() {
+    this.deleteArticuloGrid = false;
+    this.detallesMessageErrorDelete = '';
   }
 
   isDeleting: boolean = false;
-  deleteArticulo(numero: number, familia: string, subfamilia: string, articulo: string) {
+  deleteArticulo() {
     this.limpiarMessages();
-    this.isDeleting = true;
 
-    const concod = numero;
-    const afacod = familia;
-    const asucod = subfamilia;
-    const artcod = articulo;
+    const concod = this.selectedContrato.concod;
+    const afacod = this.articuloToDelete.afacod;
+    const asucod = this.articuloToDelete.asucod;
+    const artcod = this.articuloToDelete.artcod;
     if (!concod || !afacod || !asucod || !artcod) {return;}
 
+    this.isDeleting = true;
     this.http.delete(`${environment.backendUrl}/api/coa/delete-articulo/${this.entcod}/${this.eje}/${concod}/${afacod}/${asucod}/${artcod}`).subscribe({
       next: (res) => {
         this.isDeleting = false;
-        this.articulosSuccess = 'Artículo eliminado exitosamente';
         this.fetchArticulos(concod);
         this.closeDeleteArticulo();
       },
@@ -704,19 +746,6 @@ export class ContratosComponent {
         this.detallesMessageErrorDelete = err.error.error ?? err.error ?? 'wtf';
       }
     })
-  }
-
-  deleteArticuloGrid: boolean = false;
-  articuloToDelete: any[] = [];
-  detallesMessageErrorDelete: string = '';
-  openDeleteArticulo(contrato: any, articulo:any) {
-    this.deleteArticuloGrid = true;
-    this.articuloToDelete = [contrato, articulo];
-  }
-
-  closeDeleteArticulo() {
-    this.deleteArticuloGrid = false;
-    this.detallesMessageErrorDelete = '';
   }
 
   //articulos add grid
@@ -1265,7 +1294,6 @@ export class ContratosComponent {
 
     console.log("test", sameOperation)
     if (sameOperation) {
-      // this.openCantAdd();
       this.closeUpdateSure();
       this.DErrorMessage = 'La D ya está asignada a este contrato';
       return;
@@ -1301,9 +1329,9 @@ export class ContratosComponent {
     this.toUpdate = D;
 
     if (this.referencia === '') {
-      this.dMessageConfirm = '¿Está seguro de añadir D a este centro gestor?';
+      this.dMessageConfirm = '¿Quiere añadir la AD al centro gestorr?';
     } else {
-      this.dMessageConfirm = '¿Está seguro de cambiar D para este centro gestor?';
+      this.dMessageConfirm = '¿Quiere añadir la AD al centro gestor?';
     }
   }
 
@@ -1324,17 +1352,6 @@ export class ContratosComponent {
     this.cantAddGrid = false;
     this.closeAddD();
     this.closeUpdateSure();
-  }
-
-  deleteDSureGrid: boolean = false;
-  openDeleteDSureGrid() {
-    this.limpiarMessages();
-    this.deleteDSureGrid = true;
-  }
-
-  closeDeleteDSureGrid() {
-    this.limpiarMessages();
-    this.deleteDSureGrid = false;
   }
 
   whichD: number = 0;
@@ -1370,7 +1387,11 @@ export class ContratosComponent {
         console.log(this.whichD);
         return;
       }
-      this.deleteFirstD();
+      console.log("here quero 1")
+      this.deleteDGridMessage = '¿Quiere borrar la D?';
+      this.openDeleteDSureGrid();
+      this.whichD = 1;
+      // this.deleteFirstD();
     } else {
       if (cogiap > 0) {
         this.openDeleteDSureGrid();
@@ -1379,7 +1400,13 @@ export class ContratosComponent {
         console.log(this.whichD);
         return;
       }
-      this.deleteSecondD();
+      console.log("here quiero 2")
+
+      this.deleteDGridMessage = '¿Quiere borrar la D?';
+      console.log("msg", this.deleteDGridMessage)
+      this.openDeleteDSureGrid();
+      this.whichD = 2;
+      // this.deleteSecondD();
     }
   }
 
@@ -1387,6 +1414,16 @@ export class ContratosComponent {
     this.whichD = 0;
     this.concod = '';
     this.cgecodDelete = '';
+  }
+
+  deleteDSureGrid: boolean = false;
+  openDeleteDSureGrid() {
+    this.deleteDSureGrid = true;
+  }
+
+  closeDeleteDSureGrid() {
+    this.limpiarMessages();
+    this.deleteDSureGrid = false;
   }
 
   whichDDelete() {

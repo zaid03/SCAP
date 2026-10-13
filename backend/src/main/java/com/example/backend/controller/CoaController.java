@@ -116,7 +116,7 @@ public class CoaController {
 
             List<Coa> toSave = new ArrayList<>();
             for (CoaSaveDto dto : items) {
-                List<Coa> articulo = coaRepository.findByENTAndCONCODAndAFACODAndASUCODAndARTCOD(dto.ent, dto.concod, dto.afacod, dto.asucod, dto.artcod);
+                List<Coa> articulo = coaRepository.findByENTAndEJEAndCONCODAndAFACODAndASUCODAndARTCOD(dto.ent, dto.eje, dto.concod, dto.afacod, dto.asucod, dto.artcod);
                 if (!articulo.isEmpty()) {
                     unsavedNames.add(
                         new ArticuloInfo(

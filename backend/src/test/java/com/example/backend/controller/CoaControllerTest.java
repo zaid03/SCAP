@@ -1,36 +1,42 @@
 package com.example.backend.controller;
 
-import com.example.backend.config.TestSecurityConfig;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.hamcrest.Matchers.containsString;
+import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+import org.springframework.context.annotation.Import;
+import org.springframework.dao.DataAccessResourceFailureException;
+import org.springframework.http.MediaType;
+import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
+import org.springframework.test.web.servlet.MockMvc;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.patch;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
 import com.example.backend.config.TestExceptionHandler;
-import com.example.backend.dto.CoaArtProjection;
+import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.dto.CoaSaveDto;
 import com.example.backend.sqlserver2.model.Coa;
 import com.example.backend.sqlserver2.model.CoaId;
 import com.example.backend.sqlserver2.repository.CoaRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
-import org.springframework.context.annotation.Import;
-import org.springframework.dao.DataAccessResourceFailureException;
-import org.springframework.http.MediaType;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-import java.util.Collections;
-
-import static org.hamcrest.Matchers.containsString;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.verify;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
 @WebMvcTest(controllers = CoaController.class)
 @ActiveProfiles("test")
@@ -171,8 +177,8 @@ public class CoaControllerTest {
 
     @Test
     void saveArticulos_returns201OnSuccess() throws Exception {
-        when(coaRepository.findByENTAndCONCODAndAFACODAndASUCODAndARTCOD(
-                1, 100, "FAM", "SUB", "ART"))
+        when(coaRepository.findByENTAndEJEAndCONCODAndAFACODAndASUCODAndARTCOD(
+                1, "E1", 100, "FAM", "SUB", "ART"))
             .thenReturn(Collections.emptyList());
 
         CoaSaveDto dto = new CoaSaveDto();
@@ -204,8 +210,8 @@ public class CoaControllerTest {
         existing.setASUCOD("SUB");
         existing.setARTCOD("ART");
 
-        when(coaRepository.findByENTAndCONCODAndAFACODAndASUCODAndARTCOD(
-                1, 100, "FAM", "SUB", "ART"))
+        when(coaRepository.findByENTAndEJEAndCONCODAndAFACODAndASUCODAndARTCOD(
+                1, "E2", 100,"FAM", "SUB", "ART"))
             .thenReturn(List.of(existing));
 
         CoaSaveDto dto = new CoaSaveDto();
@@ -232,8 +238,8 @@ public class CoaControllerTest {
 
     @Test
     void saveArticulos_returns500OnDataAccessException() throws Exception {
-        when(coaRepository.findByENTAndCONCODAndAFACODAndASUCODAndARTCOD(
-                anyInt(), anyInt(), anyString(), anyString(), anyString()))
+        when(coaRepository.findByENTAndEJEAndCONCODAndAFACODAndASUCODAndARTCOD(
+                anyInt(), anyString(), anyInt(), anyString(), anyString(), anyString()))
             .thenThrow(new DataAccessResourceFailureException("DB error"));
 
         CoaSaveDto dto = new CoaSaveDto();

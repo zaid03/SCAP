@@ -15,6 +15,7 @@
 .average {width: 150px; max-width: 220px;} 
 .long {width: 600px; max-width: 720px; min-height: 50px;}
 .tdAlign {display: flex; justify-content: center; align-items: center;}
+.g-c-btns {gap: 10px;}
 /* details grid */
 /* add grid */
 .title {width: 90%;}
