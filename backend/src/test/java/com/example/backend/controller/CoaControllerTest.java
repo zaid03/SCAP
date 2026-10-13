@@ -211,7 +211,7 @@ public class CoaControllerTest {
         existing.setARTCOD("ART");
 
         when(coaRepository.findByENTAndEJEAndCONCODAndAFACODAndASUCODAndARTCOD(
-                1, "E2", 100,"FAM", "SUB", "ART"))
+                1, "E1", 100,"FAM", "SUB", "ART"))
             .thenReturn(List.of(existing));
 
         CoaSaveDto dto = new CoaSaveDto();
