@@ -1017,6 +1017,7 @@ public class ContabilizacionServiceTest {
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
+        org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any()
       )).thenReturn(List.of());
 
@@ -1036,6 +1037,7 @@ public class ContabilizacionServiceTest {
       Operaciones op2 = createOperacionWithSingleLinea();
 
       org.mockito.Mockito.when(operacionesService.getOperaciones(
+        org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
@@ -1075,6 +1077,7 @@ public class ContabilizacionServiceTest {
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any(),
+        org.mockito.ArgumentMatchers.<String>any(),
         org.mockito.ArgumentMatchers.<String>any()
       )).thenReturn(List.of(createOperacionWithSingleLinea()));
     }
@@ -1098,8 +1101,7 @@ void prepararLineasContrato_withEnoughSaldo_returnsPreparedLines() throws Except
     op.getLineaList().get(0).setSaldo(150.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1147,8 +1149,7 @@ void prepararLineasContrato_whenShortfallFitsDifference_updatesDifference() thro
     op.getLineaList().get(0).setSaldo(80.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1184,8 +1185,7 @@ void prepararLineasContrato_whenShortfallExceedsDifference_movesAmountToReserve(
     op.getLineaList().get(0).setSaldo(50.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1223,8 +1223,7 @@ void prepararLineasContrato_withNullSaldo_throwsException() throws Exception {
     op.getLineaList().get(0).setSaldo(null);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1375,8 +1374,7 @@ void actualizarAcumulados_whenSaldoOperationHasNoLines_doesNotUpdatePrincipal() 
     op.setLineaList(List.of());
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     service.actualizarAcumulados(
@@ -1409,8 +1407,7 @@ void actualizarAcumulados_whenSaldoOperationThrowsException_doesNotUpdatePrincip
     )).thenReturn(Optional.of(cog));
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenThrow(new RuntimeException("WS failure"));
 
     service.actualizarAcumulados(
@@ -1431,8 +1428,7 @@ void buildSmlInput_withWsOperationWithoutLines_skipsFdeLine() throws Exception {
     op.setLineaList(List.of());
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1462,8 +1458,7 @@ void buildSmlInput_withWsOperationMultipleLines_skipsFdeLine() throws Exception 
     op.setLineaList(List.of(linea1, linea2));
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(),
-        any(), any(), any(), any(), any()
+        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();

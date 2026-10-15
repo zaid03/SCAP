@@ -93,6 +93,8 @@ public class ConControllerTest {
                     public Integer getTERCOD() { return tercod; }
                     @Override
                     public String getTERNOM() { return "Supplier Name"; }
+                    @Override
+                    public String getTERNIF() { return "Supplier ternif"; }
                 };
             }
         };

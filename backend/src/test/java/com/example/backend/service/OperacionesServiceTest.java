@@ -393,6 +393,7 @@ class OperacionesServiceTest {
                     null,
                     null,
                     null,
+                    null,
                     null));
 
         assertEquals("eje is required", ex.getMessage());
@@ -405,6 +406,7 @@ class OperacionesServiceTest {
                 () -> service.getOperaciones(
                     "ORG",
                     "ENT",
+                    null,
                     null,
                     null,
                     null,
@@ -443,6 +445,7 @@ class OperacionesServiceTest {
                     "ORGANICA",
                     "FUNCIONAL",
                     "ECONOMICA",
+                    "TERCERO",
                     "REFERENCIA",
                     "EXPEDIENTE",
                     "GRUPO",
@@ -475,6 +478,9 @@ class OperacionesServiceTest {
             assertTrue(requestXml.contains("<economica>"
                     + Base64.getEncoder().encodeToString("ECONOMICA".getBytes(StandardCharsets.UTF_8))
                     + "</economica>"));
+            assertTrue(requestXml.contains("<tercero>"
+                + Base64.getEncoder().encodeToString("TERCERO".getBytes(StandardCharsets.UTF_8))
+                + "</tercero>"));
             assertTrue(requestXml.contains("<referencia>REFERENCIA</referencia>"));
             assertTrue(requestXml.contains("<expediente>"
                     + Base64.getEncoder().encodeToString("EXPEDIENTE".getBytes(StandardCharsets.UTF_8))
@@ -518,6 +524,7 @@ class OperacionesServiceTest {
                     "20",
                     "CODIGO",
                     "ORG-1",
+                    null,
                     null,
                     null,
                     null,
