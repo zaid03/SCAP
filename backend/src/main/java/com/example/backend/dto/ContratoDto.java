@@ -11,6 +11,7 @@ public class ContratoDto {
     private Integer conblo;
     private Integer tercod;
     private String ternom;
+    private String ternif;
 
     private ContratoDto(Builder builder) {
         this.concod = builder.concod;
@@ -21,6 +22,7 @@ public class ContratoDto {
         this.conblo = builder.conblo;
         this.tercod = builder.tercod;
         this.ternom = builder.ternom;
+        this.ternif = builder.ternif;
     }
 
     public static class Builder {
@@ -32,37 +34,25 @@ public class ContratoDto {
         private Integer conblo;
         private Integer tercod;
         private String ternom;
+        private String ternif;
 
-         public Builder concod(Integer concod) {
-            this.concod = concod;
-            return this;
-        }
+        public Builder concod(Integer concod) {this.concod = concod; return this;}
 
-        public Builder conlot(String conlot) {
-            this.conlot = conlot;
-            return this;
-        }
+        public Builder conlot(String conlot) {this.conlot = conlot; return this;}
 
-        public Builder condes(String condes) {
-            this.condes = condes;
-            return this;
-        }
+        public Builder condes(String condes) {this.condes = condes; return this;}
 
-        public Builder confin(LocalDateTime confin) {
-            this.confin = confin;
-            return this;
-        }
+        public Builder confin(LocalDateTime confin) {this.confin = confin; return this;}
 
-        public Builder conffi(LocalDateTime conffi) {
-            this.conffi = conffi;
-            return this;
-        }
+        public Builder conffi(LocalDateTime conffi) {this.conffi = conffi; return this;}
 
         public Builder conblo(Integer conblo) {this.conblo = conblo; return this;}
 
         public Builder tercod(Integer tercod) {this.tercod = tercod; return this;}
 
         public Builder ternom(String ternom) {this.ternom = ternom; return this;}
+
+        public Builder ternif(String ternif) {this.ternif = ternif; return this;}
 
         public ContratoDto build() {return new ContratoDto(this);}
     }
@@ -75,4 +65,5 @@ public class ContratoDto {
     public Integer getConblo() { return conblo; }
     public Integer getTercod() { return tercod; }
     public String getTernom() { return ternom; }
+    public String getTernif() {return ternif;}
 }

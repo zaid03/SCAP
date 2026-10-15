@@ -16,5 +16,6 @@ public interface CotContratoProjection {
     interface TerInfo {
         Integer getTERCOD();
         String getTERNOM();
+        String getTERNIF();
     }
 }

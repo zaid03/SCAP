@@ -50,6 +50,7 @@ public class OperacionesService {
         String organica,
         String funcional,
         String economica,
+        String tercero,
         String referencia,
         String expediente,
         String grupoApunte,
@@ -64,6 +65,7 @@ public class OperacionesService {
                 organica,
                 funcional,
                 economica,
+                tercero,
                 referencia,
                 expediente,
                 grupoApunte,
@@ -82,6 +84,7 @@ public class OperacionesService {
         String organica,
         String funcional,
         String economica,
+        String tercero,
         String referencia,
         String expediente,
         String grupoApunte,
@@ -107,6 +110,7 @@ public class OperacionesService {
             (organica != null ? "<organica>" + CryptoSical.encodeBase64(organica) + "</organica>" : "") +
             (funcional != null ? "<funcional>" + CryptoSical.encodeBase64(funcional) + "</funcional>" : "") +
             (economica != null ? "<economica>" + CryptoSical.encodeBase64(economica) + "</economica>" : "") +
+            (tercero != null ? "<tercero>" + CryptoSical.encodeBase64(tercero) + "</tercero>" : "") +
             (referencia != null ? "<referencia>" + referencia + "</referencia>" : "") +
             (expediente != null ? "<expediente>" + CryptoSical.encodeBase64(expediente) + "</expediente>" : "") +
             (grupoApunte != null ? "<grupoApunte>" + CryptoSical.encodeBase64(grupoApunte) + "</grupoApunte>" : "") +

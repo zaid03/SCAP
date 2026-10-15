@@ -73,6 +73,7 @@ public class ContratosSearch {
             .conblo(c.getCONBLO())
             .tercod(t.getTERCOD())
             .ternom(t.getTERNOM())
+            .ternif(t.getTERNIF())
             .build();
     }
 }

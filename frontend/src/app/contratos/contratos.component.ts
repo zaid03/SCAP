@@ -1212,12 +1212,14 @@ export class ContratosComponent {
     return String(value ?? '').trim();
   }
 
+  tercero: string = '';
   fetchD() {
     let codigoOperacion = 220;
     const oficina = 'AL';
     this.isLoadingD = true;
+    this.tercero = this.selectedContrato.ternif;
 
-    this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&codigoOperacion=${codigoOperacion}&organica=${this.organica}&funcional=${this.programa}&economica=${this.economica}&eje=${this.eje}`).subscribe({
+    this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&codigoOperacion=${codigoOperacion}&organica=${this.organica}&funcional=${this.programa}&economica=${this.economica}&tercero=${this.tercero}&eje=${this.eje}`).subscribe({
       next: (res) => {
         this.isLoadingD = false;
         if (!Array.isArray(res) || res.length === 0) {
@@ -1329,7 +1331,7 @@ export class ContratosComponent {
     this.toUpdate = D;
 
     if (this.referencia === '') {
-      this.dMessageConfirm = '¿Quiere añadir la AD al centro gestorr?';
+      this.dMessageConfirm = '¿Quiere añadir la AD al centro gestor?';
     } else {
       this.dMessageConfirm = '¿Quiere añadir la AD al centro gestor?';
     }
@@ -1391,7 +1393,6 @@ export class ContratosComponent {
       this.deleteDGridMessage = '¿Quiere borrar la D?';
       this.openDeleteDSureGrid();
       this.whichD = 1;
-      // this.deleteFirstD();
     } else {
       if (cogiap > 0) {
         this.openDeleteDSureGrid();

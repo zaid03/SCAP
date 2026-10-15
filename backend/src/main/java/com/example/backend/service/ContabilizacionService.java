@@ -183,7 +183,7 @@ public class ContabilizacionService {
     private Double consultarSaldoOperacion(ContabilizacionRequestDto req, String numOpe, String referencia, Fde ref) {
         try {
             List<Operaciones> resultado = operacionesService.getOperaciones(req.getOrg(), req.getEnt(), numOpe, numOpe,
-                    null, ref.getFDEORG(), ref.getFDEFUN(), ref.getFDEECO(), referencia, null, null, null, req.getEje());
+                    null, ref.getFDEORG(), ref.getFDEFUN(), ref.getFDEECO(), null, referencia, null, null, null, req.getEje());
             if (resultado == null || resultado.size() != 1) {
                 System.out.println("WS 2.49 (COG): resultado inesperado para op=" + numOpe);
                 return null;
@@ -670,7 +670,7 @@ public class ContabilizacionService {
             String referencia = fde.getFDEREF() != null ? String.valueOf(fde.getFDEREF()) : null;
             String oficina = "AL";
 
-            List<Operaciones> resultado = operacionesService.getOperaciones(orgCode, entidad, numeroOperDesde, numeroOperDesde, null, fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO(), referencia, null, null, null, eje);
+            List<Operaciones> resultado = operacionesService.getOperaciones(orgCode, entidad, numeroOperDesde, numeroOperDesde, null, fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO(), null, referencia, null, null, null, eje);
 
             if (!resultado.isEmpty()) {
                 Operaciones op = resultado.get(0);

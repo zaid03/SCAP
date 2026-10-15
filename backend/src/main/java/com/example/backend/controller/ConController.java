@@ -48,6 +48,7 @@ public class ConController {
             .conblo(c.getCONBLO())
             .tercod(t.getTERCOD())
             .ternom(t.getTERNOM())
+            .ternif(t.getTERNIF())
             .build();
     }
 
