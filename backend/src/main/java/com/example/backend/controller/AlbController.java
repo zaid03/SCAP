@@ -139,6 +139,28 @@ public class AlbController {
         }
     }
 
+    @GetMapping("/search-albaranes-both/{concod}/{ent}/{tercod}/{albdat}/{albdat2}/{eje}/{cgecod}")
+    public ResponseEntity<?> searchAlbaranesByBothDates(
+        @PathVariable Integer concod,
+        @PathVariable Integer ent,
+        @PathVariable Integer tercod,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @PathVariable LocalDateTime albdat,
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @PathVariable LocalDateTime albdat2,
+        @PathVariable String eje,
+        @PathVariable String cgecod
+    ) {
+        try {
+            List<albFacturaDto> albaranes = albRepository.findAlbFacturaBothDates(concod, ent, eje, cgecod, tercod, albdat, albdat2);
+            if (albaranes.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(albaranes);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
     //adding an albaranes and updating required fields in other models
     public record Albaranes(Integer ENT, String EJE, Integer ALBNUM, String CONCTP, String CONCPR, String CONCCR, Double ALBBIM, Integer FACNUM) {}
     @PatchMapping("/add-albaranes")

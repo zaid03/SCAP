@@ -77,7 +77,7 @@
 .albran-add .albaran-search-options {width: 99%;}
 .albran-add .art-title {width: 28%;}
 .albran-add .albaranes-table tbody td:nth-child(3) {text-align: right;}
-.proveedor-info {width: 20%; display: flex; gap: 10px; align-items: center;}
+.proveedor-info {min-width: 8%; display: flex; gap: 10px; align-items: center;}
 .search-chunk {display: flex; align-items: center; gap: 10px; width: 30%;}
 .widthInputAlbaran {width: 75% !important;}
 .albaran-search-options .albaran-options-btns {width: 10%;}

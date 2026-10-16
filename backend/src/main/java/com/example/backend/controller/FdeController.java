@@ -1,32 +1,37 @@
 package com.example.backend.controller;
 
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.sqlserver2.model.Fac;
-import com.example.backend.sqlserver2.model.FacId;
-import com.example.backend.sqlserver2.model.Fde;
-import com.example.backend.sqlserver2.model.FdeId;
-import com.example.backend.sqlserver2.model.Gbs;
-import com.example.backend.sqlserver2.repository.FdeRepository;
-import com.example.backend.sqlserver2.repository.GbsRepository;
-import com.example.backend.sqlserver2.repository.CogRepository;
-import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.dto.CogCgeProjection;
 import com.example.backend.dto.FdeFacTerProjection;
 import com.example.backend.dto.FdeResumeDto;
 import com.example.backend.dto.ProjectionContabilizar;
 import com.example.backend.service.ContabilizadoSearch;
 import com.example.backend.service.ContabilizarSearch;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.example.backend.sqlserver2.model.Fac;
+import com.example.backend.sqlserver2.model.FacId;
+import com.example.backend.sqlserver2.model.Fde;
+import com.example.backend.sqlserver2.model.FdeId;
+import com.example.backend.sqlserver2.model.Gbs;
+import com.example.backend.sqlserver2.repository.CogRepository;
+import com.example.backend.sqlserver2.repository.FacRepository;
+import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
 
 @RestController
 @RequestMapping("/api/fde")
@@ -230,6 +235,7 @@ public class FdeController {
             }
             Fac fac = factura.get();
             fac.setCONCOD(0);
+            fac.setFACIDI(0.00);
             facRepository.save(fac);
 
             fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
@@ -282,6 +288,7 @@ public class FdeController {
 
             Fac fac = factura.get();
             fac.setCONCOD(payload.CONCOD());
+            fac.setFACIDI(0.00);
             facRepository.save(fac);
             fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
             

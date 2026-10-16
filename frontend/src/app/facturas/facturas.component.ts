@@ -868,16 +868,22 @@ export class FacturasComponent {
   albaranesDesde: string = '';
   albaranesHasta: string = '';
   tercod: number = 0;
+  concod: number = 0;
   albaranesAdd: any[] = [];
   openAlbaranesAdd() {
     this.limpiarMEssages();
     
     this.tercod = this.selectedFacturas.tercod;
+    this.concod = this.selectedFacturas.concod;
     if (!this.albaranes?.length && this.selectedFacturas.concod === 0) {
       this.checkAlbaranByCon();
+      console.log("here")
+      return;
     } else {
       this.albaranesAddGrid = true;
       this.fetchAlrabanes();
+       console.log("here 1")
+      return;     
     }
   }
 
@@ -896,9 +902,11 @@ export class FacturasComponent {
         console.log(res)
         if (this.hasData > 0) {
           this.openAskGrid();
+          return;
         } else {
           this.albaranesAddGrid = true;
           this.fetchAlrabanes();
+          return;
         }
       },
       error: (err) => {
@@ -946,6 +954,7 @@ export class FacturasComponent {
     this.pageContatos = 0;
     console.log(this.concodChosen)
     this.fetchAlrabanes();
+    return;
   }
 
   saidNo() {
@@ -953,6 +962,7 @@ export class FacturasComponent {
     this.closeAskGrid()
     this.albaranesAddGrid = true;
     this.fetchAlrabanes();
+    return;
   }
 
   fetchAlrabanes() {
@@ -1020,6 +1030,25 @@ export class FacturasComponent {
           this.pageAlbaranesAdd = 0;
         }
       })
+    } else if (this.albaranesDesde && this.albaranesHasta) {
+      const backendDateDesde = this.toBackendDate(this.albaranesDesde);
+      const backendDateHasta = this.toBackendDate(this.albaranesHasta);
+      this.isLoadingAlbaranes = true;
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-both/${this.concodChosen}/${this.entcod}/${this.tercod}/${backendDateDesde}/${backendDateHasta}/${this.eje}/${this.centroGestor}`).subscribe({
+        next: (res) => {
+          this.isLoadingAlbaranes = false;
+          this.albaranesAdd = res;
+          this.pageAlbaranesAdd = 0;
+        },
+        error: (err) => {
+          this.albaranesAdd = [];
+          this.albaranesError = err.error.error ?? err.error;
+          this.isLoadingAlbaranes = false;
+          this.pageAlbaranesAdd = 0;
+        }
+      })
+    } else {
+      return ;
     }
   }
   toBackendDate(dateStr: string): string {
@@ -1516,6 +1545,7 @@ export class FacturasComponent {
     this.openADMessages();
     this.http.patch(`${environment.backendUrl}/api/fde/AD-con-Cont`, payload).subscribe({
       next: (res) => {
+        this.updateFacturaInfo();
         this.isUpdatingContrato = false;
         this.openADMessages();
         this.ADMessageSuccess = 'El AD del contrato se actualizó correctamente para esta factura.';
@@ -1539,6 +1569,7 @@ export class FacturasComponent {
     this.openADMessages();
     this.http.patch(`${environment.backendUrl}/api/fde/AD-sin-Cont`, payload).subscribe({
       next: (res) => {
+        this.updateFacturaInfo();
         this.isUpdatingContrato = false;
         this.openADMessages();
         this.ADMessageSuccess = 'El AD del contrato se actualizó correctamente para esta factura.';

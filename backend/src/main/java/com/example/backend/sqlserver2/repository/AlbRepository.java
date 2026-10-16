@@ -41,7 +41,7 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
             WHERE SOL.SOLSUB = 0
             AND SOL.CONCOD = :CONCOD
             AND ALB.ENT = :ENT
-            AND ALB.EJE = :EJE
+            AND DEP.EJE = :EJE
             AND DEP.CGECOD = :CGECOD
             AND ALB.FACNUM = 0
             AND ALB.TERCOD = :TERCOD
@@ -79,7 +79,7 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
             WHERE SOL.SOLSUB = 0
             AND SOL.CONCOD = :CONCOD
             AND ALB.ENT = :ENT
-            AND ALB.EJE = :EJE
+            AND DEP.EJE = :EJE
             AND DEP.CGECOD = :CGECOD
             AND ALB.FACNUM = 0
             AND ALB.TERCOD = :TERCOD
@@ -118,7 +118,7 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
             WHERE SOL.SOLSUB = 0
             AND SOL.CONCOD = :CONCOD
             AND ALB.ENT = :ENT
-            AND ALB.EJE = :EJE
+            AND DEP.EJE = :EJE
             AND DEP.CGECOD = :CGECOD
             AND ALB.FACNUM = 0
             AND ALB.TERCOD = :TERCOD
@@ -132,5 +132,45 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
         @Param("CGECOD") String CGECOD,
         @Param("TERCOD") Integer TERCOD,
         @Param("ALBDAT") LocalDateTime ALBDAT
+    );
+
+    @Query(
+        value = """
+            SELECT DISTINCT
+                ALB.ALBREF,
+                ALB.ALBDAT,
+                ALB.ALBBIM,
+                ALB.ALBNUM,
+                ALB.ALBFRE,
+                ALB.DEPCOD,
+                ALB.ALBCOM,
+                ALB.CONCTP,
+                ALB.CONCPR,
+                ALB.CONCCR
+            FROM ALB
+            JOIN DEP
+                ON ALB.ENT = DEP.ENT
+            AND ALB.ALBCOM = DEP.DEPCOD
+            JOIN SOL
+                ON ALB.ENT = SOL.ENT
+            AND ALB.SOLNUM = SOL.SOLNUM
+            WHERE SOL.SOLSUB = 0
+            AND SOL.CONCOD = :CONCOD
+            AND ALB.ENT = :ENT
+            AND DEP.EJE = :EJE
+            AND DEP.CGECOD = :CGECOD
+            AND ALB.FACNUM = 0
+            AND ALB.TERCOD = :TERCOD
+            AND ALB.ALBDAT BETWEEN :ALBDAT AND :ALBDAT2
+        """, nativeQuery = true
+    )
+    List<albFacturaDto> findAlbFacturaBothDates(
+        @Param("CONCOD") Integer CONCOD,
+        @Param("ENT") Integer ENT,
+        @Param("EJE") String EJE,
+        @Param("CGECOD") String CGECOD,
+        @Param("TERCOD") Integer TERCOD,
+        @Param("ALBDAT") LocalDateTime ALBDAT,
+        @Param("ALBDAT2") LocalDateTime ALBDAT2
     );
 }
