@@ -515,4 +515,57 @@ public class AlbControllerTest {
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Error :")));
     }
+
+    @Test
+    void searchAlbaranesByBothDates_returns200WithResults() throws Exception {
+        LocalDateTime dateFrom = LocalDateTime.of(2024, 1, 15, 10, 30);
+        LocalDateTime dateTo = LocalDateTime.of(2024, 1, 31, 10, 30);
+
+        when(albRepository.findAlbFacturaBothDates(
+                1, 100, "E1", "C1", 200, dateFrom, dateTo))
+            .thenReturn(List.of(dto));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-both/1/100/200/"
+                + dateFrom + "/" + dateTo + "/E1/C1")
+                .accept(MediaType.APPLICATION_JSON))
+            .andDo(print())
+            .andExpect(status().isOk())
+            .andExpect(jsonPath("$", hasSize(1)));
+    }
+
+    @Test
+    void searchAlbaranesByBothDates_returns404WhenEmpty() throws Exception {
+        LocalDateTime dateFrom = LocalDateTime.of(2024, 1, 15, 10, 30);
+        LocalDateTime dateTo = LocalDateTime.of(2024, 1, 31, 10, 30);
+
+        when(albRepository.findAlbFacturaBothDates(
+                1, 100, "E1", "C1", 200, dateFrom, dateTo))
+            .thenReturn(List.of());
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-both/1/100/200/"
+                + dateFrom + "/" + dateTo + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void searchAlbaranesByBothDates_returns400OnDataAccessException() throws Exception {
+        LocalDateTime dateFrom = LocalDateTime.of(2024, 1, 15, 10, 30);
+        LocalDateTime dateTo = LocalDateTime.of(2024, 1, 31, 10, 30);
+
+        when(albRepository.findAlbFacturaBothDates(
+                anyInt(), anyInt(), anyString(), anyString(), anyInt(),
+                any(LocalDateTime.class), any(LocalDateTime.class)))
+            .thenThrow(new DataAccessResourceFailureException("DB error"));
+
+        mockMvc.perform(get(
+                "/api/alb/search-albaranes-both/1/100/200/"
+                + dateFrom + "/" + dateTo + "/E1/C1"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+    }
 }
