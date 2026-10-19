@@ -466,8 +466,8 @@
                     <div class="btns">
                         <button 
                             class="purple-btn" 
-                            [disabled]="albaranes.length" 
-	                        [class.disabled-btn]="albaranes.length"
+                            [disabled]="albaranesDisabled" 
+	                        [class.disabled-btn]="albaranesDisabled"
                             (click)="openChangeAD()"
                         >Cambiar Contrato AD</button>
                         <button 
@@ -933,7 +933,7 @@
         </div>
         <div class="proveedor-info">
             <p class="p-style">Contrato</p>
-            <h1 class="h1-style">{{concod}}</h1>
+            <h1 class="h1-style">{{lastConcodCalled}}</h1>
         </div>
         <div class="search-chunk">
             <p class="p-style">Desde</p>
@@ -989,7 +989,7 @@
                 <td>{{a.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{a.albnum}}</td>
                 <td>{{a.albfre | date:'dd-MM-yyyy'}}</td>
-                <td>{{concodChosen}}</td>
+                <td>{{lastConcodCalled}}</td>
                 <td>{{a.depcod}}</td>
                 <td>{{a.albcom}}</td>
             </tr>
