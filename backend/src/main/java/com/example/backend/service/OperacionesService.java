@@ -186,11 +186,31 @@ public class OperacionesService {
                 .replace("&quot;", "\"")
                 .replace("&apos;", "'");
 
-        try {
-            DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
-            factory.setNamespaceAware(false);
-            DocumentBuilder builder = factory.newDocumentBuilder();
-            Document doc = builder.parse(new ByteArrayInputStream(sml.getBytes(StandardCharsets.UTF_8)));
+        try {       
+            javax.xml.parsers.DocumentBuilderFactory factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+            
+            factory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+            factory.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", true);
+
+            factory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+
+            factory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
+            factory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+            factory.setXIncludeAware(false);
+            factory.setExpandEntityReferences(false);
+
+            factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+
+            factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
+            javax.xml.parsers.DocumentBuilder dBuilder = factory.newDocumentBuilder();
+
+            org.w3c.dom.Document doc = dBuilder.parse(
+                new java.io.ByteArrayInputStream(sml.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            );
 
             NodeList operNodes = findElementsByName(doc, "operacion");
             for (int i = 0; i < operNodes.getLength(); i++) {

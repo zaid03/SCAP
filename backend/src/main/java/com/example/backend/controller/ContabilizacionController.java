@@ -122,10 +122,7 @@ public class ContabilizacionController {
                 try {
                     contabilizacionService.actualizarAcumulados(request, saved, fdeList, kImporteTotal);
                 } catch (Exception accEx) {
-                    accEx.printStackTrace();
-                    response.setMensaje(response.getMensaje()
-                        + ". ATENCIÓN: la operación se generó pero falló la actualización de acumulados: "
-                        + accEx.getMessage());
+                    response.setMensaje(response.getMensaje() + ". ATENCIÓN: la operación se generó pero falló la actualización de acumulados: " + accEx.getMessage());
                 }
                 return ResponseEntity.ok(response);
             } else {

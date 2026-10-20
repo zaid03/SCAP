@@ -193,7 +193,7 @@ public class ContabilizacionService {
             return lineas.get(0).getSaldo();
         } catch (Exception e) {
             System.out.println("========== WS 2.49 (COG) FALLIDA ==========");
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
             return null;
         }
     }
@@ -511,7 +511,7 @@ public class ContabilizacionService {
             return response.getBody();
         } catch (Exception e) {
             System.out.println("========== REQUEST FAILED ==========");
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
             return null;
         }
     }
@@ -536,12 +536,32 @@ public class ContabilizacionService {
             }
 
             javax.xml.parsers.DocumentBuilderFactory dbFactory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+            
+            dbFactory.setFeature(javax.xml.XMLConstants.FEATURE_SECURE_PROCESSING, true);
+
+            dbFactory.setFeature( "http://apache.org/xml/features/disallow-doctype-decl", true);
+
+            dbFactory.setFeature("http://xml.org/sax/features/external-general-entities", false);
+
+            dbFactory.setFeature("http://xml.org/sax/features/external-parameter-entities", false);
+
+            dbFactory.setFeature("http://apache.org/xml/features/nonvalidating/load-external-dtd", false);
+
+            dbFactory.setXIncludeAware(false);
+            dbFactory.setExpandEntityReferences(false);
+
+            dbFactory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD, "");
+
+            dbFactory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_SCHEMA, "");
+
             javax.xml.parsers.DocumentBuilder dBuilder = dbFactory.newDocumentBuilder();
-            org.w3c.dom.Document doc = dBuilder.parse(new java.io.ByteArrayInputStream(sml.getBytes()));
+
+            org.w3c.dom.Document doc = dBuilder.parse(
+                new java.io.ByteArrayInputStream(sml.getBytes(java.nio.charset.StandardCharsets.UTF_8))
+            );
 
             String exito = getTagValue(doc, "exito");
             System.out.println("Exito value: " + exito);
-            
             
             if ("-1".equals(exito)) {
                 dto.setExito(true);
@@ -594,7 +614,6 @@ public class ContabilizacionService {
         } catch (Exception e) {
             dto.setExito(false);
             dto.setMensaje("Error al procesar respuesta: " + e.getMessage());
-            e.printStackTrace();
         }
         
         return dto;
@@ -656,7 +675,7 @@ public class ContabilizacionService {
             return CryptoSical.decodeBase64(value);
         } catch (Exception e) {
             System.out.println("========== REQUEST FAILED ==========");
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
             return value;
         }
     }
@@ -711,7 +730,7 @@ public class ContabilizacionService {
             );
         } catch (Exception e) {
             System.out.println("========== WS 2.49 CONSULTA FALLIDA ==========");
-            e.printStackTrace();
+            System.out.println("Error: " + e.getMessage());
             return null;
         }
     }
