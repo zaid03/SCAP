@@ -37,6 +37,9 @@ import com.example.backend.sqlserver2.model.TpeId;
 import com.example.backend.sqlserver2.repository.TpeRepository;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.mockito.ArgumentCaptor;
+import static org.mockito.Mockito.never;
+
 @WebMvcTest(controllers = TpeController.class)
 @ActiveProfiles("test")
 @Import({TestSecurityConfig.class, TestExceptionHandler.class})
@@ -88,56 +91,187 @@ public class TpeControllerTest {
             .andExpect(status().isNotFound());
     }
 
+   
     @Test
     void shouldAddTpe_returns201_and_createEntity() throws Exception {
         int ent = 2;
         int tercod = 77;
 
-        when(tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, "NewContact")).thenReturn(false);
-        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod)).thenReturn(null);
-        when(tpeRepository.save(any(Tpe.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod))
+            .thenReturn(null);
+        when(tpeRepository.save(any(Tpe.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
 
         Map<String, String> payload = Map.of(
             "tpenom", "NewContact",
             "tpetel", "111222333",
             "tpetmo", "999000111",
-            "tpecoe", "COE",
+            "tpecoe", "contact@example.com",
             "tpeobs", "OBS"
         );
 
         mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
-            .andDo(print())
             .andExpect(status().isCreated())
-            .andExpect(content().string(containsString("Persona de contacto agregada")));
+            .andExpect(content().string(
+                containsString("Persona de contacto agregada")));
 
-        verify(tpeRepository).save(any(Tpe.class));
+        ArgumentCaptor<Tpe> captor = ArgumentCaptor.forClass(Tpe.class);
+        verify(tpeRepository).save(captor.capture());
+
+        Tpe saved = captor.getValue();
+        org.junit.jupiter.api.Assertions.assertEquals(ent, saved.getENT());
+        org.junit.jupiter.api.Assertions.assertEquals(tercod, saved.getTERCOD());
+        org.junit.jupiter.api.Assertions.assertEquals(1, saved.getTPECOD());
+        org.junit.jupiter.api.Assertions.assertEquals("NewContact", saved.getTPENOM());
     }
-    
+
     @Test
-    void shouldAddTpe_returns201_whenLastTpeIsNull() throws Exception {
+    void shouldAddTpe_generatesNextTpecod() throws Exception {
         int ent = 2;
         int tercod = 77;
 
-        when(tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, "FirstContact")).thenReturn(false);
-        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod)).thenReturn(null);
-        when(tpeRepository.save(any(Tpe.class))).thenAnswer(invocation -> invocation.getArgument(0));
+        Tpe last = createTpe(ent, tercod, 5, "Previous");
 
-        Map<String, String> payload = Map.of(
-            "tpenom", "FirstContact",
-            "tpetel", "111222333",
-            "tpetmo", "999000111",
-            "tpecoe", "COE",
-            "tpeobs", "OBS"
-        );
+        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod))
+            .thenReturn(last);
+        when(tpeRepository.save(any(Tpe.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        String payload = """
+            {
+                "tpenom": "NewContact",
+                "tpetel": "111",
+                "tpetmo": "",
+                "tpecoe": "",
+                "tpeobs": ""
+            }
+            """;
 
         mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload)))
-            .andDo(print())
-            .andExpect(status().isCreated())
-            .andExpect(content().string(containsString("Persona de contacto agregada")));
+                .content(payload))
+            .andExpect(status().isCreated());
+
+        ArgumentCaptor<Tpe> captor = ArgumentCaptor.forClass(Tpe.class);
+        verify(tpeRepository).save(captor.capture());
+
+        org.junit.jupiter.api.Assertions.assertEquals(
+            6, captor.getValue().getTPECOD());
+    }
+
+    @Test
+    void shouldAddTpe_returns409WhenTelephoneExists() throws Exception {
+        int ent = 2;
+        int tercod = 77;
+
+        when(tpeRepository.existsByENTAndTERCODAndTPETEL(ent, tercod, "111"))
+            .thenReturn(true);
+
+        String payload = """
+            {
+                "tpenom": "Duplicate",
+                "tpetel": "111",
+                "tpetmo": "",
+                "tpecoe": "",
+                "tpeobs": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isConflict())
+            .andExpect(content().string("Este persona ya existe"));
+
+        verify(tpeRepository, never()).save(any(Tpe.class));
+    }
+
+    @Test
+    void shouldAddTpe_returns409WhenMobileExists() throws Exception {
+        int ent = 2;
+        int tercod = 77;
+
+        when(tpeRepository.existsByENTAndTERCODAndTPETMO(ent, tercod, "222"))
+            .thenReturn(true);
+
+        String payload = """
+            {
+                "tpenom": "Duplicate",
+                "tpetel": "",
+                "tpetmo": "222",
+                "tpecoe": "",
+                "tpeobs": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isConflict());
+
+        verify(tpeRepository, never()).save(any(Tpe.class));
+    }
+
+    @Test
+    void shouldAddTpe_returns409WhenEmailExists() throws Exception {
+        int ent = 2;
+        int tercod = 77;
+
+        when(tpeRepository.existsByENTAndTERCODAndTPECOE(
+                ent, tercod, "contact@example.com"))
+            .thenReturn(true);
+
+        String payload = """
+            {
+                "tpenom": "Duplicate",
+                "tpetel": "",
+                "tpetmo": "",
+                "tpecoe": "contact@example.com",
+                "tpeobs": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isConflict());
+
+        verify(tpeRepository, never()).save(any(Tpe.class));
+    }
+
+    @Test
+    void shouldAddTpe_ignoresBlankContactFields() throws Exception {
+        int ent = 2;
+        int tercod = 77;
+
+        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod))
+            .thenReturn(null);
+        when(tpeRepository.save(any(Tpe.class)))
+            .thenAnswer(invocation -> invocation.getArgument(0));
+
+        String payload = """
+            {
+                "tpenom": "NoContactInfo",
+                "tpetel": "",
+                "tpetmo": "   ",
+                "tpecoe": "",
+                "tpeobs": ""
+            }
+            """;
+
+        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(payload))
+            .andExpect(status().isCreated());
+
+        verify(tpeRepository, never())
+            .existsByENTAndTERCODAndTPETEL(anyInt(), anyInt(), any(String.class));
+        verify(tpeRepository, never())
+            .existsByENTAndTERCODAndTPETMO(anyInt(), anyInt(), any(String.class));
+        verify(tpeRepository, never())
+            .existsByENTAndTERCODAndTPECOE(anyInt(), anyInt(), any(String.class));
 
         verify(tpeRepository).save(any(Tpe.class));
     }
@@ -147,23 +281,24 @@ public class TpeControllerTest {
         int ent = 2;
         int tercod = 77;
 
-        when(tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, "NewContact")).thenReturn(false);
-        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod)).thenReturn(null);
+        when(tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod))
+            .thenReturn(null);
         when(tpeRepository.save(any(Tpe.class)))
             .thenThrow(new DataAccessResourceFailureException("DB error"));
 
-        Map<String, String> payload = Map.of(
-            "tpenom", "NewContact",
-            "tpetel", "111222333",
-            "tpetmo", "999000111",
-            "tpecoe", "COE",
-            "tpeobs", "OBS"
-        );
+        String payload = """
+            {
+                "tpenom": "NewContact",
+                "tpetel": "111",
+                "tpetmo": "",
+                "tpecoe": "",
+                "tpeobs": ""
+            }
+            """;
 
         mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload)))
-            .andDo(print())
+                .content(payload))
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("La inserción falló")));
     }
