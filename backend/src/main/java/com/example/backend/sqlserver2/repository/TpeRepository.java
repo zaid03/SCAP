@@ -14,7 +14,9 @@ public interface TpeRepository extends JpaRepository<Tpe, TpeId> {
     List<Tpe> findByENTAndTERCOD(Integer ent, Integer tercod);
 
     //adding a persona
-    boolean existsByENTAndTERCODAndTPENOM(Integer ent, Integer tercod, String tpenom);
+    boolean existsByENTAndTERCODAndTPETEL(Integer ent, Integer tercod, String tpetel);
+    boolean existsByENTAndTERCODAndTPETMO(Integer ent, Integer tercod, String tpetmo);
+    boolean existsByENTAndTERCODAndTPECOE(Integer ent, Integer tercod, String tpecoe);
 
     Tpe findFirstByENTAndTERCODOrderByTPECODDesc(Integer ent, Integer tercod);
 }

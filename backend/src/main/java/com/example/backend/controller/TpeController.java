@@ -96,6 +96,12 @@ public class TpeController {
         @RequestBody personaAdd payload
     ) {
         try {
+            boolean personaExist = (payload.tpetel() != null && !payload.tpetel().isBlank() && tpeRepository.existsByENTAndTERCODAndTPETEL(ent, tercod, payload.tpetel())) || (payload.tpetmo() != null && !payload.tpetmo().isBlank() && tpeRepository.existsByENTAndTERCODAndTPETMO(ent, tercod, payload.tpetmo())) || (payload.tpecoe() != null && !payload.tpecoe().isBlank() && tpeRepository.existsByENTAndTERCODAndTPECOE(ent, tercod, payload.tpecoe()));
+
+            if (personaExist) {
+                return ResponseEntity.status(HttpStatus.CONFLICT).body("Este persona ya existe");
+            }
+
             Tpe lastTpe = tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod);
             int nextTpecod = (lastTpe == null ? 1 : lastTpe.getTPECOD() + 1);   
             Tpe tpe = new Tpe();
