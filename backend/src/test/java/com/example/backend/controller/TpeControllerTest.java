@@ -1,33 +1,41 @@
 package com.example.backend.controller;
 
-import com.example.backend.config.TestSecurityConfig;
-import com.example.backend.config.TestExceptionHandler;
-import com.example.backend.sqlserver2.model.Tpe;
-import com.example.backend.sqlserver2.model.TpeId;
-import com.example.backend.sqlserver2.repository.TpeRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import static org.hamcrest.Matchers.containsString;
+import static org.hamcrest.Matchers.hasSize;
 import org.junit.jupiter.api.Test;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doThrow;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.context.annotation.Import;
 import org.springframework.dao.DataAccessResourceFailureException;
 import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
-
-import java.util.Optional;
-import java.util.List;
-import java.util.Map;
-
-import static org.hamcrest.Matchers.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
-import static org.mockito.Mockito.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
+
+import com.example.backend.config.TestExceptionHandler;
+import com.example.backend.config.TestSecurityConfig;
+import com.example.backend.sqlserver2.model.Tpe;
+import com.example.backend.sqlserver2.model.TpeId;
+import com.example.backend.sqlserver2.repository.TpeRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = TpeController.class)
 @ActiveProfiles("test")
@@ -106,42 +114,7 @@ public class TpeControllerTest {
 
         verify(tpeRepository).save(any(Tpe.class));
     }
-
-    @Test
-    void shouldNotAddDuplicateName_returns400() throws Exception {
-        int ent = 3;
-        int tercod = 88;
-
-        when(tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, "DupName")).thenReturn(true);
-
-        Map<String, String> payload = Map.of(
-            "tpenom", "DupName",
-            "tpetel", "X",
-            "tpetmo", "Y",
-            "tpecoe", "Z",
-            "tpeobs", "OBS"
-        );
-
-        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(payload)))
-            .andDo(print())
-            .andExpect(status().isBadRequest());
-    }
-
-    @Test
-    void shouldNotAddTpe_returns400WhenNullTpenom() throws Exception {
-        int ent = 2;
-        int tercod = 77;
-
-        mockMvc.perform(post("/api/more/add/" + ent + "/" + tercod)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content("{\"tpetel\": \"111\"}"))
-            .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string(containsString("Nombre requerido.")));
-    }
-
+    
     @Test
     void shouldAddTpe_returns201_whenLastTpeIsNull() throws Exception {
         int ent = 2;

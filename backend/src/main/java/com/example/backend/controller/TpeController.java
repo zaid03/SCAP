@@ -96,11 +96,6 @@ public class TpeController {
         @RequestBody personaAdd payload
     ) {
         try {
-            // boolean name = tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, payload.tpenom());
-            // if (name){
-            //     return ResponseEntity.badRequest().body("Nombre existe.");
-            // }
-
             Tpe lastTpe = tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod);
             int nextTpecod = (lastTpe == null ? 1 : lastTpe.getTPECOD() + 1);   
             Tpe tpe = new Tpe();
