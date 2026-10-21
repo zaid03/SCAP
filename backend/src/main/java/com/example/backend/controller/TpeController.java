@@ -1,17 +1,25 @@
 package com.example.backend.controller;
 
-import com.example.backend.sqlserver2.model.Tpe;
-import com.example.backend.sqlserver2.model.TpeId;
-import com.example.backend.sqlserver2.repository.TpeRepository;
+import java.util.List;
+import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
-import java.util.Optional;
-import java.util.List;
+import com.example.backend.sqlserver2.model.Tpe;
+import com.example.backend.sqlserver2.model.TpeId;
+import com.example.backend.sqlserver2.repository.TpeRepository;
 
 @RestController
 @RequestMapping("/api/more")
@@ -88,14 +96,10 @@ public class TpeController {
         @RequestBody personaAdd payload
     ) {
         try {
-            if (payload == null || payload.tpenom() == null) {
-                return ResponseEntity.badRequest().body("Nombre requerido.");
-            }
-
-            boolean name = tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, payload.tpenom());
-            if (name){
-                return ResponseEntity.badRequest().body("Nombre existe.");
-            }
+            // boolean name = tpeRepository.existsByENTAndTERCODAndTPENOM(ent, tercod, payload.tpenom());
+            // if (name){
+            //     return ResponseEntity.badRequest().body("Nombre existe.");
+            // }
 
             Tpe lastTpe = tpeRepository.findFirstByENTAndTERCODOrderByTPECODDesc(ent, tercod);
             int nextTpecod = (lastTpe == null ? 1 : lastTpe.getTPECOD() + 1);   

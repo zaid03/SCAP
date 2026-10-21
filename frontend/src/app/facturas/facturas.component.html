@@ -159,7 +159,7 @@
                             <div class="resizer" (mousedown)="startResize($event, 10)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facado')">
-                            ADO
+                            Op. Contable
                             <span class="sort-indicator" *ngIf="sortColumn === 'facado'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 11)"></div>
                         </th>
@@ -426,7 +426,7 @@
                                     <h1 class="h1-style">{{selectedFacturas.cgecod}}</h1>
                                 </td>
                                 <td>
-                                    <p class="p-style">ADO:</p>
+                                    <p class="p-style">Op. Contable:</p>
                                 </td>
                                 <td>
                                     <textarea 

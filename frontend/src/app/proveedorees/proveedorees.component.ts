@@ -481,11 +481,9 @@ export class ProveedoreesComponent {
   isAdding: boolean = false;
   addPersonas(tpenom: string, tpetel: string, tpetmo: string, tpecoe: string, tpeobs: string) {
     this.limpiarMessages();
-    this.isAdding = true;
-    const tercod = this.personaInfo.tercod;
 
-    if(!tpenom) {
-      this.personaContactoaddError = 'Nombre requirido'
+    if(!tpenom && !tpetel && !tpetmo && !tpecoe && !tpeobs) {
+      this.personaContactoaddError = 'Se requiere al menos un campo.'
       return;
     }
 
@@ -497,6 +495,10 @@ export class ProveedoreesComponent {
       "tpeobs" : tpeobs
     }
 
+    console.log(payload)
+
+    const tercod = this.personaInfo.tercod;
+    this.isAdding = true;
     this.http.post(`${environment.backendUrl}/api/more/add/${this.entcod}/${tercod}`, payload, { responseType: 'text' }).subscribe({
       next: (res) => {
         this.personasContactoSuccessMessage = 'Persona Agregado exitosamente';

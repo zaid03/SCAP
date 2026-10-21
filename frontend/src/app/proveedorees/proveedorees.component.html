@@ -387,23 +387,54 @@
                             <tbody>
                                 <tr *ngFor="let c of paginatedPersonas">          
                                     <td>
-                                        <input type="text" [(ngModel)]="c.tpenom" placeholder="Nombre" #nom/>
+                                        <input 
+                                            type="text" 
+                                            [(ngModel)]="c.tpenom" 
+                                            placeholder="Nombre" 
+                                            #nom
+                                        />
                                     </td>
                                     <td>
-                                        <input type="text" [(ngModel)]="c.tpetel" #telefon/>
+                                        <input 
+                                            type="text" 
+                                            [(ngModel)]="c.tpetel" 
+                                            placeholder="Teléfono"
+                                            #telefon
+                                        />
                                     </td>      
                                     <td>
-                                        <input type="text" [(ngModel)]="c.tpetmo" #movil/>
+                                        <input 
+                                            type="text" 
+                                            [(ngModel)]="c.tpetmo" 
+                                            placeholder="Móvil"
+                                            #movil
+                                        />
                                     </td>
                                     <td>
-                                        <input type="email" [(ngModel)]="c.tpecoe" #email/>
+                                        <input 
+                                            type="email" 
+                                            [(ngModel)]="c.tpecoe" 
+                                            placeholder="Correo electrónico"
+                                            #email
+                                        />
                                     </td>
                                     <td>
-                                        <input type="text" [(ngModel)]="c.tpeobs" #obs/>
+                                        <input 
+                                            type="text" 
+                                            [(ngModel)]="c.tpeobs" 
+                                            placeholder="Observaciones"
+                                            #obs
+                                        />
                                     </td>
                                     <td>
-                                        <button class="red-btn" (click)="openDeletePersonas(c)">-</button>
-                                        <button class="purple-btn" (click)="updatepersonas(c)">✔</button>
+                                        <button 
+                                            class="red-btn" 
+                                            (click)="openDeletePersonas(c)"
+                                        >-</button>
+                                        <button 
+                                            class="purple-btn" 
+                                            (click)="updatepersonas(c)"
+                                        >✔</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -585,7 +616,7 @@
     <table class="details-table perAdd">
         <tr>
             <td>
-                <p class="p-style">Nombre*</p>
+                <p class="p-style">Nombre</p>
             </td>
             <td>
                 <textarea class="textArea-style sieText" #nombreadd></textarea>
