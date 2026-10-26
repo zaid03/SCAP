@@ -672,6 +672,7 @@
                                                                 (focus)="startEditingPrice(a)"
                                                                 (blur)="stopEditingPrice(a)"
                                                                 (input)="onPriceTyping($event, a)"
+                                                                [disabled]="!a.FDEECO && a.FDEECO !== 0"
                                                             />
                                                         </td>
                                                         <td class="g-c-btns">
@@ -1014,7 +1015,7 @@
 
 <div class="modal-backdrop force" *ngIf="askGrid"></div>
 <div class="delete-confirm-modal" *ngIf="askGrid">
-    <p class="p-style">EL PROVEEDOR TIENE CONTRATOS AD,  ¿QUIERE SELECCIONAR UNO O LA FACTURA NO ES DE CONTRATO?</p>
+    <p class="p-style">El proveedor tiene contratos AD, ¿Quiere seleccionar uno o la factura no es de contrato?</p>
     <div class="btns messageGrid">
         <button class="red-btn" (click)="saidNo()">No</button>
         <button class="purple-btn" (click)="saidYes()">Sí</button>

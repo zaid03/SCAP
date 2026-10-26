@@ -751,7 +751,6 @@ export class FacturasComponent {
   setAlbaranesOptio(option: 'albaranes' | 'aplicaciones' | 'descuentos', facnum: number): void {
     this.albaranesOptio = option;
     this.limpiarMEssages();
-    this.isLoading = true;
     this.albaranes = [];
     this.apalicaciones = [];
     this.descuentos = [];
@@ -766,6 +765,7 @@ export class FacturasComponent {
   albaranError: string = '';
   albaranesDisabled: boolean = false;
   fetchAlbaranesDEtail(facnum: number) {
+    this.isLoading = true;
     this.http.get<any>(`${environment.backendUrl}/api/alb/albaranes/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
         this.albaranesDisabled = true;
@@ -794,11 +794,9 @@ export class FacturasComponent {
   fetchApplicacionesDetails(facnum: number) {
     this.limpiarMEssages();
 
-    this.http.get<any>(
-      `${environment.backendUrl}/api/fde/${this.entcod}/${this.eje}/${facnum}`
-    ).subscribe({
+    this.isLoading = true;
+    this.http.get<any>(`${environment.backendUrl}/api/fde/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
-
         this.apalicaciones = response.map((item: any) => {
 
           if (item.FDEDIF !== undefined && item.FDEDIF !== null && item.FDEDIF !== '') {
@@ -840,6 +838,7 @@ export class FacturasComponent {
 
   descuentosError: string = '';
   fetchDescuentosDetails(facnum: number) {
+    this.isLoading = true;
     this.http.get<any>(`${environment.backendUrl}/api/fdt/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
         this.descuentos = response;
@@ -953,7 +952,7 @@ export class FacturasComponent {
   }
 
   getConcod(p: any) {
-    this.concodChosen = p?.concod || 0;
+    this.concodChosen = p?.concod || p.conn?.concod || 0;
     this.albaranesAddGrid = true;
     this.getConcodGrid = false;
     this.contratosPorAD = [];
@@ -1597,9 +1596,9 @@ export class FacturasComponent {
   }
 
   closeADMessages() {
+    this.fetchApplicacionesDetails(this.selectedFacturas.facnum)
     this.limpiarMEssages();
     this.ADMessagesGrid = false;
-    this.closeChangeAD();
     this.closeChangeAD();
   }
 

@@ -177,11 +177,13 @@ public class FacController {
                     eje
                 );
 
+                int facoct = 0;
                 boolean hasActiveAccount = false;
                 if (terceros != null && !terceros.isEmpty()) {
                     for (CuentaBancaria cuenta : terceros.get(0).getCuentasBancarias()) {
                         if (!"B".equalsIgnoreCase(cuenta.TDB_SIT())) {
                             hasActiveAccount = true;
+                            facoct = Integer.parseInt(cuenta.TDB_ORD());
                             break;
                         }
                     }
@@ -195,7 +197,7 @@ public class FacController {
                     factura.setFACFPG(payload.FACFPG());
                     factura.setFACOPG(payload.FACOPG());
                     factura.setFACTPG(payload.FACTPG());
-                    factura.setFACOCT(payload.FACOCT());
+                    factura.setFACOCT(facoct);
                     facRepository.save(factura);
 
                     return ResponseEntity.noContent().build();
