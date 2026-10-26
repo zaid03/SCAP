@@ -177,13 +177,15 @@ public class FacController {
                     eje
                 );
 
-                int facoct = 0;
+                Integer facoct = payload.FACOCT();
                 boolean hasActiveAccount = false;
                 if (terceros != null && !terceros.isEmpty()) {
                     for (CuentaBancaria cuenta : terceros.get(0).getCuentasBancarias()) {
                         if (!"B".equalsIgnoreCase(cuenta.TDB_SIT())) {
                             hasActiveAccount = true;
-                            facoct = Integer.parseInt(cuenta.TDB_ORD());
+                            if (cuenta.TDB_ORD() != null && !cuenta.TDB_ORD().isBlank()) {
+                                facoct = Integer.parseInt(cuenta.TDB_ORD());
+                            }
                             break;
                         }
                     }
