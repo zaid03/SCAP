@@ -1382,22 +1382,10 @@ export class ContratosComponent {
     }
 
     if (cogopd.trim() != '' && cogop2.trim() === '') {
-      if (cogimp < cogiap) {
-        this.openDeleteDSureGrid();
-        this.deleteDGridMessage = 'No tendrá Disponible para contabilizar los pedidos pendientes. ¿Quiere seguir?';
-        this.whichD = 1;
-        console.log(this.whichD);
-        return;
-      }
-      console.log("here quero 1")
-      this.deleteDGridMessage = '¿Quiere borrar la D?';
-      this.openDeleteDSureGrid();
-      this.whichD = 1;
-    } else {
       if (cogiap > 0) {
         this.openDeleteDSureGrid();
         this.deleteDGridMessage = 'No tendrá Disponible para contabilizar los pedidos pendientes. ¿Quiere seguir?';
-        this.whichD = 2;
+        this.whichD = 1;
         console.log(this.whichD);
         return;
       }
@@ -1406,8 +1394,26 @@ export class ContratosComponent {
       this.deleteDGridMessage = '¿Quiere borrar la D?';
       console.log("msg", this.deleteDGridMessage)
       this.openDeleteDSureGrid();
-      this.whichD = 2;
+      this.whichD = 1;
       // this.deleteSecondD();
+    } else {
+
+      if (cogimp < cogiap) {
+        this.openDeleteDSureGrid();
+        this.deleteDGridMessage = 'No tendrá Disponible para contabilizar los pedidos pendientes. ¿Quiere seguir?';
+        this.whichD = 2;
+        console.log(this.whichD);
+        return;
+      }
+      console.log("here quero 1")
+      this.deleteDGridMessage = '¿Quiere borrar la D?';
+      this.openDeleteDSureGrid();
+      this.whichD = 2;
+
+
+
+
+      
     }
   }
 

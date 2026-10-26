@@ -120,8 +120,8 @@
                         <td (click)="openDetails(c)" class="pointer">{{c.concod}}</td>
                         <td>{{c.conlot}}</td>
                         <td>{{c.condes}}</td>
-                        <td>{{c.confin | date: 'dd/MM/yyyy': 'UTC': 'es-ES'}}</td>
-                        <td>{{c.conffi | date: 'dd/MM/yyyy': 'UTC': 'es-ES'}}</td>
+                        <td>{{c.confin | date:'dd-MM-yyyy'}}</td>
+                        <td>{{c.conffi | date:'dd-MM-yyyy'}}</td>
                         <td>{{setBloqueado(c.conblo)}}</td>
                         <td>{{c.tercod}}</td>
                         <td>{{c.ternom}}</td>
@@ -225,6 +225,7 @@
                                         [(ngModel)]="tempContrato.condes" 
                                         [disabled]="!isUpdate"
                                         (input)="allowToUpdate = true"
+                                        maxlength="50"
                                         #desc
                                     ></textarea>
                                 </td>
