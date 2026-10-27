@@ -877,6 +877,7 @@
                 <th>Económica</th>
                 <th>Importe</th>
                 <th>Saldo</th>
+                <th>Saldo previo</th>
                 <th>Descripción</th>
             </tr>
         </thead>
@@ -895,6 +896,7 @@
                 <td>{{d.lineaList[0].lineco}}</td>
                 <td>{{d.lineaList[0].limporte | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{d.lineaList[0].saldo | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                <td>{{d.lineaList[0].saldop | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{d.texto}}</td>
             </tr>
         </tbody>

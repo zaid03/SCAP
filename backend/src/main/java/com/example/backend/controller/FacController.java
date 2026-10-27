@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -177,16 +178,23 @@ public class FacController {
                     eje
                 );
 
-                Integer facoct = payload.FACOCT();
+                Integer facoct = null;
                 boolean hasActiveAccount = false;
                 if (terceros != null && !terceros.isEmpty()) {
                     for (CuentaBancaria cuenta : terceros.get(0).getCuentasBancarias()) {
                         if (!"B".equalsIgnoreCase(cuenta.TDB_SIT())) {
-                            hasActiveAccount = true;
-                            if (cuenta.TDB_ORD() != null && !cuenta.TDB_ORD().isBlank()) {
-                                facoct = Integer.parseInt(cuenta.TDB_ORD());
+                            String orden = cuenta.TDB_ORD();
+
+                            if (orden == null || orden.isBlank() || payload.FACOCT() == null) {
+                                hasActiveAccount = true;
+                                break;
                             }
-                            break;
+
+                            facoct = Integer.parseInt(orden);
+                            if (Objects.equals(facoct, payload.FACOCT())) {
+                                hasActiveAccount = true;
+                                break;
+                            }
                         }
                     }
                 }

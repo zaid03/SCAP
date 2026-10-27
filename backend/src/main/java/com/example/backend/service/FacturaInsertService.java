@@ -76,7 +76,7 @@ public class FacturaInsertService {
                 Integer maxFacnum = facRepository.findMaxFACNUMByENTAndEJE(dto.ENT, dto.EJE);
                 int newFacnum = (maxFacnum == null ? 1 : maxFacnum + 1);
 
-                int facoct = 0;
+                Integer facoct = 0;
                 try {
                     String tercod = String.valueOf(ter.getTERCOD());
 

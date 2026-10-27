@@ -246,13 +246,13 @@
                                 <td>
                                     <p class="p-style">Núm. Reg:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facnum}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Proveedor:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <div class="cell-content">
                                         <h1 class="h1-style">{{selectedFacturas.tercod}}</h1>
                                         <h1 class="h1-style">{{selectedFacturas.ter_TERNOM}}</h1>
@@ -261,13 +261,13 @@
                                 <td>
                                     <p class="p-style">NIF:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.ter_TERNIF}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Total Factura:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facimp | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                 </td>
                             </tr>
@@ -275,13 +275,13 @@
                                 <td>
                                     <p class="p-style">Núm.Factura:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facdoc}}</h1>
                                 </td>
-                                <td>
+                                <td >
                                     <p class="p-style">Des.Fact/ADO:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj" >
                                     <textarea 
                                     class="textArea-style averageThird" 
                                     [(ngModel)]="selectedFacturas.factxt"
@@ -291,7 +291,7 @@
                                 <td>
                                     <p class="p-style">Forma de pago:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                         class="textArea-style pagoSmallWidth" 
                                         [(ngModel)]="tempFactura.facfpg"
@@ -302,7 +302,7 @@
                                 <td>
                                     <p class="p-style">Aplicado:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.faciec | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                 </td>
                             </tr>
@@ -310,7 +310,7 @@
                                 <td>
                                     <p class="p-style">R.C.F:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <div class="cell-content">
                                         <h1 class="h1-style">{{ selectedFacturas.facfac }}-</h1>
                                         <h1 class="h1-style">{{ selectedFacturas.facann }}-</h1>
@@ -320,7 +320,7 @@
                                 <td>
                                     <p class="p-style">Tipo de contrato:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                     class="textArea-style averageThird" 
                                     [(ngModel)]="tempFactura.conctp"
@@ -331,7 +331,7 @@
                                 <td>
                                     <p class="p-style">Ordinal de pago:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                         class="textArea-style pagoSmallWidth" 
                                         [(ngModel)]="tempFactura.facopg"
@@ -342,7 +342,7 @@
                                 <td>
                                     <p class="p-style">Apl.diferencias:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facidi | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                 </td>
                             </tr>
@@ -350,13 +350,13 @@
                                 <td>
                                     <p class="p-style">Fecha Factura:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facdat | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Criterio de puntuación:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                     class="textArea-style averageThird" 
                                     [(ngModel)]="tempFactura.concpr"
@@ -367,7 +367,7 @@
                                 <td>
                                     <p class="p-style">Tipo de pago:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                         class="textArea-style pagoSmallWidth pagoFix" 
                                         [(ngModel)]="tempFactura.factpg"
@@ -378,7 +378,7 @@
                                 <td>
                                     <p class="p-style">Pte.Aplicar:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{getPendingApply(selectedFacturas) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                 </td>
                             </tr>
@@ -386,13 +386,13 @@
                                 <td>
                                     <p class="p-style">F.Registro:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facfre | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Procedimiento de contacto:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                     class="textArea-style averageThird" 
                                     [(ngModel)]="tempFactura.conccr"
@@ -403,7 +403,7 @@
                                 <td>
                                     <p class="p-style">Cuenta Tercero:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                         class="textArea-style pagoSmallWidth" 
                                         [(ngModel)]="tempFactura.facoct"
@@ -414,7 +414,7 @@
                                 <td>
                                     <p class="p-style">Descuentos:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facdto | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                 </td>
                             </tr>
@@ -422,13 +422,13 @@
                                 <td>
                                     <p class="p-style">C.Gestor:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.cgecod}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Op. Contable:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <textarea 
                                     class="textArea-style averageThird" 
                                     [(ngModel)]="selectedFacturas.facado"
@@ -438,7 +438,7 @@
                                 <td>
                                     <p class="p-style">F.Contable:</p>
                                 </td>
-                                <td>
+                                <td class="gap-adj">
                                     <h1 class="h1-style">{{selectedFacturas.facfco | date:'dd-MM-yyyy'}}</h1>
                                 </td>
                             </tr>
