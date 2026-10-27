@@ -92,7 +92,8 @@
 .info-content {display: flex; align-items: center; width: 30%; gap: 10px;}
 .pointer {cursor: pointer;}
 .d-table tbody td:nth-child(8),
-.d-table tbody td:nth-child(9) {text-align: right !important;}
+.d-table tbody td:nth-child(9),
+.d-table tbody td:nth-child(10) {text-align: right !important;}
 /* D grid for centro gestor */
 /* add contrato grid */
 .proveedor-grid-modal .search-holder {width: 99%;}
