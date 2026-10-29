@@ -682,7 +682,6 @@ export class FacturasComponent {
   updateFactura() {
     this.limpiarMEssages();
     this.isUpdatingFactura = true;
-    const backendDate = this.toBackendDate(this.tempFactura.facfre);
     const facnum = this.tempFactura.facnum;
     const tercod = this.selectedFacturas?.tercod;
 
@@ -1538,7 +1537,7 @@ export class FacturasComponent {
   isUpdatingContrato: boolean = false;
   changeContrato(p: any) {
     const facnum = this.selectedFacturas.facnum;
-    const concod = p?.conn?.concod;
+    const concod = this.lastConcodCalled;
     const conlot = p?.conn?.conlot;
     const payload = {
       "ENT": this.entcod,

@@ -35,9 +35,12 @@ import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.FacId;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Gbs;
+import com.example.backend.sqlserver2.model.Ter;
+import com.example.backend.sqlserver2.model.TerId;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
+import com.example.backend.sqlserver2.repository.TerRepository;
 
 @RestController
 @RequestMapping("/api/fac")
@@ -54,6 +57,8 @@ public class FacController {
     private FacturaSearch facturaSearch;
     @Autowired
     private SicalService sicalService;
+    @Autowired
+    private TerRepository terRepository;
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
@@ -148,7 +153,7 @@ public class FacController {
     }
 
     //modifying a factura
-    public record facturaUpdate(String FACOBS, String CONCTP, String CONCPR, String CONCCR, String FACFPG, String FACOPG, String FACTPG, Integer FACOCT, String tercod, String orgCode, String entidad) {}
+    public record facturaUpdate(String FACOBS, String CONCTP, String CONCPR, String CONCCR, String FACFPG, String FACOPG, String FACTPG, Integer FACOCT, Integer tercod, String orgCode, String entidad) {}
     @PatchMapping("/update-factura/{ent}/{eje}/{facnum}")
     public ResponseEntity<?> updateFactura(
         @PathVariable Integer ent,
@@ -167,12 +172,16 @@ public class FacController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
+            TerId terId = new TerId(ent, payload.tercod());
+            Optional<Ter> terOptio = terRepository.findById(terId);
+            Integer terayt = terOptio.get().getTERAYT();
+
             try {
 
                 List<Tercero> terceros = sicalService.getTerceros(
                     null,
                     null,
-                    payload.tercod(),
+                    String.valueOf(terayt),
                     payload.orgCode(),
                     payload.entidad(),
                     eje

@@ -1,32 +1,28 @@
 package com.example.backend.service;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
 import com.example.backend.dto.CuentaBancaria;
 import com.example.backend.dto.FacturaInsertDto;
 import com.example.backend.dto.Tercero;
-import com.example.backend.dto.bolsaPorContrato;
 import com.example.backend.exception.XmlParsingException;
-import com.example.backend.service.FacturaInsertService.FacturaInfo;
 import com.example.backend.sqlserver2.model.Cfg;
 import com.example.backend.sqlserver2.model.Cot;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
-import com.example.backend.sqlserver2.model.FdeId;
-import com.example.backend.sqlserver2.model.Ter;
 import com.example.backend.sqlserver2.model.Gbs;
+import com.example.backend.sqlserver2.model.Ter;
 import com.example.backend.sqlserver2.repository.CfgRepository;
 import com.example.backend.sqlserver2.repository.CogRepository;
-import com.example.backend.sqlserver2.repository.FacRepository;
-import com.example.backend.sqlserver2.repository.TerRepository;
-import com.example.backend.sqlserver2.repository.GbsRepository;
-import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.CotRepository;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
-import org.springframework.stereotype.Service;
-
-import java.util.ArrayList;
-import java.util.List;
+import com.example.backend.sqlserver2.repository.FacRepository;
+import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.sqlserver2.repository.GbsRepository;
+import com.example.backend.sqlserver2.repository.TerRepository;
 
 @Service
 public class FacturaInsertService {
@@ -76,14 +72,14 @@ public class FacturaInsertService {
                 Integer maxFacnum = facRepository.findMaxFACNUMByENTAndEJE(dto.ENT, dto.EJE);
                 int newFacnum = (maxFacnum == null ? 1 : maxFacnum + 1);
 
-                Integer facoct = 0;
+                Integer facoct = null;
                 try {
-                    String tercod = String.valueOf(ter.getTERCOD());
+                    String terayt = String.valueOf(ter.getTERAYT());
 
                     List<Tercero> terceros = sicalService.getTerceros(
                         null,
                         null,
-                        tercod,
+                        terayt,
                         dto.orgCode,
                         dto.entidad,
                         dto.eje
@@ -98,7 +94,7 @@ public class FacturaInsertService {
                         }
                     }
                 } catch (XmlParsingException | NumberFormatException exception) {
-                    facoct = 0;
+                    facoct = null;
                 }
 
                 Fac fac = new Fac();
