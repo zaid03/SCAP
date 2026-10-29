@@ -97,21 +97,21 @@ public class ContabilizacionService {
         double kImporteTotal = round2(totalFde(principal));
 
         LineaGastoDefinitivo datos = consultarOperacionGastoDefinitivo(principal, req.getOrg(), req.getEnt(), req.getEje());
-        if (datos == null || datos.saldo() == null) {
+        if (datos == null || datos.saldop() == null) {
             throw new SmlBuildingException("Contrato: no se pudo obtener el saldo de la operación " + principal.getFDEOPE());
         }
-        double saldo = datos.saldo();
-        System.out.println("Contrato: KImporteTotal=" + kImporteTotal + " saldo=" + saldo);
+        double saldop = datos.saldop();
+        System.out.println("Contrato: KImporteTotal=" + kImporteTotal + " saldop =" + saldop);
 
-        if (saldo >= kImporteTotal) {
-            return new ContratoPreparado(fdeList, kImporteTotal); // con la primera línea basta
+        if (saldop >= kImporteTotal) {
+            return new ContratoPreparado(fdeList, kImporteTotal);
         }
 
         reserva.setFDEECO(principal.getFDEECO());
 
         double imp1 = principal.getFDEIMP() != null ? principal.getFDEIMP() : 0.0;
         double dif1 = principal.getFDEDIF() != null ? principal.getFDEDIF() : 0.0;
-        double kImpFalta = round2(kImporteTotal - saldo);
+        double kImpFalta = round2(kImporteTotal - saldop);
 
         if (kImpFalta <= dif1) {
             principal.setFDEDIF(round2(dif1 - kImpFalta));
@@ -166,16 +166,16 @@ public class ContabilizacionService {
         if (ref == null) return;
 
         if (cog.getCOGOPD() != null && !cog.getCOGOPD().isBlank()) {
-            Double saldo = consultarSaldoOperacion(req, cog.getCOGOPD(), cog.getCOGRFD(), ref);
-            if (saldo != null) {
-                cogRepository.actualizarSaldoPrincipal(saldo, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
+            Double saldop = consultarSaldoOperacion(req, cog.getCOGOPD(), cog.getCOGRFD(), ref);
+            if (saldop != null) {
+                cogRepository.actualizarSaldoPrincipal(saldop, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
             }
         }
 
         if (cog.getCOGOP2() != null && !cog.getCOGOP2().isBlank()) {
-            Double saldo = consultarSaldoOperacion(req, cog.getCOGOP2(), cog.getCOGRF2(), ref);
-            if (saldo != null) {
-                cogRepository.actualizarSaldoSecundario(saldo, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
+            Double saldop = consultarSaldoOperacion(req, cog.getCOGOP2(), cog.getCOGRF2(), ref);
+            if (saldop != null) {
+                cogRepository.actualizarSaldoSecundario(saldop, fac.getENT(), fac.getEJE(), fac.getCONCOD(), fac.getCGECOD());
             }
         }
     }
@@ -190,7 +190,7 @@ public class ContabilizacionService {
             }
             List<Operaciones.Linea> lineas = resultado.get(0).getLineaList();
             if (lineas == null || lineas.isEmpty()) return null;
-            return lineas.get(0).getSaldo();
+            return lineas.get(0).getSaldop();
         } catch (Exception e) {
             System.out.println("========== WS 2.49 (COG) FALLIDA ==========");
             System.out.println("Error: " + e.getMessage());
@@ -680,7 +680,7 @@ public class ContabilizacionService {
         }
     }
 
-    private record LineaGastoDefinitivo(String nlinea, String prya, String pryt, String pryo, String pryn, String pryx, Double saldo) {}
+    private record LineaGastoDefinitivo(String nlinea, String prya, String pryt, String pryo, String pryn, String pryx, Double saldop) {}
 
     private LineaGastoDefinitivo consultarOperacionGastoDefinitivo(Fde fde, String orgCode, String entidad, String eje) {
         try {
@@ -726,7 +726,7 @@ public class ContabilizacionService {
                     l.getPryo(),
                     l.getPryn(),
                     l.getPryx() != null ? String.valueOf(l.getPryx()) : null,
-                    l.getSaldo() // NEW
+                    l.getSaldop()
             );
         } catch (Exception e) {
             System.out.println("========== WS 2.49 CONSULTA FALLIDA ==========");
