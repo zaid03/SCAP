@@ -1251,7 +1251,7 @@ export class ContratosComponent {
   updateD(D: any) {
     this.limpiarMessages();
 
-    this.cogimp = D.lineaList[0].saldo;
+    this.cogimp = D.lineaList[0].saldop;
     this.cogopd = D.numope;
     this.cogrfd = D.lineaList[0].referencia;
     const concod = this.selectedContrato.concod;
@@ -1281,7 +1281,7 @@ export class ContratosComponent {
   updateD2(D: any) {
     this.limpiarMessages();
 
-    this.cogim2 = D.lineaList[0].saldo;
+    this.cogim2 = D.lineaList[0].saldop;
     this.cogop2 = D.numope;
     this.cogrf2 = D.lineaList[0].referencia;
     const concod = this.selectedContrato.concod;
@@ -1367,7 +1367,7 @@ export class ContratosComponent {
     let cogopd = D.cogopd ?? '';
     let cogop2 = D.cogop2 ?? '';
     let cogiap = D.cogiap ?? '';
-    let cogimp = D.cogimp ?? '';
+    let cogimp = D.saldop ?? '';
 
     console.log("cgecod",this.cgecodDelete)
     console.log("concod", this.concod);
@@ -1558,14 +1558,14 @@ export class ContratosComponent {
         }}).pipe(switchMap(res => {
           const operation = Array.isArray(res) ? res[0] : res;
           const line = Array.isArray(operation?.lineaList)
-            ? operation.lineaList.find((candidate: any) => candidate?.saldo != null)
+            ? operation.lineaList.find((candidate: any) => candidate?.saldop != null)
             : undefined;
-          if (line?.saldo == null) {
+          if (line?.saldop == null) {
             console.log("hhere baby girl")
             return of(null);
             
           }
-          item.cogimp = Number(line.saldo);
+          item.cogimp = Number(line.saldop);
           return this.http.patch(
             `${environment.backendUrl}/api/cog/updateD1/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`,
             { COGIMP: item.cogimp }
@@ -1588,12 +1588,12 @@ export class ContratosComponent {
         }}).pipe(switchMap(res => {
           const operation = Array.isArray(res) ? res[0] : res;
           const line = Array.isArray(operation?.lineaList)
-            ? operation.lineaList.find((candidate: any) => candidate?.saldo != null)
+            ? operation.lineaList.find((candidate: any) => candidate?.saldop != null)
             : undefined;
-          if (line?.saldo == null) {
+          if (line?.saldop == null) {
             return of(null);
           }
-          item.cogim2 = Number(line.saldo);
+          item.cogim2 = Number(line.saldop);
           return this.http.patch(`${environment.backendUrl}/api/cog/updateD2/${this.entcod}/${this.eje}/${this.selectedContrato.concod}/${item.cgecod}`, { COGIM2: item.cogim2 });
           })
         ));
