@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.mock;
@@ -765,8 +766,6 @@ public class ContabilizacionServiceTest {
         assertTrue(result.contains("<imp>"));
     }
 
-    // NOTE: dto lines are only emitted when a matching Fde line (same org/fun/eco)
-    // was actually included in <l_linea>. This test now supplies that matching Fde.
     @Test
     void buildSmlInput_withFdtAllFieldsPopulated_includesAllInOutput() throws Exception {
         ContabilizacionRequestDto req = createValidRequest();
@@ -1098,10 +1097,13 @@ public class ContabilizacionServiceTest {
 @Test
 void prepararLineasContrato_withEnoughSaldo_returnsPreparedLines() throws Exception {
     Operaciones op = createOperacionWithSingleLinea();
-    op.getLineaList().get(0).setSaldo(150.0);
+    op.getLineaList().get(0).setSaldop(150.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class)
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1110,6 +1112,7 @@ void prepararLineasContrato_withEnoughSaldo_returnsPreparedLines() throws Except
     principal.setFDEIMP(100.0);
     principal.setFDEDIF(0.0);
     principal.setFDEECO("ECO001");
+    principal.setFDEOPE("OPE001");
 
     Fde reserva = createValidFde();
     reserva.setFDEIMP(0.0);
@@ -1123,7 +1126,6 @@ void prepararLineasContrato_withEnoughSaldo_returnsPreparedLines() throws Except
     assertEquals(100.0, result.kImporteTotal());
     assertEquals(2, result.lineas().size());
 
-    // Verify that original FDE objects were copied
     assertFalse(result.lineas().get(0) == principal);
     assertFalse(result.lineas().get(1) == reserva);
 }
@@ -1146,10 +1148,13 @@ void prepararLineasContrato_withoutReserve_throwsException() {
 @Test
 void prepararLineasContrato_whenShortfallFitsDifference_updatesDifference() throws Exception {
     Operaciones op = createOperacionWithSingleLinea();
-    op.getLineaList().get(0).setSaldo(80.0);
+    op.getLineaList().get(0).setSaldop(80.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class)
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1158,6 +1163,7 @@ void prepararLineasContrato_whenShortfallFitsDifference_updatesDifference() thro
     principal.setFDEIMP(50.0);
     principal.setFDEDIF(50.0);
     principal.setFDEECO("ECO001");
+    principal.setFDEOPE("OPE001");
 
     Fde reserva = createValidFde();
     reserva.setFDEIMP(0.0);
@@ -1182,10 +1188,13 @@ void prepararLineasContrato_whenShortfallFitsDifference_updatesDifference() thro
 @Test
 void prepararLineasContrato_whenShortfallExceedsDifference_movesAmountToReserve() throws Exception {
     Operaciones op = createOperacionWithSingleLinea();
-    op.getLineaList().get(0).setSaldo(50.0);
+    op.getLineaList().get(0).setSaldop(50.0);
 
     when(operacionesService.getOperaciones(
-        any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any(), any()
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class), nullable(String.class), nullable(String.class),
+        nullable(String.class), nullable(String.class)
     )).thenReturn(List.of(op));
 
     ContabilizacionRequestDto req = createValidRequest();
@@ -1194,6 +1203,7 @@ void prepararLineasContrato_whenShortfallExceedsDifference_movesAmountToReserve(
     principal.setFDEIMP(100.0);
     principal.setFDEDIF(10.0);
     principal.setFDEECO("ECO001");
+    principal.setFDEOPE("OPE001");
 
     Fde reserva = createValidFde();
     reserva.setFDEIMP(0.0);
@@ -1205,9 +1215,6 @@ void prepararLineasContrato_whenShortfallExceedsDifference_movesAmountToReserve(
 
     Fde resultPrincipal = result.lineas().get(0);
     Fde resultReserva = result.lineas().get(1);
-
-    // total = 110, saldo = 50, falta = 60
-    // dif = 10, so resto = 50
     assertEquals(50.0, resultPrincipal.getFDEIMP());
     assertEquals(0.0, resultPrincipal.getFDEDIF());
 

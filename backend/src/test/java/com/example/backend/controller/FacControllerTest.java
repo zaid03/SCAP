@@ -43,6 +43,8 @@ import com.example.backend.sqlserver2.model.FacId;
 import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.model.Gbs;
 import com.example.backend.sqlserver2.model.GbsId;
+import com.example.backend.sqlserver2.model.Ter;
+import com.example.backend.sqlserver2.model.TerId;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
 import com.example.backend.sqlserver2.repository.GbsRepository;
@@ -136,7 +138,7 @@ public class FacControllerTest {
         p.put("FACOPG", "OPG");
         p.put("FACTPG", "TPG");
         p.put("FACOCT", 5);
-        p.put("tercod", "T1");
+        p.put("tercod", 1);
         p.put("orgCode", "ORG");
         p.put("entidad", "ENT");
         return p;
@@ -149,6 +151,9 @@ public class FacControllerTest {
         when(tercero.getCuentasBancarias()).thenReturn(List.of(cuenta));
         when(sicalService.getTerceros(any(), any(), any(), any(), any(), any()))
             .thenReturn(List.of(tercero));
+        Ter ter = new Ter();
+        ter.setTERAYT(1);
+        when(terRepository.findById(any(TerId.class))).thenReturn(Optional.of(ter));
     }
 
     @Test
@@ -292,11 +297,10 @@ public class FacControllerTest {
         when(facRepository.findById(id)).thenReturn(Optional.of(new Fac()));
         mockTerceroConCuentaActiva();
 
-        // only FACOBS/CONCTP plus the now-required tercod/orgCode/entidad
         Map<String, Object> payload = new HashMap<>();
         payload.put("FACOBS", "Obs");
         payload.put("CONCTP", "TP");
-        payload.put("tercod", "T1");
+        payload.put("tercod", 1);
         payload.put("orgCode", "ORG");
         payload.put("entidad", "ENT");
 

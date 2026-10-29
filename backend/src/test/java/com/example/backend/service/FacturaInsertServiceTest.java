@@ -415,6 +415,7 @@ class FacturaInsertServiceTest {
         Ter ter = new Ter();
         ter.setTERCOD(terCod);
         ter.setTERNIF(terNif);
+        ter.setTERAYT(1);
         return ter;
     }
     
@@ -455,7 +456,7 @@ class FacturaInsertServiceTest {
         when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
         when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
         when(sicalService.getTerceros(
-            isNull(), isNull(), eq("1"), any(), any(), any()))
+            isNull(), isNull(), eq("1"), isNull(), isNull(), isNull()))
             .thenReturn(List.of(tercero));
         when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
             .thenReturn(new ArrayList<>());
@@ -484,7 +485,7 @@ class FacturaInsertServiceTest {
         when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
         when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
         when(sicalService.getTerceros(
-            isNull(), isNull(), eq("1"), any(), any(), any()))
+            isNull(), isNull(), eq("1"), isNull(), isNull(), isNull()))
             .thenThrow(new XmlParsingException("Invalid XML"));
         when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
             .thenReturn(new ArrayList<>());
@@ -499,7 +500,7 @@ class FacturaInsertServiceTest {
         ArgumentCaptor<Fac> captor = ArgumentCaptor.forClass(Fac.class);
         verify(facRepository).save(captor.capture());
 
-        assertEquals(0, captor.getValue().getFACOCT());
+        assertNull(captor.getValue().getFACOCT());
     }
 
     @Test
@@ -520,7 +521,7 @@ class FacturaInsertServiceTest {
         when(cfgRepository.findByENTAndEJE(1, "2024")).thenReturn(List.of(cfg));
         when(facRepository.findMaxFACNUMByENTAndEJE(1, "2024")).thenReturn(100);
         when(sicalService.getTerceros(
-            isNull(), isNull(), eq("1"), any(), any(), any()))
+            isNull(), isNull(), eq("1"), isNull(), isNull(), isNull()))
             .thenReturn(List.of(tercero));
         when(gbsRepository.findByENTAndEJEAndCGECOD(1, "2024", "CGE001"))
             .thenReturn(new ArrayList<>());
@@ -535,6 +536,6 @@ class FacturaInsertServiceTest {
         ArgumentCaptor<Fac> captor = ArgumentCaptor.forClass(Fac.class);
         verify(facRepository).save(captor.capture());
 
-        assertEquals(0, captor.getValue().getFACOCT());
+        assertNull(captor.getValue().getFACOCT());
     }
 }
