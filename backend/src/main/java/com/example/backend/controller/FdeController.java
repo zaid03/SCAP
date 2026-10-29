@@ -290,6 +290,7 @@ public class FdeController {
             fac.setCONCOD(payload.CONCOD());
             fac.setFACIDI(0.00);
             facRepository.save(fac);
+            
             fdeRepository.deleteByENTAndEJEAndFACNUM(payload.ENT(), payload.EJE(), payload.FACNUM());
             
             Fde fde1 = new Fde();

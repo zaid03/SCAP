@@ -930,10 +930,12 @@ export class FacturasComponent {
   }
 
   concodChosen = 0;
+  withConcod: boolean = false;
   saidYes() {
     this.limpiarMEssages();
     this.closeAskGrid();
     this.openGetConcodGrid();
+    this.withConcod = true;
   }
 
   getConcodGrid: boolean = false;
@@ -1095,20 +1097,41 @@ export class FacturasComponent {
     if (this.caughtAlbranaes.length === 0) {
       return;
     }
-
     this.limpiarMEssages();
     const facnum = this.selectedFacturas.facnum;
-    const payload = this.caughtAlbranaes.map(Obj => ({
-      "ENT": this.entcod,
-      "EJE": this.eje,
-      "ALBNUM": Obj.albnum,
-      "CONCTP": Obj.conctp,
-      "CONCPR": Obj.concpr,
-      "CONCCR": Obj.conccr,
-      "ALBBIM": Obj.albbim,
-      "FACNUM": facnum
-    }))
 
+    if (this.withConcod) {
+      const payload = this.caughtAlbranaes.map(Obj => ({
+        "ENT": this.entcod,
+        "EJE": this.eje,
+        "ALBNUM": Obj.albnum,
+        "CONCTP": Obj.conctp,
+        "CONCPR": Obj.concpr,
+        "CONCCR": Obj.conccr,
+        "ALBBIM": Obj.albbim,
+        "FACNUM": facnum,
+        "CONCOD": this.concodChosen
+      }))
+      this.addAlbaranes(payload);
+      this.withConcod = false;
+    } else {
+      const payload = this.caughtAlbranaes.map(Obj => ({
+        "ENT": this.entcod,
+        "EJE": this.eje,
+        "ALBNUM": Obj.albnum,
+        "CONCTP": Obj.conctp,
+        "CONCPR": Obj.concpr,
+        "CONCCR": Obj.conccr,
+        "ALBBIM": Obj.albbim,
+        "FACNUM": facnum
+      }))
+      this.addAlbaranes(payload);
+      this.withConcod = false;
+    }
+  }
+
+  addAlbaranes(payload: any) {
+    const facnum = this.selectedFacturas.facnum;
     this.isAddingAlbaranes = true;
     this.http.patch(`${environment.backendUrl}/api/alb/add-albaranes`, payload).subscribe({
       next: (res) => {
