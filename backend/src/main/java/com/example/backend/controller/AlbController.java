@@ -1,34 +1,30 @@
 package com.example.backend.controller;
 
-import java.time.LocalDateTime;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
+import com.example.backend.dto.AlbResumeDto;
+import com.example.backend.dto.albFacturaDto;
+import com.example.backend.dto.AsuEcoImpProjection;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.example.backend.dto.AlbResumeDto;
-import com.example.backend.dto.AsuEcoImpProjection;
-import com.example.backend.dto.albFacturaDto;
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
+import com.example.backend.sqlserver2.repository.AlbRepository;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.FacId;
 import com.example.backend.sqlserver2.model.Fde;
-import com.example.backend.sqlserver2.repository.AdeRepository;
-import com.example.backend.sqlserver2.repository.AlbRepository;
 import com.example.backend.sqlserver2.repository.FacRepository;
+import com.example.backend.sqlserver2.repository.AdeRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/alb")
@@ -165,7 +161,69 @@ public class AlbController {
         }
     }
 
-   
+    //adding an albaranes and updating required fields in other models
+    public record Albaranes(Integer ENT, String EJE, Integer ALBNUM, String CONCTP, String CONCPR, String CONCCR, Double ALBBIM, Integer FACNUM, Integer CONCOD) {}
+    @PatchMapping("/add-albaranes")
+    public ResponseEntity<?> addingAlbaranes(
+        @RequestBody List<Albaranes> payload
+    ) {
+        try {
+            if (payload == null || payload.isEmpty()) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+
+            for (Albaranes albData : payload) {
+                AlbId id = new AlbId(albData.ENT(), albData.ALBNUM());
+                Optional<Alb> albaranOpt = albRepository.findById(id);
+                if (albaranOpt.isPresent()) {
+                    Alb albaran = albaranOpt.get();
+                    albaran.setEJE(albData.EJE());
+                    albaran.setFACNUM(albData.FACNUM());
+                    albRepository.save(albaran);
+                }
+
+                FacId facId = new FacId(albData.ENT(), albData.EJE(), albData.FACNUM());
+                Optional<Fac> facturaOpt = facRepository.findById(facId);
+                if (facturaOpt.isPresent()) {
+                    Fac factura = facturaOpt.get();
+                    Double newFaciec = factura.getFACIEC() + albData.ALBBIM();
+
+                    factura.setCONCTP(albData.CONCTP());
+                    factura.setCONCPR(albData.CONCPR());
+                    factura.setCONCCR(albData.CONCCR());
+                    factura.setFACIEC(newFaciec);
+
+                    if (albData.CONCOD() != null) {
+                        factura.setCONCOD(albData.CONCOD());
+                    }
+                    facRepository.save(factura);
+                }
+
+                Optional<AsuEcoImpProjection> resultOpt = adeRepository.findSumByEntAndAlbnum(albData.ENT() , albData.ALBNUM());
+
+                if (resultOpt.isPresent()) {
+                    AsuEcoImpProjection result = resultOpt.get();
+                    Optional<Fde> applicacionOptio = fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(
+                        albData.ENT(), 
+                        albData.EJE(), 
+                        albData.FACNUM(),
+                        result.getASUECO()
+                    );
+
+                    if (applicacionOptio.isPresent()) {
+                        Fde applicacion = applicacionOptio.get();
+                        Double newFDEIMP = result.getIMP();
+                        applicacion.setFDEIMP(newFDEIMP);
+                        fdeRepository.save(applicacion);
+                    }
+                }
+            }
+
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
 
     //quitar albaranes
     public record Quitar(Integer ENT, String EJE, Integer ALBNUM, Integer FACNUM, Double ALBBIM) {}
