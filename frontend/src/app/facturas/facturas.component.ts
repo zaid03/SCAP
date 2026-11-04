@@ -878,7 +878,7 @@ export class FacturasComponent {
   tercod: number = 0;
   concod: number = 0;
   albaranesAdd: any[] = [];
-  lastConcodCalled = 0;
+  // lastConcodCalled = 0;
   openAlbaranesAdd() {
     this.limpiarMEssages();
     
@@ -890,7 +890,7 @@ export class FacturasComponent {
       return;
     } else {
       this.albaranesAddGrid = true;
-      this.lastConcodCalled = this.concod;
+      // this.lastConcodCalled = this.concod;
       this.fetchAlrabanes(this.concod);
        console.log("here 1")
       return;     
@@ -915,7 +915,7 @@ export class FacturasComponent {
           return;
         } else {
           this.albaranesAddGrid = true;
-          this.lastConcodCalled = this.concod;
+          // this.lastConcodCalled = this.concod;
           this.fetchAlrabanes(this.concod);
           return;
         }
@@ -941,42 +941,39 @@ export class FacturasComponent {
   saidYes() {
     this.limpiarMEssages();
     this.closeAskGrid();
-    this.openGetConcodGrid();
-    this.withConcod = true;
-  }
-
-  getConcodGrid: boolean = false;
-  openGetConcodGrid() {
-    this.limpiarMEssages();
-    this.getConcodGrid = true;
-    this.fetchContatosAd();
-  }
-
-  closeGetConcodGrid() {
-    this.getConcodGrid = false;
-    this.contratosPorAD = [];
-    this.pageContatos = 0;
-    this.saidNo();
-  }
-
-  getConcod(p: any) {
-    this.concodChosen = p?.concod || p.conn?.concod || 0;
     this.albaranesAddGrid = true;
-    this.getConcodGrid = false;
-    this.contratosPorAD = [];
-    this.pageContatos = 0;
-    console.log(this.concodChosen)
-    this.lastConcodCalled = this.concodChosen;
-    this.fetchAlrabanes(this.concodChosen);
-    return;
+    this.fetchAlrabanes(this.concod);
   }
+
+  // getConcodGrid: boolean = false;
+  // openGetConcodGrid() {
+  //   this.limpiarMEssages();
+  //   this.getConcodGrid = true;
+  //   this.fetchContatosAd();
+  // }
+
+  // closeGetConcodGrid() {
+  //   this.getConcodGrid = false;
+  //   this.contratosPorAD = [];
+  //   this.pageContatos = 0;
+  //   this.saidNo();
+  // }
+
+  // getConcod(p: any) {
+  //   this.concodChosen = p?.concod || p.conn?.concod || 0;
+  //   this.albaranesAddGrid = true;
+  //   this.getConcodGrid = false;
+  //   this.contratosPorAD = [];
+  //   this.pageContatos = 0;
+  //   console.log(this.concodChosen)
+  //   this.lastConcodCalled = this.concodChosen;
+  //   this.fetchAlrabanes(this.concodChosen);
+  //   return;
+  // }
 
   saidNo() {
     this.limpiarMEssages();
     this.closeAskGrid()
-    this.albaranesAddGrid = true;
-    this.lastConcodCalled = this.concod;
-    this.fetchAlrabanes(this.concod);
     return;
   }
 
@@ -1016,7 +1013,7 @@ export class FacturasComponent {
     if (this.albaranesDesde && !this.albaranesHasta) {
       const backendDate = this.toBackendDate(this.albaranesDesde);
       this.isLoadingAlbaranes = true;
-      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Desde/${this.lastConcodCalled}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Desde/${this.concod}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
         next: (res) => {
           this.isLoadingAlbaranes = false;
           this.albaranesAdd = res;
@@ -1032,7 +1029,7 @@ export class FacturasComponent {
     } else if (!this.albaranesDesde && this.albaranesHasta) {      
       const backendDate = this.toBackendDate(this.albaranesHasta);
       this.isLoadingAlbaranes = true;
-      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Hasta/${this.lastConcodCalled}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-Hasta/${this.concod}/${this.entcod}/${this.tercod}/${backendDate}/${this.eje}/${this.centroGestor}`).subscribe({
         next: (res) => {
           this.isLoadingAlbaranes = false;
           this.albaranesAdd = res;
@@ -1049,7 +1046,7 @@ export class FacturasComponent {
       const backendDateDesde = this.toBackendDate(this.albaranesDesde);
       const backendDateHasta = this.toBackendDate(this.albaranesHasta);
       this.isLoadingAlbaranes = true;
-      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-both/${this.lastConcodCalled}/${this.entcod}/${this.tercod}/${backendDateDesde}/${backendDateHasta}/${this.eje}/${this.centroGestor}`).subscribe({
+      this.http.get<any>(`${environment.backendUrl}/api/alb/search-albaranes-both/${this.concod}/${this.entcod}/${this.tercod}/${backendDateDesde}/${backendDateHasta}/${this.eje}/${this.centroGestor}`).subscribe({
         next: (res) => {
           this.isLoadingAlbaranes = false;
           this.albaranesAdd = res;
@@ -1074,7 +1071,7 @@ export class FacturasComponent {
   limpiarSearch() {
     this.limpiarMEssages();
     this.emptySearchAlbaranes();
-    this.fetchAlrabanes(this.lastConcodCalled);
+    this.fetchAlrabanes(this.concod);
   }
 
   emptySearchAlbaranes() {
@@ -1567,7 +1564,7 @@ export class FacturasComponent {
   isUpdatingContrato: boolean = false;
   changeContrato(p: any) {
     const facnum = this.selectedFacturas.facnum;
-    const concod = this.lastConcodCalled;
+    const concod = p.conn?.concod;
     const conlot = p?.conn?.conlot;
     const payload = {
       "ENT": this.entcod,

@@ -934,7 +934,7 @@
         </div>
         <div class="proveedor-info">
             <p class="p-style">Contrato</p>
-            <h1 class="h1-style">{{lastConcodCalled}}</h1>
+            <h1 class="h1-style">{{concod}}</h1>
         </div>
         <div class="search-chunk">
             <p class="p-style">Desde</p>
@@ -990,7 +990,7 @@
                 <td>{{a.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{a.albnum}}</td>
                 <td>{{a.albfre | date:'dd-MM-yyyy'}}</td>
-                <td>{{lastConcodCalled}}</td>
+                <td>{{concod}}</td>
                 <td>{{a.depcod}}</td>
                 <td>{{a.albcom}}</td>
             </tr>
@@ -1015,14 +1015,14 @@
 
 <div class="modal-backdrop force" *ngIf="askGrid"></div>
 <div class="delete-confirm-modal" *ngIf="askGrid">
-    <p class="p-style">El proveedor tiene contratos AD, ¿Quiere seleccionar uno o la factura no es de contrato?</p>
+    <p class="errorBtn">Se van a mostrar albaranes sin contrato, pero el proveedor tiene.  Si quiere seleccionar un contrato pulse “NO” y use el botón “Cambiar Contrato”. ¿Quiere seguir?</p>
     <div class="btns messageGrid">
         <button class="red-btn" (click)="saidNo()">No</button>
         <button class="purple-btn" (click)="saidYes()">Sí</button>
     </div>
 </div>
 
-<div class="modal-backdrop force" *ngIf="getConcodGrid"></div>
+<!-- <div class="modal-backdrop force" *ngIf="getConcodGrid"></div>
 <div class="delete-confirm-modal adj" *ngIf="getConcodGrid">
     <div class="btns">
         <div class="title cambiarAD">
@@ -1073,7 +1073,7 @@
             </div>
         </div>
     </div>
-</div>
+</div> -->
 
 <div class="modal-backdrop" *ngIf="deleteAlbaranGrid"></div>
 <div class="delete-confirm-modal" *ngIf="deleteAlbaranGrid">
