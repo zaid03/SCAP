@@ -200,6 +200,9 @@ export class MonitorContabilizacionComponent {
   formatDate = (v: any) => {
     if (!v && v !== 0) return '';
     const s = String(v);
+    const isoDate = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoDate) return `${isoDate[3]}/${isoDate[2]}/${isoDate[1]}`;
+
     const d = new Date(s);
     return isNaN(d.getTime()) ? s : d.toLocaleDateString('es-ES');
   };
@@ -213,6 +216,55 @@ export class MonitorContabilizacionComponent {
     }).format(Number(value));
   };
 
+  private parseMoney(value: any): number {
+    if (value === null || value === undefined || value === '') return 0;
+    if (typeof value === 'number') return value;
+
+    let stringValue = String(value).trim();
+    const isParenthesizedNegative = /^\(.*\)$/.test(stringValue);
+
+    if (isParenthesizedNegative) {
+      stringValue = stringValue.replace(/[()]/g, '');
+    }
+
+    stringValue = stringValue
+      .replace(/\u00A0/g, ' ')
+      .replace(/[^\d.,-]/g, '');
+
+    if (stringValue.includes(',')) {
+      stringValue = stringValue.replace(/\./g, '').replace(',', '.');
+    }
+
+    const numberValue = parseFloat(stringValue);
+    if (isNaN(numberValue)) return 0;
+
+    return isParenthesizedNegative ? -numberValue : numberValue;
+  }
+
+  private applyExcelCurrencyFormat(
+    worksheet: XLSX.WorkSheet,
+    rowCount: number
+  ): void {
+    const currencyFormat = '#,##0.00 [$€-es-ES]';
+    const currencyColumns = [5, 13];
+
+    for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
+      for (const columnIndex of currencyColumns) {
+        const cellAddress = XLSX.utils.encode_cell({
+          r: rowIndex,
+          c: columnIndex
+        });
+        const cell = worksheet[cellAddress];
+
+        if (!cell) continue;
+
+        cell.v = this.parseMoney(cell.v);
+        cell.t = 'n';
+        cell.z = currencyFormat;
+      }
+    }
+  }
+
   DownloadPDF() {
     this.limpiarMEssages();
 
@@ -222,8 +274,7 @@ export class MonitorContabilizacionComponent {
       return;
     }
 
-    const rows = source.map((row: any, index: number) => ({
-      index: index + 1,
+    const rows = source.map((row: any) => ({
       facnum: row.facnum ?? '',
       tercod: row.tercod ?? '',
       ternom: row.ter.ternom ?? '',
@@ -241,7 +292,6 @@ export class MonitorContabilizacionComponent {
     }));
 
     const columns = [
-      { header: '#', dataKey: 'index' },
       { header: 'Número Registro', dataKey: 'facnum' },
       { header: 'Código Prov', dataKey: 'tercod' },
       { header: 'Nombre Proveedor', dataKey: 'ternom' },
@@ -260,39 +310,48 @@ export class MonitorContabilizacionComponent {
 
     const doc = new jsPDF({ orientation: 'landscape', unit: 'mm', format: 'a4' });
     doc.setFont('helvetica', 'normal');
-    doc.setFontSize(14);
-    doc.text('Listado de Monitor de contabilización', 10, 20);
+    doc.setFontSize(12);
 
     autoTable(doc, {
-      startY: 30,
-      theme: 'plain',
-      head: [columns.map(c => c.header)],
+      startY: 20,
+      columns,
       body: rows.map(row => columns.map(c => row[c.dataKey as keyof typeof row] ?? '')),
-      styles: { font: 'helvetica', fontSize: 8, cellPadding: 4 },
+      styles: { font: 'helvetica', fontSize: 8 },
+      tableWidth: 'wrap',
       headStyles: {
         fillColor: [240, 240, 240],
         textColor: [33, 53, 71],
         fontStyle: 'bold',
         halign: 'left'
       },
-      tableLineColor: [200, 200, 200],
-      tableLineWidth: 0.5,
+      didParseCell: (data) => {
+        if (data.section === 'body' && [1, 5, 13].includes(data.column.index)) {
+          data.cell.styles.halign = 'right';
+        }
+        if (data.section === 'body' && data.column.index === 5) {
+          data.cell.styles.overflow = 'ellipsize';
+          data.cell.styles.fontSize = 7;
+        }
+      },
       columnStyles: {
-        index: { cellWidth: 8 },
-        facnum: { cellWidth: 18 },
-        tercod: { cellWidth: 18 },
+        facnum: { cellWidth: 15 },
+        tercod: { cellWidth: 15 },
         ternom: { cellWidth: 36 },
         ternif: { cellWidth: 20 },
         facfre: { cellWidth: 20 },
-        facimp: { cellWidth: 22 },
-        facdto: { cellWidth: 10},
+        facimp: { cellWidth: 15 },
+        facdto: { cellWidth: 15 },
         facdoc: { cellWidth: 20 },
         facann: { cellWidth: 15 },
         facfac: { cellWidth: 18 },
         facdat: { cellWidth: 20 },
-        factxt: { cellWidth: 36},
+        factxt: { cellWidth: 35 },
         facado: { cellWidth: 15 },
         facfco: { cellWidth: 20 }
+      },
+      didDrawPage: () => {
+        doc.setFontSize(10);
+        doc.text('Listado de Monitor de contabilización', 14, 10);
       }
     });
 
@@ -312,16 +371,16 @@ export class MonitorContabilizacionComponent {
       tercod: row.tercod ?? '',
       ternom: row.ter.ternom ?? '',
       ternif: row.ter.ternif ?? '',
-      facfre: row.facfre ?? '',
+      facfre: this.formatDate(row.facfre) ?? '',
       facimp: row.facimp ?? '',
       facdto: row.facdto ?? '',
       facdoc: row.facdoc ?? '',
       facann: row.facann ?? '',
       facfac: row.facfac ?? '',
-      facdat: row.facdat ?? '',
+      facdat: this.formatDate(row.facdat) ?? '',
       factxt: row.factxt ?? '',
       facado: row.facado ?? '',
-      facfco: row.facfco ?? ''
+      facfco: this.formatDate(row.facfco) ?? ''
     }));
   
     const worksheet = XLSX.utils.aoa_to_sheet([]);
@@ -334,17 +393,17 @@ export class MonitorContabilizacionComponent {
       { wch: 10 },
       { wch: 12 },
       { wch: 40 },
-      { wch: 20 },
-      { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
+      { wch: 10 },
       { wch: 10 },
       { wch: 20 },
-      { wch: 22 },
-      { wch: 15 },
+      { wch: 10 },
+      { wch: 10 },
       { wch: 15 },
       { wch: 40 },
-      { wch: 30 },
-      { wch: 30 },
-      { wch: 30 }
+      { wch: 15 },
+      { wch: 15 }
     ];
   
     const workbook = XLSX.utils.book_new();

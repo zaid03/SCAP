@@ -237,6 +237,9 @@ export class ConsultaFacturaComponent {
   formatDate = (v: any) => {
     if (!v && v !== 0) return '';
     const s = String(v);
+    const isoDate = s.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoDate) return `${isoDate[3]}/${isoDate[2]}/${isoDate[1]}`;
+
     const d = new Date(s);
     return isNaN(d.getTime()) ? s : d.toLocaleDateString('es-ES');
   };
@@ -279,7 +282,7 @@ export class ConsultaFacturaComponent {
     worksheet: XLSX.WorkSheet,
     rowCount: number
   ): void {
-    const currencyFormat = '[$€-es-ES] #,##0.00';
+    const currencyFormat = '#,##0.00 [$€-es-ES]';
     const currencyColumns = [5, 13];
 
     for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
@@ -339,7 +342,7 @@ export class ConsultaFacturaComponent {
       { header: 'R.C.F', dataKey: 'facfac' },
       { header: 'F.Factura', dataKey: 'facdat' },
       { header: 'Contrato AD', dataKey: 'concod' },
-      { header: 'ADO', dataKey: 'facado' },
+      { header: 'Op. Contable', dataKey: 'facado' },
       { header: 'F. Contable', dataKey: 'facfco' },
       { header: 'Pte. Aplicar', dataKey: 'pendingApply' },
       { header: 'C. Gestor', dataKey: 'cgecod' },
@@ -366,6 +369,10 @@ export class ConsultaFacturaComponent {
         if (data.section === 'body' && [1, 5, 13].includes(data.column.index)) {
           data.cell.styles.halign = 'right';
         }
+        if (data.section === 'body' && [5, 13].includes(data.column.index)) {
+          data.cell.styles.overflow = 'ellipsize';
+          data.cell.styles.fontSize = 7;
+        }
       },
       columnStyles: {
         facnum: { cellWidth: 15 },
@@ -373,7 +380,7 @@ export class ConsultaFacturaComponent {
         ternom: { cellWidth: 28 },
         ternif: { cellWidth: 18 },
         facfre: { cellWidth: 18 },
-        facimp: { cellWidth: 15 },
+        facimp: { cellWidth: 17, overflow: 'ellipsize' },
         facdoc: { cellWidth: 20 },
         facann: { cellWidth: 15 },
         facfac: { cellWidth: 15 },
@@ -381,7 +388,7 @@ export class ConsultaFacturaComponent {
         concod: { cellWidth: 15 },
         facado: { cellWidth: 15 },
         facfco: { cellWidth: 15 },
-        pendingApply: { cellWidth: 15 },
+        pendingApply: { cellWidth: 17, overflow: 'ellipsize' },
         cgecod: { cellWidth: 14 },
         estado: { cellWidth: 20 }
       },
@@ -407,15 +414,15 @@ export class ConsultaFacturaComponent {
       tercod: row.tercod ?? '',
       ternom: row.ter_TERNOM ?? '',
       ternif: row.ter_TERNIF ?? '',
-      facfre: row.facfre ?? '',
+      facfre: this.formatDate(row.facfre) ?? '',
       facimp: this.parseMoney(row.facimp),
       facdoc: row.facdoc ?? '',
       facann: row.facann ?? '',
       facfac: row.facfac ?? '',
-      facdat: row.facdat ?? '',
+      facdat: this.formatDate(row.facdat) ?? '',
       concod: row.concod ?? '',
       facado: row.facado ?? '',
-      facfco: row.facfco ?? '',
+      facfco: this.formatDate(row.facfco) ?? '',
       getPendingApply: this.parseMoney(this.getPendingApply(row)),
       cgecod: row.cgecod ?? '',
       getStaus: this.getStaus(row.facado, row.facimp, row.faciec, row.facidi) ?? ''
@@ -436,7 +443,7 @@ export class ConsultaFacturaComponent {
       'R.C.F',
       'F.Factura',
       'Contrato AD',
-      'Ado',
+      'Op. Contable',
       'F.Contable',
       'Pte. Aplicar',
       'C.gestor',
@@ -451,18 +458,18 @@ export class ConsultaFacturaComponent {
       { wch: 12 },
       { wch: 40 },
       { wch: 20 },
+      { wch: 15 },
+      { wch: 15 },
       { wch: 20 },
       { wch: 10 },
+      { wch: 10 },
+      { wch: 15 },
+      { wch: 8 },
       { wch: 20 },
       { wch: 15 },
-      { wch: 20 },
-      { wch: 10},
-      { wch: 20 },
       { wch: 15 },
-      { wch: 15 },
-      { wch: 15 },
-      { wch: 30 },
-      { wch: 20 }
+      { wch: 10 },
+      { wch: 15 }
     ];
   
     const workbook = XLSX.utils.book_new();
