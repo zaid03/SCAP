@@ -30,7 +30,7 @@ public interface  GbsRepository extends JpaRepository<Gbs, GbsId>{
     //needed for contabilizar a factura
     Optional<Gbs> findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(Integer ENT, String EJE, String CGECOD, String GBSORG, String GBSFUN, String GBSECO);
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Gbs g SET g.GBSIUS = COALESCE(g.GBSIUS, 0) + :imp, g.GBSIUT = COALESCE(g.GBSIUT, 0) + :imp " + "WHERE g.ENT = :ent AND g.EJE = :eje AND g.CGECOD = :cge " + "AND g.GBSORG = :org AND g.GBSFUN = :fun AND g.GBSECO = :eco")
+    @Query("UPDATE Gbs g SET g.GBSICO = COALESCE(g.GBSICO, 0) + :imp, g.GBSICT = COALESCE(g.GBSICT, 0) + :imp " + "WHERE g.ENT = :ent AND g.EJE = :eje AND g.CGECOD = :cge " + "AND g.GBSORG = :org AND g.GBSFUN = :fun AND g.GBSECO = :eco")
     int acumular(@Param("imp") double imp, @Param("ent") Integer ent, @Param("eje") String eje, @Param("cge") String cge, @Param("org") String org, @Param("fun") String fun, @Param("eco") String eco);
 
     //for cambiar contrato to factura

@@ -212,7 +212,13 @@ public class AlbController {
 
                     if (applicacionOptio.isPresent()) {
                         Fde applicacion = applicacionOptio.get();
-                        Double newFDEIMP = result.getIMP();
+                        Double currentFDEIMP = applicacion.getFDEIMP() != null
+                            ? applicacion.getFDEIMP()
+                            : 0.0;
+                        Double albaranIMP = result.getIMP() != null
+                            ? result.getIMP()
+                            : 0.0;
+                        Double newFDEIMP = currentFDEIMP + albaranIMP;
                         applicacion.setFDEIMP(newFDEIMP);
                         fdeRepository.save(applicacion);
                     }

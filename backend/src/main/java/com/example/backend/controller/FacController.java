@@ -174,8 +174,10 @@ public class FacController {
 
             TerId terId = new TerId(ent, payload.tercod());
             Optional<Ter> terOptio = terRepository.findById(terId);
-            Integer terayt = terOptio.get().getTERAYT();
-
+            if (terOptio.isPresent()) {
+                Integer terayt = terOptio.get().getTERAYT();
+            }
+            
             try {
 
                 List<Tercero> terceros = sicalService.getTerceros(
