@@ -141,10 +141,10 @@
                             <div class="resizer" (mousedown)="startResize($event, 4)"></div>
                         </th>
                         <th 
-                            (click)="setSort('saldo')"
+                            (click)="setSort('saldop')"
                             class="sortable resizable"
                         >   Saldo Operación
-                            <span *ngIf="sortField === 'saldo'">
+                            <span *ngIf="sortField === 'saldop'">
                                 {{ sortDirection === 'asc' ? '▲' : '▼' }}
                             </span>
                             <div class="resizer" (mousedown)="startResize($event, 5)"></div>
@@ -213,9 +213,9 @@
                         <td>{{ p.gbsope }}</td>
                         <td>{{ p.gbsref }}</td>
                         <td>{{ p.limporte | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
-                        <td>{{ p.saldo | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
+                        <td>{{ p.saldop | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>{{ getkAcPeCo(p.gbsiut, p.gbsict) | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
-                        <td> {{ getkdispon(p.saldo, getkAcPeCo(p?.gbsiut, p?.gbsict)) | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
+                        <td> {{ getkdispon(p.saldop, getkAcPeCo(p?.gbsiut, p?.gbsict)) | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>{{ p.gbsimp | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>{{ p.gbsibg | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
                         <td>{{ p.gbsius | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
@@ -337,13 +337,13 @@
                                 </tr>
                                 <tr class="border-second">
                                     <td class="alignment borderLeft">
-                                        <h1 class="h1-style">{{selectedBolsas?.saldo | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
+                                        <h1 class="h1-style">{{selectedBolsas?.saldop | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                     </td>
                                     <td class="alignment">
                                         <h1 class="h1-style">{{getkAcPeCo(selectedBolsas.gbsiut, selectedBolsas.gbsict) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                     </td>
                                     <td class="alignment borderRight">
-                                        <h1 class="h1-style">{{getkdispon(selectedBolsas.saldo, getkAcPeCo(selectedBolsas?.gbsiut, selectedBolsas?.gbsict)) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
+                                        <h1 class="h1-style">{{getkdispon(selectedBolsas.saldop, getkAcPeCo(selectedBolsas?.gbsiut, selectedBolsas?.gbsict)) | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
                                     </td>
                                 </tr>
                             </table>
@@ -488,7 +488,7 @@
                             class="purple-btn"
                             [disabled]="!isUpdate" 
 	                        *ngIf="isUpdate"
-                            (click)="isUpdateAllowed(gbsimp.value, getkdispon(selectedBolsas.saldo, getkAcPeCo(selectedBolsas.gbsiut, selectedBolsas.gbsict)), selectedBolsas.gbsref, tempBolsa.gbsibg)"
+                            (click)="isUpdateAllowed(gbsimp.value, getkdispon(selectedBolsas.saldop, getkAcPeCo(selectedBolsas.gbsiut, selectedBolsas.gbsict)), selectedBolsas.gbsref, tempBolsa.gbsibg)"
                         >Guardar</button>
                         <button 
                             class="purple-btn" 
@@ -571,7 +571,7 @@
                 <td>{{d.lineaList[0].linfun}}</td>
                 <td>{{d.lineaList[0].lineco}}</td>
                 <td>{{d.lineaList[0].limporte | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
-                <td>{{d.lineaList[0].saldo | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                <td>{{d.lineaList[0].saldop | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                 <td>{{d.texto}}</td>
             </tr>
         </tbody>

@@ -140,14 +140,14 @@ export class BolsaCreditoComponent {
               this.creditos[idx].partidas = [];
             },
           });
-          this.creditos[idx].saldo = 0;
+          this.creditos[idx].saldop = 0;
           this.creditos[idx].limporte = 0;
           this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&numeroOperDesde=${numeroOper}&numeroOperHasta=${numeroOper}&referencia=${referencia}&organica=${org}&funcional=${fun}&economica=${eco}&eje=${this.eje}&numRegDev=${1}`).pipe(takeUntil(this.fetchCancel$), finalize(() => {pendingRequests--;if (pendingRequests === 0) {this.swLoading = false;}})).subscribe({
             next: (operaciones) => {
               const operacionesArr = Array.isArray(operaciones) ? operaciones : [];
               this.creditos[idx].operaciones = operacionesArr;
               const firstLinea = operacionesArr[0]?.lineaList?.[0] ?? {};
-              const saldo = this.creditos[idx].saldo = firstLinea?.saldo ?? 0;
+              const saldop = this.creditos[idx].saldop = firstLinea?.saldop ?? 0;
               const limporte = this.creditos[idx].limporte = firstLinea?.limporte ?? 0;
             },
             error: () => {
@@ -212,7 +212,7 @@ export class BolsaCreditoComponent {
         return this.sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
       }
 
-      if (field === 'limporte' || field === 'saldo') {
+      if (field === 'limporte' || field === 'saldop') {
         aVal = this.parseMoney(a?.[field]);
         bVal = this.parseMoney(b?.[field]);
 
@@ -232,12 +232,12 @@ export class BolsaCreditoComponent {
 
       if (field === 'gbsict') {
         aVal = this.getkdispon(
-          a?.saldo,
+          a?.saldop,
           this.getkAcPeCo(a?.gbsiut, a?.gbsict)
         );
 
         bVal = this.getkdispon(
-          b?.saldo,
+          b?.saldop,
           this.getkAcPeCo(b?.gbsiut, b?.gbsict)
         );
 
@@ -253,8 +253,8 @@ export class BolsaCreditoComponent {
        }
 
       if (field === 'disponible') {
-        aVal = this.getkdispon(a.saldo, this.getkAcPeCo(a.gbsiut, a.gbsict));
-        bVal = this.getkdispon(b.saldo, this.getkAcPeCo(b.gbsiut, b.gbsict));
+        aVal = this.getkdispon(a.saldop, this.getkAcPeCo(a.gbsiut, a.gbsict));
+        bVal = this.getkdispon(b.saldop, this.getkAcPeCo(b.gbsiut, b.gbsict));
         return this.sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
        }
 
@@ -319,9 +319,9 @@ export class BolsaCreditoComponent {
       gbsope: row.gbsope ?? '',
       gbsref: row.gbsref ?? '',
       limporte: this.formatCurrency(row.limporte) ?? '',
-      saldo: this.formatCurrency(row.saldo) ?? '',
+      saldo: this.formatCurrency(row.saldop) ?? '',
       getkAcPeCo: this.formatCurrency(this.getkAcPeCo(row.gbsiut, row.gbsict)) ?? '',
-      getkdispon: this.formatCurrency(this.getkdispon(row.saldo, this.getkAcPeCo(row?.gbsiut, row?.gbsict))) ?? '',
+      getkdispon: this.formatCurrency(this.getkdispon(row.saldop, this.getkAcPeCo(row?.gbsiut, row?.gbsict))) ?? '',
       gbsimp: this.formatCurrency(row.gbsimp) ?? '',
       gbsibg: this.formatCurrency(row.gbsibg) ?? '',
       gbsius: this.formatCurrency(row.gbsius) ?? '',
@@ -393,24 +393,21 @@ export class BolsaCreditoComponent {
     worksheet: XLSX.WorkSheet,
     rowCount: number
   ): void {
-    const currencyFormat = '[$€-es-ES] #,##0.00';
+    const currencyFormat = '#,##0.00 [$€-es-ES]';
+    const currencyColumns = [4, 5, 6, 7, 8, 9, 10, 11];
 
     for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
-      for (let columnIndex = 4; columnIndex <= 11; columnIndex++) {
+      for (const columnIndex of currencyColumns) {
         const cellAddress = XLSX.utils.encode_cell({
           r: rowIndex,
           c: columnIndex
         });
-
         const cell = worksheet[cellAddress];
 
-        if (!cell) {
-          continue;
-        }
+        if (!cell) continue;
 
         cell.v = this.parseMoney(cell.v);
         cell.t = 'n';
-
         cell.z = currencyFormat;
       }
     }
@@ -432,9 +429,9 @@ export class BolsaCreditoComponent {
       Operación_contable: row.gbsope ?? '',
       Ref_contable: row.gbsref ?? '',
       Imp_Operación: this.parseMoney(row.limporte),
-      Saldo_Operación: this.parseMoney(row.saldo),
+      Saldo_Operación: this.parseMoney(row.saldop),
       Pte_Contabilizar_SCAP: this.parseMoney(this.getkAcPeCo(row.gbsiut, row.gbsict)),
-      Disponible: this.parseMoney(this.getkdispon(row.saldo, this.getkAcPeCo(row.gbsiut, row.gbsict))),
+      Disponible: this.parseMoney(this.getkdispon(row.saldop, this.getkAcPeCo(row.gbsiut, row.gbsict))),
       Importe_bolsa: this.parseMoney(row.gbsimp),
       Importe_bolsa_gestión: this.parseMoney(row.gbsibg),
       Usado_bolsa: this.parseMoney(row.gbsius),
@@ -645,8 +642,8 @@ export class BolsaCreditoComponent {
     return sum;
   }
 
-  public getkdispon(saldo: any, getkAcPeCo: any): number {
-    let a = this.parseMoney(saldo);
+  public getkdispon(saldop: any, getkAcPeCo: any): number {
+    let a = this.parseMoney(saldop);
     let b = this.parseMoney(getkAcPeCo);
     let value = a - b;
     return value;
@@ -806,7 +803,7 @@ export class BolsaCreditoComponent {
 
   transFond() {
     this.limpiarMessages();
-    const disponible = this.getkdispon(this.selectedBolsas.saldo, this.getkAcPeCo(this.selectedBolsas.gbsiut, this.selectedBolsas.gbsict));
+    const disponible = this.getkdispon(this.selectedBolsas.saldop, this.getkAcPeCo(this.selectedBolsas.gbsiut, this.selectedBolsas.gbsict));
     let gbsimp = this.cleaningCurrency(this.selectedBolsas.gbsimp); 
     let gbsibg = this.cleaningCurrency(this.selectedBolsas.gbsibg);
     if (disponible === null || gbsibg === null || gbsimp === null) {return;}
