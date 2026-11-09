@@ -4,8 +4,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.Objects;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
@@ -172,10 +172,13 @@ public class FacController {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
+            Integer terayt;
             TerId terId = new TerId(ent, payload.tercod());
             Optional<Ter> terOptio = terRepository.findById(terId);
             if (terOptio.isPresent()) {
-                Integer terayt = terOptio.get().getTERAYT();
+                terayt = terOptio.get().getTERAYT();
+            } else {
+                terayt = null;
             }
             
             try {
