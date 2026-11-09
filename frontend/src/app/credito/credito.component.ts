@@ -390,24 +390,21 @@ export class CreditoComponent {
     worksheet: XLSX.WorkSheet,
     rowCount: number
   ): void {
-    const currencyFormat = '[$€-es-ES] #,##0.00';
+    const currencyFormat = '#,##0.00 [$€-es-ES]';
+    const currencyColumns = [4, 5, 6, 7, 8, 9, 10, 11];
 
     for (let rowIndex = 2; rowIndex < rowCount + 2; rowIndex++) {
-      for (let columnIndex = 4; columnIndex <= 11; columnIndex++) {
+      for (const columnIndex of currencyColumns) {
         const cellAddress = XLSX.utils.encode_cell({
           r: rowIndex,
           c: columnIndex
         });
-
         const cell = worksheet[cellAddress];
 
-        if (!cell) {
-          continue;
-        }
+        if (!cell) continue;
 
         cell.v = this.parseMoney(cell.v);
         cell.t = 'n';
-
         cell.z = currencyFormat;
       }
     }
