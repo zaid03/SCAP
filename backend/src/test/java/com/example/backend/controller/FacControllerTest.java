@@ -15,6 +15,7 @@ import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoInteractions;
 import static org.mockito.Mockito.when;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
@@ -415,18 +416,12 @@ public class FacControllerTest {
     }
 
     @Test
-    void contabilizarFactura_returnsBadRequestWhenBolsaMissing() throws Exception {
+    void contabilizarFactura_returnsNoContentWithoutCheckingBolsa() throws Exception {
         FacId facId = new FacId(1, "E1", 100);
         Fac factura = new Fac();
-        when(facRepository.findById(facId)).thenReturn(Optional.of(factura));
 
-        Fde fde = new Fde();
-        fde.setFDEORG("ORG");
-        fde.setFDEFUN("FUN");
-        fde.setFDEECO("ECO");
-        when(fdeRepository.findByENTAndEJEAndFACNUM(1, "E1", 100)).thenReturn(List.of(fde));
-        when(gbsRepository.findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(1, "E1", "C1", "ORG", "FUN", "ECO"))
-            .thenReturn(Optional.empty());
+        when(facRepository.findById(facId))
+            .thenReturn(Optional.of(factura));
 
         Map<String, Object> payload = Map.of(
             "ENT", 1,
@@ -442,8 +437,10 @@ public class FacControllerTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(payload)))
             .andDo(print())
-            .andExpect(status().isBadRequest())
-            .andExpect(content().string(containsString("No existe bolsa para")));
+            .andExpect(status().isNoContent());
+
+        verify(facRepository).save(any(Fac.class));
+        verifyNoInteractions(gbsRepository);
     }
 
     @Test
@@ -473,25 +470,12 @@ public class FacControllerTest {
     }
 
     @Test
-    void contabilizarFactura_returnsNoContentOnSuccessWithBolsas() throws Exception {
+    void contabilizarFactura_returnsNoContentWithoutUpdatingGbs() throws Exception {
         FacId facId = new FacId(1, "E1", 100);
         Fac factura = new Fac();
-        when(facRepository.findById(facId)).thenReturn(Optional.of(factura));
 
-        Fde fde = new Fde();
-        fde.setFDEORG("ORG");
-        fde.setFDEFUN("FUN");
-        fde.setFDEECO("ECO");
-        fde.setFDEIMP(50.0);
-        fde.setFDEDIF(10.0);
-        when(fdeRepository.findByENTAndEJEAndFACNUM(1, "E1", 100)).thenReturn(List.of(fde));
-
-        GbsId gbsId = new GbsId(1, "E1", "C1", "REF");
-        Gbs bolsa = new Gbs();
-        bolsa.setGBSIUS(100.0);
-        bolsa.setGBSIUT(100.0);
-        when(gbsRepository.findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(1, "E1", "C1", "ORG", "FUN", "ECO"))
-            .thenReturn(Optional.of(bolsa));
+        when(facRepository.findById(facId))
+            .thenReturn(Optional.of(factura));
 
         Map<String, Object> payload = Map.of(
             "ENT", 1,
@@ -510,7 +494,7 @@ public class FacControllerTest {
             .andExpect(status().isNoContent());
 
         verify(facRepository).save(any(Fac.class));
-        verify(gbsRepository).save(any(Gbs.class));
+        verifyNoInteractions(gbsRepository);
     }
 
     @Test
