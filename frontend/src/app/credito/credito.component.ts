@@ -131,14 +131,14 @@ export class CreditoComponent {
                 this.creditos[idx].partidas = [];
               },
             });
-            this.creditos[idx].saldo = 0;
+            this.creditos[idx].saldop = 0;
             this.creditos[idx].limporte = 0;
             this.http.get<any>(`${environment.backendUrl}/api/sical/operaciones?orgCode=${this.orgCode}&entidad=${this.entidad}&numeroOperDesde=${numeroOper}&numeroOperHasta=${numeroOper}&referencia=${referencia}&organica=${org}&funcional=${fun}&economica=${eco}&eje=${this.eje}&numRegDev=${1}`).pipe(finalize(() => {pendingRequests--; if (pendingRequests === 0) {this.swLoading = false;}})).subscribe({
               next: (operaciones) => {
                 const operacionesArr = Array.isArray(operaciones) ? operaciones : [];
                 this.creditos[idx].operaciones = operacionesArr;
                 const firstLinea = operacionesArr[0]?.lineaList?.[0] ?? {};
-                const saldo = this.creditos[idx].saldo = firstLinea?.saldo ?? 0;
+                const saldop = this.creditos[idx].saldop = firstLinea?.saldop ?? 0;
                 const limporte = this.creditos[idx].limporte = firstLinea?.limporte ?? 0;
               },
               error: () => {
@@ -201,7 +201,7 @@ export class CreditoComponent {
         return this.sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
       }
 
-      if (field === 'limporte' || field === 'saldo') {
+      if (field === 'limporte' || field === 'saldop') {
         aVal = this.parseMoney(a?.[field]);
         bVal = this.parseMoney(b?.[field]);
 
@@ -221,12 +221,12 @@ export class CreditoComponent {
 
       if (field === 'gbsict') {
         aVal = this.getkdispon(
-          a?.saldo,
+          a?.saldop,
           this.getkAcPeCo(a?.gbsiut, a?.gbsict)
         );
 
         bVal = this.getkdispon(
-          b?.saldo,
+          b?.saldop,
           this.getkAcPeCo(b?.gbsiut, b?.gbsict)
         );
 
@@ -251,8 +251,8 @@ export class CreditoComponent {
        }
 
       if (field === 'disponible') {
-        aVal = this.getkdispon(a.saldo, this.getkAcPeCo(a.gbsiut, a.gbsict));
-        bVal = this.getkdispon(b.saldo, this.getkAcPeCo(b.gbsiut, b.gbsict));
+        aVal = this.getkdispon(a.saldop, this.getkAcPeCo(a.gbsiut, a.gbsict));
+        bVal = this.getkdispon(b.saldop, this.getkAcPeCo(b.gbsiut, b.gbsict));
         return this.sortDirection === 'asc' ? aVal - bVal : bVal - aVal;
        }
 
@@ -317,9 +317,9 @@ export class CreditoComponent {
       gbsope: row.gbsope ?? '',
       gbsref: row.gbsref ?? '',
       limporte: this.formatCurrency(row.limporte) ?? '',
-      saldo: this.formatCurrency(row.saldo) ?? '',
+      saldo: this.formatCurrency(row.saldop) ?? '',
       getkAcPeCo: this.formatCurrency(this.getkAcPeCo(row.gbsiut, row.gbsict)) ?? '',
-      getkdispon: this.formatCurrency(this.getkdispon(row.saldo, this.getkAcPeCo(row?.gbsiut, row?.gbsict))) ?? '',
+      getkdispon: this.formatCurrency(this.getkdispon(row.saldop, this.getkAcPeCo(row?.gbsiut, row?.gbsict))) ?? '',
       gbsimp: this.formatCurrency(row.gbsimp) ?? '',
       gbsibg: this.formatCurrency(row.gbsibg) ?? '',
       gbsius: this.formatCurrency(row.gbsius) ?? '',
@@ -426,9 +426,9 @@ export class CreditoComponent {
       Operación_contable: row.gbsope ?? '',
       Ref_contable: row.gbsref ?? '',
       Imp_Operación: this.parseMoney(row.limporte),
-      Saldo_Operación: this.parseMoney(row.saldo),
+      Saldo_Operación: this.parseMoney(row.saldop),
       Pte_Contabilizar_SCAP: this.parseMoney(this.getkAcPeCo(row.gbsiut, row.gbsict)),
-      Disponible: this.parseMoney(this.getkdispon(row.saldo, this.getkAcPeCo(row.gbsiut, row.gbsict))),
+      Disponible: this.parseMoney(this.getkdispon(row.saldop, this.getkAcPeCo(row.gbsiut, row.gbsict))),
       Importe_bolsa: this.parseMoney(row.gbsimp),
       Importe_bolsa_gestión: this.parseMoney(row.gbsibg),
       Usado_bolsa: this.parseMoney(row.gbsius),
@@ -627,8 +627,8 @@ export class CreditoComponent {
     return sum;
   }
 
-  public getkdispon(saldo: any, getkAcPeCo: any): number {
-    let a = this.parseMoney(saldo);
+  public getkdispon(saldop: any, getkAcPeCo: any): number {
+    let a = this.parseMoney(saldop);
     let b = this.parseMoney(getkAcPeCo);
     let value = a - b;
     return value;

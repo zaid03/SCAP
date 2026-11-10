@@ -143,8 +143,11 @@ public class ContabilizacionService {
         for (Fde fde : fdeList) {
             double imp = round2(totalFde(fde));
             if (imp <= 0) continue;
-            int n = gbsRepository.acumular(imp, fac.getENT(), fac.getEJE(), fac.getCGECOD(),
-                    fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO());
+            int n = gbsRepository.acumular(
+                fac.getENT(),
+                fac.getEJE(),
+                fac.getFACNUM()
+            );
             System.out.println("GBS acumulado imp=" + imp + " eco=" + fde.getFDEECO() + " filas=" + n);
         }
     }

@@ -29,9 +29,37 @@ public interface  GbsRepository extends JpaRepository<Gbs, GbsId>{
 
     //needed for contabilizar a factura
     Optional<Gbs> findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(Integer ENT, String EJE, String CGECOD, String GBSORG, String GBSFUN, String GBSECO);
+    //needed for contabilizar a factura
     @Modifying(flushAutomatically = true, clearAutomatically = true)
-    @Query("UPDATE Gbs g SET g.GBSICO = COALESCE(g.GBSICO, 0) + :imp, g.GBSICT = COALESCE(g.GBSICT, 0) + :imp " + "WHERE g.ENT = :ent AND g.EJE = :eje AND g.CGECOD = :cge " + "AND g.GBSORG = :org AND g.GBSFUN = :fun AND g.GBSECO = :eco")
-    int acumular(@Param("imp") double imp, @Param("ent") Integer ent, @Param("eje") String eje, @Param("cge") String cge, @Param("org") String org, @Param("fun") String fun, @Param("eco") String eco);
+    @Query(value = """
+        UPDATE g
+        SET g.GBSICO = COALESCE(g.GBSICO, 0)
+                        + COALESCE(fde.FDEIMP, 0)
+                        + COALESCE(fde.FDEDIF, 0),
+            g.GBSICT = COALESCE(g.GBSICT, 0)
+                        + COALESCE(fde.FDEIMP, 0)
+                        + COALESCE(fde.FDEDIF, 0)
+        FROM dbo.GBS g
+        INNER JOIN dbo.FDE fde
+            ON g.ENT = fde.ENT
+        AND g.EJE = fde.EJE
+        AND g.GBSORG = fde.FDEORG
+        AND g.GBSFUN = fde.FDEFUN
+        AND g.GBSECO = fde.FDEECO
+        INNER JOIN dbo.FAC fac
+            ON fac.ENT = fde.ENT
+        AND fac.EJE = fde.EJE
+        AND fac.FACNUM = fde.FACNUM
+        AND g.CGECOD = fac.CGECOD
+        WHERE fde.ENT = :ent
+        AND fde.EJE = :eje
+        AND fde.FACNUM = :facnum
+        """, nativeQuery = true)
+    int acumular(
+        @Param("ent") Integer ent,
+        @Param("eje") String eje,
+        @Param("facnum") Integer facnum
+    );
 
     //for cambiar contrato to factura
     List<bolsaPorContrato> findAllByENTAndEJEAndCGECOD(Integer ent, String eje, String cgecod);
