@@ -140,16 +140,20 @@ public class ContabilizacionService {
     }
 
     private void actualizarGbs(Fac fac, List<Fde> fdeList) {
-        for (Fde fde : fdeList) {
-            double imp = round2(totalFde(fde));
-            if (imp <= 0) continue;
-            int n = gbsRepository.acumular(
-                fac.getENT(),
-                fac.getEJE(),
-                fac.getFACNUM()
-            );
-            System.out.println("GBS acumulado imp=" + imp + " eco=" + fde.getFDEECO() + " filas=" + n);
+        boolean hasAmount = fdeList.stream()
+            .anyMatch(fde -> totalFde(fde) > 0);
+
+        if (!hasAmount) {
+            return;
         }
+
+        int n = gbsRepository.acumular(
+            fac.getENT(),
+            fac.getEJE(),
+            fac.getFACNUM()
+        );
+
+        System.out.println("GBS acumulado factura=" + fac.getFACNUM() + " filas=" + n);
     }
 
     private void actualizarContrato(ContabilizacionRequestDto req, Fac fac, List<Fde> fdeList, double kImporteTotal) {

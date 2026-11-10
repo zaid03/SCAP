@@ -308,10 +308,10 @@ public class FacController {
             ResponseEntity<?> facturaResult = updateFacturaRecord(payload);
             if (facturaResult != null) return facturaResult;
             
-            if (!payload.ESCONTRATO()) {
-                ResponseEntity<?> bolsaResult = procesarBolsas(payload);
-                if (bolsaResult != null) return bolsaResult;
-            }
+            // if (!payload.ESCONTRATO()) {
+            //     ResponseEntity<?> bolsaResult = procesarBolsas(payload);
+            //     if (bolsaResult != null) return bolsaResult;
+            // }
             
             return ResponseEntity.noContent().build();
             
@@ -346,45 +346,45 @@ public class FacController {
         return null;
     }
 
-    private ResponseEntity<?> procesarBolsas(Contabilizar payload) {
-        List<Fde> applicacionesList = fdeRepository.findByENTAndEJEAndFACNUM(
-            payload.ENT(), payload.EJE(), payload.FACNUM()
-        );
+    // private ResponseEntity<?> procesarBolsas(Contabilizar payload) {
+    //     List<Fde> applicacionesList = fdeRepository.findByENTAndEJEAndFACNUM(
+    //         payload.ENT(), payload.EJE(), payload.FACNUM()
+    //     );
 
-        List<String> errores = new ArrayList<>();
+    //     List<String> errores = new ArrayList<>();
         
-        for (Fde fde : applicacionesList) {
-            procesarFdeYBolsa(payload, fde, errores);
-        }
+    //     for (Fde fde : applicacionesList) {
+    //         procesarFdeYBolsa(payload, fde, errores);
+    //     }
         
-        if (!errores.isEmpty()) {
-            return ResponseEntity.badRequest()
-                .body("No existe bolsa para: " + String.join(", ", errores));
-        }
+    //     if (!errores.isEmpty()) {
+    //         return ResponseEntity.badRequest()
+    //             .body("No existe bolsa para: " + String.join(", ", errores));
+    //     }
         
-        return null;
-    }
+    //     return null;
+    // }
 
-    private void procesarFdeYBolsa(Contabilizar payload, Fde fde, List<String> errores) {
-        Optional<Gbs> bolsaOptio = gbsRepository.findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(
-            payload.ENT(), payload.EJE(), payload.CGECOD(), 
-            fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO()
-        );
+    // private void procesarFdeYBolsa(Contabilizar payload, Fde fde, List<String> errores) {
+    //     Optional<Gbs> bolsaOptio = gbsRepository.findByENTAndEJEAndCGECODAndGBSORGAndGBSFUNAndGBSECO(
+    //         payload.ENT(), payload.EJE(), payload.CGECOD(), 
+    //         fde.getFDEORG(), fde.getFDEFUN(), fde.getFDEECO()
+    //     );
         
-        if (bolsaOptio.isEmpty()) {
-            errores.add(fde.getFDEORG() + "/" + fde.getFDEFUN() + "/" + fde.getFDEECO());
-            return;
-        }
+    //     if (bolsaOptio.isEmpty()) {
+    //         errores.add(fde.getFDEORG() + "/" + fde.getFDEFUN() + "/" + fde.getFDEECO());
+    //         return;
+    //     }
         
-        Gbs bolsa = bolsaOptio.get();
-        Double fdeimp = fde.getFDEIMP() != null ? fde.getFDEIMP() : 0.0;
-        Double fdedif = fde.getFDEDIF() != null ? fde.getFDEDIF() : 0.0;
+    //     Gbs bolsa = bolsaOptio.get();
+    //     Double fdeimp = fde.getFDEIMP() != null ? fde.getFDEIMP() : 0.0;
+    //     Double fdedif = fde.getFDEDIF() != null ? fde.getFDEDIF() : 0.0;
         
-        Double newGbsius = bolsa.getGBSIUS() + fdeimp + fdedif;
-        Double newGbsiut = bolsa.getGBSIUT() + fdeimp + fdedif;
+    //     Double newGbsius = bolsa.getGBSIUS() + fdeimp + fdedif;
+    //     Double newGbsiut = bolsa.getGBSIUT() + fdeimp + fdedif;
         
-        bolsa.setGBSIUS(newGbsius);
-        bolsa.setGBSIUT(newGbsiut);
-        gbsRepository.save(bolsa);
-    }
+    //     bolsa.setGBSIUS(newGbsius);
+    //     bolsa.setGBSIUT(newGbsiut);
+    //     gbsRepository.save(bolsa);
+    // }
 }
