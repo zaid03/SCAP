@@ -125,7 +125,6 @@ public class FacContabilizacionSpecification {
         predicate = cb.and(predicate, cb.equal(root.get("ENT"), ent));
         predicate = cb.and(predicate, cb.equal(root.get("EJE"), eje));
         predicate = cb.and(predicate, cb.equal(root.get("CGECOD"), cgecod));
-        predicate = cb.and(predicate, cb.isNull(root.get("FACADO")));
         return predicate;
     }
 
@@ -175,7 +174,15 @@ public class FacContabilizacionSpecification {
     private static Predicate searchByTercodOrFallback(Root<Fac> root, CriteriaBuilder cb, String trimmed) {
         try {
             Integer tercod = Integer.parseInt(trimmed);
-            return cb.equal(root.get("TERCOD"), tercod);
+            String facfac = trimmed;
+            Integer facnum = Integer.parseInt(trimmed);
+            String facdoc = trimmed;
+            return cb.or(
+                cb.equal(root.get("TERCOD"), tercod),
+                cb.equal(root.get("FACFAC"), facfac),
+                cb.equal(root.get("FACNUM"), facnum),
+                cb.equal(root.get("FACDOC"), facdoc)
+            );
         } catch (NumberFormatException e) {
             return searchByNameOrDoc(root, cb, trimmed);
         }
