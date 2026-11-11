@@ -112,7 +112,8 @@ public class FacController {
         @RequestParam(required = false) String estado,
         @RequestParam(required = false) String fecha,
         @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate fromDate,
-        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate
+        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate toDate,
+        @RequestParam(defaultValue = "false") boolean noCont
     ) {
         try {
             FacturaSearch.FacturaSearchCriteria criteria = new FacturaSearch.FacturaSearchCriteria.Builder()
@@ -125,6 +126,7 @@ public class FacController {
                 .fecha(fecha)
                 .fromDate(fromDate)
                 .toDate(toDate)
+                .noCont(noCont)
                 .build();
             
             List<FacWithTerProjection> facturas = facturaSearch.searchFactura(criteria);

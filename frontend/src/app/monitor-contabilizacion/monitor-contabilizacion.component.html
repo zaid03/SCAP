@@ -199,7 +199,7 @@
                             style="cursor: pointer;"
                         >{{f.facnum}}</td>
                         <td>{{f.tercod}}</td>
-                        <td>{{f.ter.ternom}}</td>
+                        <td>{{f.ter?.ternom}}</td>
                         <td>{{f.ter.ternif}}</td>
                         <td>{{f.facfre | date:'dd-MM-yyyy'}}</td>
                         <td>{{f.facimp | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>

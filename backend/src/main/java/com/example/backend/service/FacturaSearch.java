@@ -26,6 +26,7 @@ public class FacturaSearch {
         public final String fecha;
         public final LocalDate fromDate;
         public final LocalDate toDate;
+        public final boolean noCont;
 
         private FacturaSearchCriteria(Builder builder) {
             this.ent = builder.ent;
@@ -37,6 +38,7 @@ public class FacturaSearch {
             this.fecha = builder.fecha;
             this.fromDate = builder.fromDate;
             this.toDate = builder.toDate;
+            this.noCont = builder.noCont;
         }
 
         public static class Builder {
@@ -49,6 +51,7 @@ public class FacturaSearch {
             private String fecha;
             private LocalDate fromDate;
             private LocalDate toDate;
+            boolean noCont;
 
             public Builder ent(Integer ent) { this.ent = ent; return this; }
             public Builder eje(String eje) { this.eje = eje; return this; }
@@ -59,6 +62,7 @@ public class FacturaSearch {
             public Builder fecha(String fecha) { this.fecha = fecha; return this; }
             public Builder fromDate(LocalDate fromDate) { this.fromDate = fromDate; return this; }
             public Builder toDate(LocalDate toDate) { this.toDate = toDate; return this; }
+            public Builder noCont(boolean noCont) {this.noCont = noCont; return this; }
 
             public FacturaSearchCriteria build() {
                 return new FacturaSearchCriteria(this);
@@ -71,8 +75,8 @@ public class FacturaSearch {
         LocalDateTime toDateTime = criteria.toDate != null ? criteria.toDate.atTime(23, 59, 59) : null;
 
         List<FacWithTerProjection> facturas = new ArrayList<>();
-        if (criteria.cgecod == null || criteria.cgecod.isEmpty()) {
-            facturas = facRepository.findByENTAndEJEOrderByFACFREAsc(criteria.ent, criteria.eje);
+        if (criteria.noCont) {
+            facturas = facRepository.findByENTAndEJEAndCGECODAndFACADOIsNullOrderByFACFREAsc(criteria.ent, criteria.eje, criteria.cgecod);
         } else {
             facturas = facRepository.findByENTAndEJEAndCGECODOrderByFACFREAsc(criteria.ent, criteria.eje, criteria.cgecod);
         }
@@ -150,6 +154,7 @@ public class FacturaSearch {
     ) {
         return facturas.stream().filter(f -> 
             (f.getTERCOD() != null && f.getTERCOD().toString().equals(main_filter)) ||
+            (f.getFACADO() != null && f.getFACADO().toString().equals(main_filter)) ||
             (f.getFACFAC() != null && f.getFACFAC().toString().equals(main_filter)) ||
             (f.getFACNUM() != null && f.getFACNUM().toString().equals(main_filter)) ||
             (f.getFACDOC() != null && f.getFACDOC().toString().equals(main_filter))
@@ -160,8 +165,9 @@ public class FacturaSearch {
         String main_filter
     ) {
         return  facturas.stream().filter(f -> 
-            (f.getTer_TERNIF() != null && f.getTer_TERNIF().equals(main_filter)) || 
-            (f.getFACADO() != null && f.getFACADO().contains(main_filter))
+            (f.getTer_TERNIF() != null && f.getTer_TERNIF().contains(main_filter)) || 
+            (f.getFACADO() != null && f.getFACADO().contains(main_filter)) ||
+            (f.getFACDOC() != null && f.getFACDOC().contains(main_filter))
         ).toList();
     }
     private List<FacWithTerProjection> filterByTernifOrTernomOrFacdoc (
