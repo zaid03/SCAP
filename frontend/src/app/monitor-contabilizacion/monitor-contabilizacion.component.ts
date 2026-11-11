@@ -35,7 +35,8 @@ export class MonitorContabilizacionComponent {
 
   //global variables
   private entcod: number | null = null;
-  private eje: number | null = null;
+  eje: string = '';
+  backupEje: string = '';
   public centroGestor: string = '';
   private WSent: string = '';
   private WSorg: string = '';
@@ -61,7 +62,7 @@ export class MonitorContabilizacionComponent {
 
     if (cge){ const parsed = JSON.parse(cge); this.centroGestor = parsed.value;}
     if (entidad) {const parsed = JSON.parse(entidad); this.entcod = parsed.ENTCOD;}
-    if (eje) {const parsed = JSON.parse(eje); this.eje = parsed.eje;}
+    if (eje) {const parsed = JSON.parse(eje); this.eje = parsed.eje; this.backupEje = parsed.eje;}
     if (entSession) {const parsed = JSON.parse(entSession); this.WSent = parsed.WSENT;}
     if (orgSession) {const parsed = JSON.parse(orgSession); this.WSorg = parsed.WSORG;}
 
@@ -416,7 +417,6 @@ export class MonitorContabilizacionComponent {
   }
 
   facturaSearch: string = '';
-  ejerSearch: string = '';
   fechasType: 'registro' | 'factura' = 'factura';
   desde: string = '';
   hasta: string = '';
@@ -435,8 +435,8 @@ export class MonitorContabilizacionComponent {
     if (this.hasta && this.hasta.trim() !== '') {
       params += `&hasta=${this.hasta}T23:59:59`;
     }
-    if (this.ejerSearch && this.ejerSearch.trim() !== '') {
-      params += `&facann=${this.ejerSearch}`;
+    if (this.eje && this.eje.trim() !== '') {
+      params += `&facann=${this.eje}`;
     }
     if (this.facturaSearch && this.facturaSearch.trim() !== '') {
       params += `&search=${encodeURIComponent(this.facturaSearch)}`;
@@ -459,7 +459,7 @@ export class MonitorContabilizacionComponent {
 
   limpiarSearch() {
     this.facturaSearch = '';
-    this.ejerSearch = '';
+    this.eje = this.backupEje;
     this.fechasType = 'factura';
     this.desde = '';
     this.hasta = '';
@@ -524,10 +524,11 @@ export class MonitorContabilizacionComponent {
     this.detailView = 'Contabilización';
   }
 
+  isLoadingDetails: boolean = false;
   setAlbaranesOptio(option: 'albaranes' | 'aplicaciones' | 'descuentos', facnum: number): void {
     this.albaranesOptio = option;
     this.limpiarMEssages();
-    this.isLoading = true;
+    this.isLoadingDetails = true;
     this.albaranes = [];
     this.apalicaciones = [];
     this.descuentos = [];
@@ -550,13 +551,13 @@ export class MonitorContabilizacionComponent {
           this.pageAlbaranes = 0;
         } else {
           this.albaranes = response;
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageAlbaranes = 0;
         }
       }, error: (err) => {
         this.albaranes = [];
         this.moreInfoMessageError = err.error.error ?? err.error;
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAlbaranes = 0;
       }
     });
@@ -577,7 +578,7 @@ export class MonitorContabilizacionComponent {
           this.moreInfoMessageIsSuccess = true;
           this.moreInfoMessageSuccess = 'No hay aplicaciones por las medidas de búsqueda';
           this.apalicaciones = []
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageAplicaiones = 0
         } else {
 
@@ -599,13 +600,13 @@ export class MonitorContabilizacionComponent {
             }
             return item;
           });
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageAplicaiones = 0
         }
       }, error: (err) => {
         this.apalicaciones = [];
         this.moreInfoMessageError = err.error.error ?? err.error;
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAplicaiones = 0
       }
     });
@@ -626,17 +627,17 @@ export class MonitorContabilizacionComponent {
           this.moreInfoMessageIsSuccess = true;
           this.moreInfoMessageSuccess = 'No hay descuentos por las medidas de búsqueda';
           this.descuentos = []
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageDescuentos = 0;
         } else {
           this.descuentos = response;
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageDescuentos = 0;
         }
       }, error: (err) => {
         this.descuentos = [];
         this.moreInfoMessageError = err.error.error ?? err.error;
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageDescuentos = 0;
       }
     });

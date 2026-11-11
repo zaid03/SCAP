@@ -770,20 +770,21 @@ export class FacturasComponent {
 
   albaranError: string = '';
   albaranesDisabled: boolean = false;
+  isLoadingDetails: boolean = false;
   fetchAlbaranesDEtail(facnum: number) {
-    this.isLoading = true;
+    this.isLoadingDetails = true;
     this.http.get<any>(`${environment.backendUrl}/api/alb/albaranes/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
         this.albaranesDisabled = true;
         this.albaranes = response;
         this.backipAlbaranes = Array.isArray(response) ? [...response] : [];
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAlbaranes = 0;
       }, error: (err) => {
         this.albaranes = [];
         this.albaranesDisabled = false;
         this.albaranError = err.error.error ?? err.error;
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAlbaranes = 0;
       }
     });
@@ -800,7 +801,7 @@ export class FacturasComponent {
   fetchApplicacionesDetails(facnum: number) {
     this.limpiarMEssages();
 
-    this.isLoading = true;
+    this.isLoadingDetails = true;
     this.http.get<any>(`${environment.backendUrl}/api/fde/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
         this.apalicaciones = response.map((item: any) => {
@@ -821,13 +822,13 @@ export class FacturasComponent {
         });
 
         this.backupAplicaciones = [...this.apalicaciones];
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAplicaiones = 0;
       },
 
       error: (err) => {
         this.apalicaciones = [];
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageAplicaiones = 0;
         this.moreInfoMessageError = err.error.error ?? err.error;
       }
@@ -844,17 +845,17 @@ export class FacturasComponent {
 
   descuentosError: string = '';
   fetchDescuentosDetails(facnum: number) {
-    this.isLoading = true;
+    this.isLoadingDetails = true;
     this.http.get<any>(`${environment.backendUrl}/api/fdt/${this.entcod}/${this.eje}/${facnum}`).subscribe({
       next: (response) => {
         this.descuentos = response;
         this.backupDescuentos = Array.isArray(response) ? [...response] : [];
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageDescuentos = 0;
       }, error: (err) => {
         this.descuentos = [];
         this.descuentosError = err.error.error ?? err.error;
-        this.isLoading = false;
+        this.isLoadingDetails = false;
         this.pageDescuentos = 0;
       }
     });

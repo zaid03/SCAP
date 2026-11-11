@@ -25,7 +25,7 @@
                             name="factura" 
                             class="search-bar smallWidth"
                             placeholder="Eje"
-                            [(ngModel)]="ejerSearch"
+                            [(ngModel)]="eje"
                             maxlength="4"
                             inputmode="numeric"
                             pattern="[0-9]*"
@@ -195,7 +195,9 @@
                         [class.selected-row]="isFacturaSelected(f)"
                         style="cursor: pointer;"
                     >
-                        <td (click)="showDetails(f)" style="cursor: pointer;">{{f.facnum}}</td>
+                        <td (click)="showDetails(f); $event.stopPropagation()"
+                            style="cursor: pointer;"
+                        >{{f.facnum}}</td>
                         <td>{{f.tercod}}</td>
                         <td>{{f.ter.ternom}}</td>
                         <td>{{f.ter.ternif}}</td>
@@ -544,6 +546,10 @@
                                 <ng-container [ngSwitch]="albaranesOptio">
                                     <ng-container *ngSwitchCase="'albaranes'">
                                         <h1 class="successBtn">{{moreInfoMessageSuccess}}</h1>
+                                        <div *ngIf="isLoadingDetails" class="loading-message">
+                                            <div class="spinner"></div>
+                                            <span>Cargando</span>
+                                        </div>
                                         <div class="detail-card">
                                             <table class="main-table alb width-last">
                                                 <thead>
@@ -588,7 +594,7 @@
                                     </ng-container>
                                     <ng-container *ngSwitchCase="'aplicaciones'">
                                         <h1 class="successBtn">{{moreInfoMessageSuccess}}</h1>
-                                        <div *ngIf="isLoading" class="loading-message">
+                                        <div *ngIf="isLoadingDetails" class="loading-message">
                                             <div class="spinner"></div>
                                             <span>Cargando</span>
                                         </div>
@@ -632,7 +638,7 @@
                                     </ng-container>
                                     <ng-container    *ngSwitchCase="'descuentos'">
                                         <h1 class="successBtn">{{moreInfoMessageSuccess}}</h1>
-                                        <div *ngIf="isLoading" class="loading-message">
+                                        <div *ngIf="isLoadingDetails" class="loading-message">
                                             <div class="spinner"></div>
                                             <span>Cargando</span>
                                         </div>

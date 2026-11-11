@@ -656,10 +656,11 @@ export class ConsultaFacturaComponent {
   //   this.detailView = 'Contabilización';
   // }
 
+  isLoadingDetails: boolean = false;
   setAlbaranesOptio(option: 'albaranes' | 'aplicaciones' | 'descuentos', facnum: number): void {
     this.albaranesOptio = option;
     this.limpiarMEssages();
-    this.isLoading = true;
+    this.isLoadingDetails = true;
     this.albaranes = [];
     this.apalicaciones = [];
     this.descuentos = [];
@@ -671,19 +672,19 @@ export class ConsultaFacturaComponent {
             this.moreInfoMessageIsSuccess = true;
             this.moreInfoMessageSuccess = 'No hay albaranes por las medidas de búsqueda';
             this.albaranes = []
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageAlbaranes = 0;
           } else {
             this.albaranes = response;
             this.backipAlbaranes = Array.isArray(response) ? [...response] : [];
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageAlbaranes = 0;
           }
         }, error: (err) => {
           this.albaranes = [];
           this.moreInfoMessageIsError = true;
           this.moreInfoMessageError = err.error.error ?? err.error;
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageAlbaranes = 0;
         }
       });
@@ -696,19 +697,19 @@ export class ConsultaFacturaComponent {
             this.moreInfoMessageIsSuccess = true;
             this.moreInfoMessageSuccess = 'No hay aplicaciones por las medidas de búsqueda';
             this.apalicaciones = []
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageAplicaiones = 0
           } else {
             this.apalicaciones = response;
             this.backupAplicaciones = Array.isArray(response) ? [...response] : [];
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageAplicaiones = 0
           }
         }, error: (err) => {
           this.apalicaciones = [];
           this.moreInfoMessageIsError = true;
           this.moreInfoMessageError = err.error.error ?? err.error;
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageAplicaiones = 0
         }
       });
@@ -721,19 +722,19 @@ export class ConsultaFacturaComponent {
             this.moreInfoMessageIsSuccess = true;
             this.moreInfoMessageSuccess = 'No hay descuentos por las medidas de búsqueda';
             this.descuentos = []
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageDescuentos = 0;
           } else {
             this.descuentos = response;
             this.backupDescuentos = Array.isArray(response) ? [...response] : [];
-            this.isLoading = false;
+            this.isLoadingDetails = false;
             this.pageDescuentos = 0;
           }
         }, error: (err) => {
           this.descuentos = [];
           this.moreInfoMessageIsError = true;
           this.moreInfoMessageError = err.error.error ?? err.error;
-          this.isLoading = false;
+          this.isLoadingDetails = false;
           this.pageDescuentos = 0;
         }
       });

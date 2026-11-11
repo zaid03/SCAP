@@ -640,7 +640,7 @@
                                     <ng-container *ngSwitchCase="'aplicaciones'">
                                         <h1 class="successBtn">{{moreInfoMessageSuccess}}</h1>
                                         <h1 class="errorBtn">{{moreInfoMessageError}}</h1>
-                                        <div *ngIf="isLoading" class="loading-message">
+                                        <div *ngIf="isLoadingDetails" class="loading-message">
                                             <div class="spinner"></div>
                                             <span>Cargando</span>
                                         </div>
@@ -711,7 +711,7 @@
                                     </ng-container>
                                     <ng-container    *ngSwitchCase="'descuentos'">
                                         <h1 class="successBtn">{{moreInfoMessageSuccess}}</h1>
-                                        <div *ngIf="isLoading" class="loading-message">
+                                        <div *ngIf="isLoadingDetails" class="loading-message">
                                             <div class="spinner"></div>
                                             <span>Cargando</span>
                                         </div>
