@@ -489,6 +489,7 @@ export class MonitorContabilizacionComponent {
     if (this.selectedFacturas.facfre) {
       this.selectedFacturas.facfre = this.datePipe.transform(this.selectedFacturas.facfre, 'yyyy-MM-dd');
     }
+
     this.openAlbarnaes();
   }
 

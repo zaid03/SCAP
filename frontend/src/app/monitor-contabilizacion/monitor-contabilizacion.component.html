@@ -199,7 +199,7 @@
                             style="cursor: pointer;"
                         >{{f.facnum}}</td>
                         <td>{{f.tercod}}</td>
-                        <td>{{f.ter?.ternom}}</td>
+                        <td>{{f.ter.ternom}}</td>
                         <td>{{f.ter.ternif}}</td>
                         <td>{{f.facfre | date:'dd-MM-yyyy'}}</td>
                         <td>{{f.facimp | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
@@ -260,14 +260,14 @@
                                 <td>
                                     <div class="cell-content">
                                         <h1 class="h1-style">{{selectedFacturas.tercod}}</h1>
-                                        <h1 class="h1-style">{{selectedFacturas.ter_TERNOM}}</h1>
+                                        <h1 class="h1-style">{{selectedFacturas.ter.ternom}}</h1>
                                     </div>
                                 </td>
                                 <td>
                                     <p class="p-style">NIF:</p>
                                 </td>
                                 <td>
-                                    <h1 class="h1-style">{{selectedFacturas.ter_TERNIF}}</h1>
+                                    <h1 class="h1-style">{{selectedFacturas.ter.ternif}}</h1>
                                 </td>
                                 <td>
                                     <p class="p-style">Total Factura:</p>
