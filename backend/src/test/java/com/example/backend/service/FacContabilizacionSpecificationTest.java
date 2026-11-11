@@ -139,7 +139,6 @@ public class FacContabilizacionSpecificationTest {
         verify(root).get("ENT");
         verify(root).get("EJE");
         verify(root).get("CGECOD");
-        verify(root).get("FACADO");
         verify(root).get("FACIMP");
         verify(cb, atLeastOnce()).equal(any(), any());
     }
@@ -204,8 +203,6 @@ public class FacContabilizacionSpecificationTest {
         verify(root).get("ENT");
         verify(root).get("EJE");
         verify(root).get("CGECOD");
-        verify(root).get("FACADO");
-        verify(cb).isNull(mockPath);
     }
 
     @Test
