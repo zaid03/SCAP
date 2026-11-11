@@ -125,6 +125,7 @@ public class FacContabilizacionSpecification {
         predicate = cb.and(predicate, cb.equal(root.get("ENT"), ent));
         predicate = cb.and(predicate, cb.equal(root.get("EJE"), eje));
         predicate = cb.and(predicate, cb.equal(root.get("CGECOD"), cgecod));
+        predicate = cb.and(predicate, cb.isNull(root.get("FACADO")));
         return predicate;
     }
 
