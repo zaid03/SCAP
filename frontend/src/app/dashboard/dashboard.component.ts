@@ -80,10 +80,15 @@ export class DashboardComponent implements OnInit {
     this.fetchVersion();
   }
 
+  isPre: boolean = false;
   fetchVersion() {
     this.http.get<any>(`${environment.backendUrl}/api/version/num`).subscribe({
       next: (res) => {
         this.version = res.version;
+        console.log(this.version)
+        if (this.version != '1.1.0') {
+          this.isPre = true;
+        }
       },
       error: (err) => {
         console.warn('versión no encontrada');
