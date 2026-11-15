@@ -125,7 +125,7 @@
         </div>
       </div>
 
-      <!-- <div class="menu" (click)="articulos = !articulos" tabindex="0">
+      <div class="menu" (click)="articulos = !articulos" tabindex="0" *ngIf="isPre">
         <a class="choice">Artículos</a>
         <div class="menu-content" [class.open]="articulos">
           <div class="menu-item">
@@ -135,9 +135,9 @@
             >Familias y subfamilias</a>
           </div>
         </div>
-      </div> -->
+      </div>
 
-      <!-- <div class="menu" (click)="temp = !temp" tabindex="0">
+      <div class="menu" (click)="temp = !temp" tabindex="0" *ngIf="isPre">
         <a class="choice">componentes no clasificados</a>
         <div class="menu-content" [class.open]="temp">
           <div class="menu-item">
@@ -171,12 +171,15 @@
             <a class=""
               (click)="navigateTo('MGArticulos')"
             >Mantenimiento general de artículos</a>
-            <a class="margin"
+            <a class=""
               (click)="navigateTo('MAlmacen')"
             >Mantenimiento de artículos por almacén</a>
+            <a class="margin"
+              (click)="navigateTo('CAlbaranes')"
+            >Consulta de albaranes</a>
           </div>
         </div>
-      </div> -->
+      </div>
     </div>
   </div>
 </div>

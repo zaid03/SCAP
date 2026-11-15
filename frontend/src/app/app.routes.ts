@@ -37,6 +37,7 @@ import { BolsaCreditoComponent } from './bolsa-credito/bolsa-credito.component';
 import { ConsultaBolsasComponent } from './consulta-bolsas/consulta-bolsas.component';
 import { ContratosComponent } from './contratos/contratos.component';
 import { MonitorContabilizacionComponent } from './monitor-contabilizacion/monitor-contabilizacion.component';
+import { ConsultaAlbaranesComponent } from './consulta-albaranes/consulta-albaranes.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -77,7 +78,8 @@ export const routes: Routes = [
     { path: 'Ccredito', component: ConsultaBolsasComponent},
     { path: 'contratos', component: ContratosComponent},
     { path: 'contabilizacion', component: MonitorContabilizacionComponent},
-    { path: '', redirectTo: '/login', pathMatch: 'full' }, //route by default
+    { path: 'CAlbaranes', component: ConsultaAlbaranesComponent},
+    { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 
 @NgModule({

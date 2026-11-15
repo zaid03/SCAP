@@ -1,4 +1,5 @@
 import { Component, Output, EventEmitter, OnInit } from '@angular/core';
+import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { CommonModule } from '@angular/common';
@@ -31,7 +32,7 @@ export class SidebarComponent implements OnInit {
   contabilidad = false;
   articulos = false;
   temp = false;
-  constructor(private router: Router) {}
+  constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
     const profile = sessionStorage.getItem('Perfil');
@@ -53,6 +54,26 @@ export class SidebarComponent implements OnInit {
             : (m.MNUCOD ?? m.mnucod ?? m.MENUCOD ?? m.code ?? m.codigo ?? m.id))
         .filter(Boolean);
     }
+
+    this.fetchVersion();
+  }
+
+  version: string = '';
+  isPre: boolean = false;
+  fetchVersion() {
+    this.http.get<any>(`${environment.backendUrl}/api/version/num`).subscribe({
+      next: (res) => {
+        this.version = res.version;
+        console.log(this.version)
+        if (this.version != '1.1.0') {
+          this.isPre = true;
+        }
+      },
+      error: (err) => {
+        console.warn('versión no encontrada');
+        return;
+      }
+    })
   }
 
   isDisabled(code: string): boolean {
@@ -162,6 +183,9 @@ export class SidebarComponent implements OnInit {
         break;
       case 'CHistoriaADCon':
         this.router.navigate(['/CHistoriaADCon']);
+        break;
+      case 'CAlbaranes':
+        this.router.navigate(['/CAlbaranes']);
         break;
       default:
         break;
