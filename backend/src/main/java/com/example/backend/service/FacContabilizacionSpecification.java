@@ -164,7 +164,10 @@ public class FacContabilizacionSpecification {
         if (onlyDigits && length <= 5) {
             return searchByTercodOrFallback(root, cb, trimmed);
         } else if (onlyDigits && length > 5) {
-            return cb.like(root.get("ter").get("TERNIF"), "%" + trimmed + "%");
+            return cb.or(
+                cb.like(root.get("ter").get("TERNIF"), "%" + trimmed + "%"),
+                cb.like(cb.upper(root.get(FACDOC)), "%" + trimmed.toUpperCase() + "%")
+            );
         } else if (hasLetters && length > 5) {
             return searchByNifNameOrDoc(root, cb, trimmed);
         } else {

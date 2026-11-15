@@ -96,7 +96,9 @@ export class MonitorContabilizacionComponent {
     this.limpiarMEssages();
     this.isLoading = true;
 
-    this.http.get<any>(`${environment.backendUrl}/api/fac/contabilizacion/search?ent=${this.entcod}&eje=${this.eje}&cgecod=${this.centroGestor}`).subscribe({
+    let params = `ent=${this.entcod}&eje=${this.eje}&cgecod=${this.centroGestor}&facann=${this.eje}`;
+
+    this.http.get<any>(`${environment.backendUrl}/api/fac/contabilizacion/search?${params}`).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.page = 0;
@@ -426,7 +428,7 @@ export class MonitorContabilizacionComponent {
     this.caughtFacturas = [];
     this.isLoading = true;
 
-    let params = `ent=${this.entcod}&eje=${this.eje}&cgecod=${this.centroGestor}`;
+    let params = `ent=${this.entcod}&eje=${this.backupEje}&cgecod=${this.centroGestor}`;
 
     params += `&fechaType=${this.fechasType}`;
     if (this.desde && this.desde.trim() !== '') {
