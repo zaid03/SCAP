@@ -35,7 +35,6 @@ export class ConsultaAlbaranesComponent {
   private entcod: number | null = null;
   eje: number | null = null;
   centroGestor: string = '';
-  page = 0;
   pageSize = 20;
   public Math = Math;
 
@@ -59,6 +58,7 @@ export class ConsultaAlbaranesComponent {
     }
 
     this.fetchAlbaranes();
+    this.fetchItemsAmount()
   }
 
   albaranes: any[] = [];
@@ -66,86 +66,122 @@ export class ConsultaAlbaranesComponent {
   isLoading: boolean = false;
   albaranesSuccess: string = '';
   albaranesError: string = '';
+  page = 0;
   fetchAlbaranes() {
-
+    this.isLoading = true;
+    this.http.get<any>(`${environment.backendUrl}/api/alb/fetch-C-albaranes/${this.entcod}?page=${this.page}`).subscribe({
+      next: (res) => {
+        this.isLoading = false;
+        this.albaranes = res;
+      },
+      error: (err) => {
+        this.albaranes = [];
+        this.isLoading = false;
+        this.albaranesError = err.error.error || err.error;
+      }
+    })
   }
-  private updatePagination(): void {
-    const total = this.totalPages;
-    if (total === 0) {
-      this.page = 0;
-      return;
-    }
-    if (this.page >= total) {
-      this.page = total - 1;
-    }
-  }
-
-  get paginatedAlbaranes(): any[] {
-    if (!this.albaranes || this.albaranes.length === 0) return [];
-    const start = this.page * this.pageSize;
-    return this.albaranes.slice(start, start + this.pageSize);
-  }
-  get totalPages(): number {
-    return Math.max(1, Math.ceil((this.albaranes?.length ?? 0) / this.pageSize));
+  totalPages: number = 0;
+  fetchItemsAmount() {
+    this.http.get<any>(`${environment.backendUrl}/api/alb/fetch-rows-albaranes/${this.entcod}`).subscribe({
+      next: (res) => {
+        this.totalPages = this.Math.round(res / 20);
+      },
+      error: (err) => {
+        console.warn(err.error.error || err.error);
+      }
+    })
   }
   prevPage(): void {
-    if (this.page > 0) this.page--;
+    if (this.page > 0) {
+      this.page--;
+      this.fetchAlbaranes();
+    } 
   }
   nextPage(): void {
-    if (this.page < this.totalPages - 1) this.page++;
+    if (this.page < this.totalPages - 1) {
+      this.page++;
+      this.fetchAlbaranes();
+    }
   }
   goToPage(event: any): void {
-    const inputPage = Number(event.target.value);
-    if (inputPage >= 1 && inputPage <= this.totalPages) {
-      this.page = inputPage - 1;
+    this.page = Number(event.target.value) - 1;
+    if (this.page > 0 && this.page < this.totalPages - 1) {
+      this.fetchAlbaranes();
     }
   }
 
   //main table functions
-  sortField: 'facnum' | 'tercod' | 'ter_TERNOM' | 'ter_TERNIF' | 'facfre' | 'facimp' | 'facdoc' | 'facann' | 'facfac' | 'facdat' | 'concod' | 'facado' | 'facfco' |'getPendingApply(p)' | 'cgecod' | 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)' | null = null;
+  sortField: 'albnum' | 'ter.tercod' | 'ter.ternom' | 'albref' | 'albdat' | 'albbim' | 'albfre' | 'depcod' | 'albcom' | 'solnum' | 'facnum' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
-  private defaultProveedores: any[] = [];
-  toggleSort(column: string) {
+  toggleSort(column: string): void {
     if (this.sortColumn === column) {
       this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
+
     this.applySort();
-    this.page = 0;
-    this.updatePagination();
+  }
+
+  private getSortValue(row: any, column: string): string | number {
+    switch (column) {
+      case 'albnum':
+        return row.albnum ?? 0;
+
+      case 'ter.tercod':
+        return row.ter?.tercod ?? 0;
+
+      case 'ter.ternom':
+        return row.ter?.ternom ?? '';
+
+      case 'albref':
+        return row.albref ?? '';
+
+      case 'albdat':
+        return row.albdat ? new Date(row.albdat).getTime() : 0;
+
+      case 'albbim':
+        return Number(row.albbim ?? 0);
+
+      case 'albfre':
+        return row.albfre ? new Date(row.albfre).getTime() : 0;
+
+      case 'depcod':
+        return row.depcod ?? '';
+
+      case 'albcom':
+        return row.albcom ?? '';
+
+      case 'solnum':
+        return row.solnum ?? 0;
+
+      case 'facnum':
+        return row.facnum ?? 0;
+
+      default:
+        return '';
+    }
   }
 
   private applySort(): void {
-    if (!this.sortColumn) return;
-    this.albaranes.sort((a, b) => {
-      let aValue: any;
-      let bValue: any;
+    const direction = this.sortDirection === 'asc' ? 1 : -1;
 
-      if (this.sortColumn === 'getPendingApply(p)') {
-        // aValue = this.getPendingApply(a);
-        // bValue = this.getPendingApply(b);
-      } else if (this.sortColumn === 'getStaus(p.facado, p.facimp, p.faciec, p.facidi)') {
-        // aValue = this.getStaus(a.facado, a.facimp, a.faciec, a.facidi);
-        // bValue = this.getStaus(b.facado, b.facimp, b.faciec, b.facidi);
-      } else {
-        aValue = a[this.sortColumn];
-        bValue = b[this.sortColumn];
+    this.albaranes = [...this.albaranes].sort((a, b) => {
+      const aValue = this.getSortValue(a, this.sortColumn);
+      const bValue = this.getSortValue(b, this.sortColumn);
+
+      if (typeof aValue === 'number' && typeof bValue === 'number') {
+        return (aValue - bValue) * direction;
       }
 
-      const aNum = Number(aValue);
-      const bNum = Number(bValue);
-      if (!isNaN(aNum) && !isNaN(bNum)) {
-        return this.sortDirection === 'asc' ? aNum - bNum : bNum - aNum;
-      }
-
-      aValue = (aValue ?? '').toString().toUpperCase();
-      bValue = (bValue ?? '').toString().toUpperCase();
-      if (aValue < bValue) return this.sortDirection === 'asc' ? -1 : 1;
-      if (aValue > bValue) return this.sortDirection === 'asc' ? 1 : -1;
-      return 0;
+      return String(aValue)
+        .localeCompare(String(bValue), 'es', {
+          numeric: true,
+          sensitivity: 'base'
+        }) * direction;
     });
   }
 
@@ -178,6 +214,10 @@ export class ConsultaAlbaranesComponent {
     this.resizingColIndex = null;
   };
 
+  //details functions
+  showDetails(albaran: any) {
+
+  }
 
   //misc
   limpiarMEssages() {

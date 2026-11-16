@@ -310,4 +310,18 @@ public class AlbController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
+
+    //fetching amount of rows for C.albaranes
+    @GetMapping("/fetch-rows-albaranes/{ent}")
+    public ResponseEntity<?> fetchRowsAlbaranes(
+        @PathVariable Integer ent
+    ) {
+        try {
+            Integer albranesAmount = albRepository.countByENT(ent);
+
+            return ResponseEntity.ok(albranesAmount);
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
 }

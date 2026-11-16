@@ -178,4 +178,7 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
 
     //fetch for consulta albaranes
     List<albarnesByProveedorProjection> findByENT(Integer ent, Pageable pageable);
+
+    //fetching amount of rows for C.albaranes
+    Integer countByENT(Integer ent);
 }

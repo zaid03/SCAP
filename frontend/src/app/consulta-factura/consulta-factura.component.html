@@ -203,12 +203,12 @@
                 <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
                 <span>Página</span>
                 <input
-                type="number"
-                min="1"
-                [max]="totalPages"
-                [value]="page + 1"
-                (change)="goToPage($event)"
-                class="pagination-input"
+                    type="number"
+                    min="1"
+                    [max]="totalPages"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
                 />
                 <span>de {{ totalPages }}</span>
                 <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
