@@ -10,6 +10,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
@@ -21,8 +23,6 @@ import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.AdeRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
 
-import jakarta.transaction.TransactionScoped;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -30,6 +30,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
+import java.util.Map;
 
 import jakarta.transaction.Transactional;
 
@@ -292,20 +293,68 @@ public class AlbController {
         }
     }
 
+    //new and untested
+
+
+    
     //fetch for consulta albaranes
-    @Transactional
     @GetMapping("/fetch-C-albaranes/{ent}")
+    @Transactional
     public ResponseEntity<?> fetchCAlbaranes(
         @PathVariable Integer ent,
-        @RequestParam(defaultValue = "0") int page
+        @RequestParam(defaultValue = "0") int page,
+        @RequestParam(required = false) String sort,
+        @RequestParam(defaultValue = "asc") String direction
     ) {
         try {
-            List<albarnesByProveedorProjection> albranes = albRepository.findByENT(ent, PageRequest.of(page, PAGE_SIZE));
-            if (albranes.isEmpty()) {
+            int safePage = Math.max(page, 0);
+
+            Pageable pageable = PageRequest.of(
+                safePage,
+                PAGE_SIZE,
+                Sort.unsorted()
+            );
+
+            if (sort != null && !sort.isBlank()) {
+                Map<String, String> allowedSorts = Map.ofEntries(
+                    Map.entry("albnum", "ALBNUM"),
+                    Map.entry("ter.tercod", "ter.TERCOD"),
+                    Map.entry("ter.ternom", "ter.TERNOM"),
+                    Map.entry("albref", "ALBREF"),
+                    Map.entry("albdat", "ALBDAT"),
+                    Map.entry("albbim", "ALBBIM"),
+                    Map.entry("albfre", "ALBFRE"),
+                    Map.entry("depcod", "DEPCOD"),
+                    Map.entry("albcom", "ALBCOM"),
+                    Map.entry("solnum", "SOLNUM"),
+                    Map.entry("facnum", "FACNUM")
+                );
+
+                String property = allowedSorts.get(sort);
+
+                if (property != null) {
+                    Sort.Direction sortDirection =
+                        "desc".equalsIgnoreCase(direction)
+                            ? Sort.Direction.DESC
+                            : Sort.Direction.ASC;
+
+                    pageable = PageRequest.of(
+                        safePage,
+                        PAGE_SIZE,
+                        Sort.by(sortDirection, property)
+                    );
+                }
+            }
+
+            List<albarnesByProveedorProjection> result =
+                albRepository.findByENT(ent, pageable);
+
+            if (result.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
 
-            return ResponseEntity.ok(albranes);
+            return ResponseEntity.ok(result);
+
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }

@@ -36,7 +36,6 @@ export class ConsultaAlbaranesComponent {
   eje: number | null = null;
   centroGestor: string = '';
   pageSize = 20;
-  public Math = Math;
 
   constructor(private http: HttpClient, private router: Router) {}
 
@@ -62,14 +61,22 @@ export class ConsultaAlbaranesComponent {
   }
 
   albaranes: any[] = [];
-  backupAlbaranes: any[] = [];
   isLoading: boolean = false;
   albaranesSuccess: string = '';
   albaranesError: string = '';
   page = 0;
   fetchAlbaranes() {
+    let url =
+    `${environment.backendUrl}/api/alb/fetch-C-albaranes/${this.entcod}` +
+    `?page=${this.page}`;
+
+    if (this.sortColumn) {
+      url += `&sort=${encodeURIComponent(this.sortColumn)}`;
+      url += `&direction=${this.sortDirection}`;
+    }
+
     this.isLoading = true;
-    this.http.get<any>(`${environment.backendUrl}/api/alb/fetch-C-albaranes/${this.entcod}?page=${this.page}`).subscribe({
+    this.http.get<any>(url).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.albaranes = res;
@@ -85,7 +92,7 @@ export class ConsultaAlbaranesComponent {
   fetchItemsAmount() {
     this.http.get<any>(`${environment.backendUrl}/api/alb/fetch-rows-albaranes/${this.entcod}`).subscribe({
       next: (res) => {
-        this.totalPages = this.Math.round(res / 20);
+        this.totalPages = Math.ceil(res / 20);
       },
       error: (err) => {
         console.warn(err.error.error || err.error);
@@ -117,72 +124,15 @@ export class ConsultaAlbaranesComponent {
   sortDirection: 'asc' | 'desc' = 'asc';
   toggleSort(column: string): void {
     if (this.sortColumn === column) {
-      this.sortDirection = this.sortDirection === 'asc' ? 'desc' : 'asc';
+      this.sortDirection =
+        this.sortDirection === 'asc' ? 'desc' : 'asc';
     } else {
       this.sortColumn = column;
       this.sortDirection = 'asc';
     }
 
-    this.applySort();
-  }
-
-  private getSortValue(row: any, column: string): string | number {
-    switch (column) {
-      case 'albnum':
-        return row.albnum ?? 0;
-
-      case 'ter.tercod':
-        return row.ter?.tercod ?? 0;
-
-      case 'ter.ternom':
-        return row.ter?.ternom ?? '';
-
-      case 'albref':
-        return row.albref ?? '';
-
-      case 'albdat':
-        return row.albdat ? new Date(row.albdat).getTime() : 0;
-
-      case 'albbim':
-        return Number(row.albbim ?? 0);
-
-      case 'albfre':
-        return row.albfre ? new Date(row.albfre).getTime() : 0;
-
-      case 'depcod':
-        return row.depcod ?? '';
-
-      case 'albcom':
-        return row.albcom ?? '';
-
-      case 'solnum':
-        return row.solnum ?? 0;
-
-      case 'facnum':
-        return row.facnum ?? 0;
-
-      default:
-        return '';
-    }
-  }
-
-  private applySort(): void {
-    const direction = this.sortDirection === 'asc' ? 1 : -1;
-
-    this.albaranes = [...this.albaranes].sort((a, b) => {
-      const aValue = this.getSortValue(a, this.sortColumn);
-      const bValue = this.getSortValue(b, this.sortColumn);
-
-      if (typeof aValue === 'number' && typeof bValue === 'number') {
-        return (aValue - bValue) * direction;
-      }
-
-      return String(aValue)
-        .localeCompare(String(bValue), 'es', {
-          numeric: true,
-          sensitivity: 'base'
-        }) * direction;
-    });
+    this.page = 0;
+    this.fetchAlbaranes();
   }
 
   private startX: number = 0;
@@ -213,6 +163,21 @@ export class ConsultaAlbaranesComponent {
     document.removeEventListener('mouseup', this.stopResize);
     this.resizingColIndex = null;
   };
+
+  main_search: string = '';
+  centroDep: string = '';
+  comprador: string = '';
+  ejeSearch: stirng = '';
+  search() {
+
+  }
+
+  limpiarSearch() {
+    this.page = 0;
+    this.sortColumn = '';
+    this.fetchAlbaranes();
+    this.fetchItemsAmount();
+  }
 
   //details functions
   showDetails(albaran: any) {
