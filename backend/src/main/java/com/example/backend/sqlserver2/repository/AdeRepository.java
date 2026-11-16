@@ -1,12 +1,14 @@
 package com.example.backend.sqlserver2.repository;
 
 import java.util.Optional;
+import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import com.example.backend.dto.AsuEcoImpProjection;
+import com.example.backend.dto.articulosPorAlbaran;
 import com.example.backend.sqlserver2.model.Ade;
 import com.example.backend.sqlserver2.model.AdeId;
 
@@ -21,4 +23,7 @@ public interface AdeRepository extends JpaRepository<Ade, AdeId>{
         GROUP BY s.ASUECO
         """, nativeQuery = true)
     Optional<AsuEcoImpProjection> findSumByEntAndAlbnum(@Param("ent") Integer ent, @Param("albnum") Integer albnum);
+
+    //selecting articulos for an albaran
+    List<articulosPorAlbaran> findByENTAndALBNUM(Integer ent, Integer albnum);
 }

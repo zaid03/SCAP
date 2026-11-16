@@ -333,7 +333,7 @@
                             <div class="spinner"></div>
                             <span>Cargando</span>
                         </div>
-                        <table class="main-table">
+                        <table class="main-table sAT">
                             <thead>
                                 <tr>
                                     <th>Familia</th>
@@ -347,11 +347,16 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <!-- <tr *ngFor="let s of paginatedArticulos">
-                                    <td>{{s.depcod}}</td>
-                                    <td>{{s.depdes}}</td>
-                                    <td><button class="red-btn" (click)="showDelete(s)">-</button></td>
-                                </tr> -->
+                                <tr *ngFor="let s of paginatedArticulos">
+                                    <td>{{s.afacod}}</td>
+                                    <td>{{s.asucod}}</td>
+                                    <td>{{s.artcod}}</td>
+                                    <td>{{s.adepre | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                                    <td>{{s.adeuni}}</td>
+                                    <td>{{s.aderef}}</td>
+                                    <td>{{s.adeobs}}</td>
+                                    <td><button class="red-btn">-</button></td>
+                                </tr>
                             </tbody>
                         </table>
                         <h1 class="errorBtn">{{articulosError}}</h1>

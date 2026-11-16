@@ -12,7 +12,8 @@
 /* search container and inputs */
 /* main table and details*/
 .ca td:nth-child(6),
-.align {text-align: right;}
+.align,
+.sAT td:nth-child(4) {text-align: right;}
 .adjustArea {width: 220px; max-width: 280px !important; height: 40px;}
 /* main table and details*/
 /* media */

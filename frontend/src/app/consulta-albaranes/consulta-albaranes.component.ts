@@ -226,33 +226,59 @@ export class ConsultaAlbaranesComponent {
     this.limpiarMEssages();
     this.AlbaranesGrid = true;
     this.detailView = 'Albaranes';
-    this.fetchArticulos();
+    let albnum = albaran.albnum;
+    this.fetchArticulos(albnum);
   }
 
   isLoadingDetails: boolean = false;
   articulosError: string = '';
   articulos: any = [];
   pageServices: number = 0;
-  fetchArticulos() {
-
+  fetchArticulos(albnum: number) {
+    this.isLoadingDetails = true;
+    this.http.get<any>(`${environment.backendUrl}/api/ade/fetch-articulos/${this.entcod}/${albnum}`).subscribe({
+      next: (res) => {
+        this.isLoadingDetails = false;
+        this.articulos = res;
+      },
+      error: (err) => {
+        this.isLoadingDetails = false;
+        this.articulos = [];
+        this.articulosError = err.error.error || err.error;
+      }
+    })
   }
   get paginatedArticulos(): any[] {
-    if (!this.articulos || this.articulos.length === 0) return [];
-    const start = this.articulos * this.pageSize;
+    const start = this.pageServices * this.pageSize;
     return this.articulos.slice(start, start + this.pageSize);
   }
   get totalPagesServices(): number {
-    return Math.max(1, Math.ceil((this.articulos?.length ?? 0) / this.pageSize));
+    return Math.max(
+      1,
+      Math.ceil((this.articulos?.length ?? 0) / this.pageSize)
+    );
   }
+
   prevPageService(): void {
-    if (this.pageServices > 0) this.pageServices--;
+    if (this.pageServices > 0) {
+      this.pageServices--;
+    }
   }
+
   nextPageService(): void {
-    if (this.pageServices < this.totalPages - 1) this.pageServices++;
+    if (this.pageServices < this.totalPagesServices - 1) {
+      this.pageServices++;
+    }
   }
+
   goToPageService(event: any): void {
     const inputPage = Number(event.target.value);
-    if (inputPage >= 1 && inputPage <= this.totalPages) {
+
+    if (
+      Number.isInteger(inputPage) &&
+      inputPage >= 1 &&
+      inputPage <= this.totalPagesServices
+    ) {
       this.pageServices = inputPage - 1;
     }
   }
