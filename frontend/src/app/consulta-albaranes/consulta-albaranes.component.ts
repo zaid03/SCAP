@@ -167,7 +167,11 @@ export class ConsultaAlbaranesComponent {
   main_search: string = '';
   centroDep: string = '';
   comprador: string = '';
-  ejeSearch: stirng = '';
+  ejeSearch: string = '';
+  fechaTipo: 'registro' | 'albaran' | '' = '';
+  fromDate: string = '';
+  toDate: string = '';
+  estadoTipo: 'facturado' | 'sin_factura' | 'no_facturable' | 'sin_factura' = 'sin_factura';
   search() {
 
   }
@@ -175,18 +179,89 @@ export class ConsultaAlbaranesComponent {
   limpiarSearch() {
     this.page = 0;
     this.sortColumn = '';
+    this.main_search = '';
+    this.centroDep = '';
+    this.comprador = '';
+    this.ejeSearch = '';
+    this.fechaTipo = '';
+    this.fromDate = '';
+    this.toDate = '';
+    this.estadoTipo = 'sin_factura';
     this.fetchAlbaranes();
     this.fetchItemsAmount();
   }
 
   //details functions
+  selectedAlbaran: any = null;
+  detailSuccess: String = '';
   showDetails(albaran: any) {
+    this.limpiarMEssages();
+    this.selectedAlbaran = albaran;
+    this.showArticulos(albaran);
+  }
 
+  closeDetails() {
+    this.selectedAlbaran = null;
+    this.limpiarMEssages();
+  }
+
+  facturaEstado(facnum: any): string {
+    if (facnum != null) {
+      if (facnum === 0) {
+        return 'SIN FACTURA';
+      } else if (facnum > 0) {
+        return 'FACTURADO';
+      } else if (facnum < 0) {
+        return 'No FACTURABLE';
+      }
+    }
+    return '';
+  }
+
+  //subDetails functions
+  detailView: 'Albaranes' | 'Contabilización' = 'Albaranes';
+  albaranesOptio: 'albaranes' | 'aplicaciones' | 'descuentos' = 'albaranes';
+  AlbaranesGrid: boolean = false;
+  showArticulos(albaran: any) {
+    this.limpiarMEssages();
+    this.AlbaranesGrid = true;
+    this.detailView = 'Albaranes';
+    this.fetchArticulos();
+  }
+
+  isLoadingDetails: boolean = false;
+  articulosError: string = '';
+  articulos: any = [];
+  pageServices: number = 0;
+  fetchArticulos() {
+
+  }
+  get paginatedArticulos(): any[] {
+    if (!this.articulos || this.articulos.length === 0) return [];
+    const start = this.articulos * this.pageSize;
+    return this.articulos.slice(start, start + this.pageSize);
+  }
+  get totalPagesServices(): number {
+    return Math.max(1, Math.ceil((this.articulos?.length ?? 0) / this.pageSize));
+  }
+  prevPageService(): void {
+    if (this.pageServices > 0) this.pageServices--;
+  }
+  nextPageService(): void {
+    if (this.pageServices < this.totalPages - 1) this.pageServices++;
+  }
+  goToPageService(event: any): void {
+    const inputPage = Number(event.target.value);
+    if (inputPage >= 1 && inputPage <= this.totalPages) {
+      this.pageServices = inputPage - 1;
+    }
   }
 
   //misc
   limpiarMEssages() {
   this.albaranesSuccess = '';
   this.albaranesError = '';
+  this.detailSuccess = '';
+  this.articulosError = '';
   }
 }
