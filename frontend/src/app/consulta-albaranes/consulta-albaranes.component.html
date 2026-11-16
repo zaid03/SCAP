@@ -1,1 +1,194 @@
-<p>consulta-albaranes works!</p>
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Consulta de albàranes</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            class="search-bar" 
+                            placeholder="Albàran" 
+                            name="search"
+                            
+                        >
+                        <input 
+                            type="text" 
+                            name="factura" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Centro gestor"
+                           
+                            maxlength="4"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                            
+                        />
+                        <input 
+                            type="text" 
+                            name="Gestor" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Comprador"
+                           
+                            maxlength="4"
+                        />
+                        <input 
+                            type="text" 
+                            name="Gestor" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Eje. factura"
+                           
+                            maxlength="4"
+                        />  
+                        <div class="more-search-options">
+                            <select >
+                                <option value="registro">Registro</option>
+                                <option value="factura">Albàran</option>
+                            </select>
+                            Desde
+                            <input 
+                                type="date" 
+                                name="desde" 
+                                class="fecha-dato" 
+                                
+                            >   
+                            Hasta
+                            <input 
+                                type="date" 
+                                name="hasta" 
+                                class="fecha-dato" 
+                              
+                            > 
+                            <select >
+                                <option value="contabilizadas">Facturado</option>
+                                <option value="noContabilizadas">Sin factura</option>
+                                <option value="ptApplidas">No facturable</option>
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btns">
+                        <button type="button" class="purple-btn" >Buscar</button>
+                        <button type="button" class="purple-btn" >Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" >Exportar a Excel</button>
+                    <button class="purple-btn" >Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="successBtn">{{albaranesSuccess}}</h1>
+        <h1 class="errorBtn">{{albaranesError}}</h1>
+        <div class="main-list">
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table ca">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('ALBNUM')">
+                            Albarán 
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBNUM'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('tercod')">
+                            Proveedor
+                            <span class="sort-indicator" *ngIf="sortColumn === 'tercod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ter_TERNOM')">
+                            Nombre
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ter_TERNOM'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ALBREF')">
+                            Ref. Proveedor
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBREF'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ALBDAT')">
+                            Fecha Alb.
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBDAT'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ALBBIM')">
+                            Importe
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBBIM'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ALBFRE')">
+                            Fecha Reg.
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBFRE'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('DEPCOD')">
+                            Centro Destino
+                            <span class="sort-indicator" *ngIf="sortColumn === 'DEPCOD'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ALBCOM')">
+                            Comprador
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ALBCOM'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('Concatenar')">
+                            Pedido
+                            <span class="sort-indicator" *ngIf="sortColumn === 'Concatenar'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('Concatenar')">
+                            Concatenar
+                            <span class="sort-indicator" *ngIf="sortColumn === 'Concatenar'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let p of paginatedAlbaranes">
+                        <!-- <td (click)="showDetails(p)" style="cursor: pointer;">{{ p.facnum }}</td>
+                        <td>{{ p.tercod }}</td>
+                        <td>{{ p.ter_TERNOM }}</td>
+                        <td>{{ p.ter_TERNIF }}</td>
+                        <td>{{ p.facfre | date:'dd-MM-yyyy'}}</td>
+                        <td>{{ p.facimp | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
+                        <td>{{ p.facdoc }}</td>
+                        <td>{{ p.facann }}</td>
+                        <td>{{ p.facfac }}</td>
+                        <td>{{ p.facdat | date:'dd-MM-yyyy' }}</td>
+                        <td>{{ p.concod }}</td> -->
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                type="number"
+                min="1"
+                [max]="totalPages"
+                [value]="page + 1"
+                (change)="goToPage($event)"
+                class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            
+        </div>
+    </div>
+</div>
