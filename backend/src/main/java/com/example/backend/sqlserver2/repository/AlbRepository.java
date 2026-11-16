@@ -7,8 +7,10 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import org.springframework.data.domain.Pageable;
 
 import com.example.backend.dto.albFacturaDto;
+import com.example.backend.dto.albarnesByProveedorProjection;
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
 
@@ -173,4 +175,7 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
         @Param("ALBDAT") LocalDateTime ALBDAT,
         @Param("ALBDAT2") LocalDateTime ALBDAT2
     );
+
+    //fetch for consulta albaranes
+    List<albarnesByProveedorProjection> findByENT(Integer ent, Pageable pageable);
 }

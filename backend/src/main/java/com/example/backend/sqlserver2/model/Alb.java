@@ -76,6 +76,14 @@ public class Alb {
     public Dep getDep() { return dep; }
     public void setDep(Dep dep) { this.dep = dep; }
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumns({
+        @JoinColumn(name = "ENT", referencedColumnName = "ENT", insertable = false, updatable = false),
+        @JoinColumn(name = "TERCOD", referencedColumnName = "TERCOD", insertable = false, updatable = false)
+    })
+    private Ter ter;
+    public Ter getTer() { return ter; }
+
     public Integer getENT() { return ENT; }
     public void setENT(Integer ENT) { this.ENT = ENT; }
 

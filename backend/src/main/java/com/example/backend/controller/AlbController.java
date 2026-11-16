@@ -2,9 +2,11 @@ package com.example.backend.controller;
 
 import com.example.backend.dto.AlbResumeDto;
 import com.example.backend.dto.albFacturaDto;
+import com.example.backend.dto.albarnesByProveedorProjection;
 import com.example.backend.dto.AsuEcoImpProjection;
 
 import org.springframework.dao.DataAccessException;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,9 @@ import com.example.backend.sqlserver2.model.Fde;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.AdeRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+
+import jakarta.transaction.TransactionScoped;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -25,6 +30,8 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
+
+import jakarta.transaction.Transactional;
 
 @RestController
 @RequestMapping("/api/alb")
@@ -40,6 +47,7 @@ public class AlbController {
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
+    private static final int PAGE_SIZE = 20;
 
     //fetch albaranes for facturas
     @GetMapping("/albaranes/{ent}/{eje}/{facnum}")
@@ -279,6 +287,25 @@ public class AlbController {
             }
 
             return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
+
+    //fetch for consulta albaranes
+    @Transactional
+    @GetMapping("/fetch-C-albaranes/{ent}")
+    public ResponseEntity<?> fetchCAlbaranes(
+        @PathVariable Integer ent,
+        @RequestParam(defaultValue = "0") int page
+    ) {
+        try {
+            List<albarnesByProveedorProjection> albranes = albRepository.findByENT(ent, PageRequest.of(page, PAGE_SIZE));
+            if (albranes.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            }
+
+            return ResponseEntity.ok(albranes);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
