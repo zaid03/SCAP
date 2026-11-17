@@ -46,16 +46,18 @@ export class ConsultaAlbaranesComponent {
     const cge = sessionStorage.getItem('CENTROGESTOR');
 
     if (cge){const parsed = JSON.parse(cge); this.centroGestor = parsed.value}
+    this.centroDep = this.centroGestor;
     if (entidad) {const parsed = JSON.parse(entidad); this.entcod = parsed.ENTCOD;}
     if (eje) {const parsed = JSON.parse(eje); this.eje = parsed.eje;}
 
-    if (!entidad || this.entcod === null || !eje || this.eje === null || !cge || cge === null) {
+    if (!entidad || this.entcod === null || !eje || this.eje === null || !cge || this.centroGestor === null) {
       sessionStorage.clear();
       alert('Debes iniciar sesión para acceder a esta página.');
       this.router.navigate(['/login']);
       return;
     }
 
+    console.log(this.centroGestor)
     this.fetchAlbaranes();
     this.fetchItemsAmount()
   }
@@ -173,14 +175,14 @@ export class ConsultaAlbaranesComponent {
   toDate: string = '';
   estadoTipo: 'facturado' | 'sin_factura' | 'no_facturable' | 'sin_factura' = 'sin_factura';
   search() {
-
+    
   }
 
   limpiarSearch() {
     this.page = 0;
     this.sortColumn = '';
     this.main_search = '';
-    this.centroDep = '';
+    this.centroDep = this.centroGestor;
     this.comprador = '';
     this.ejeSearch = '';
     this.fechaTipo = '';
@@ -189,6 +191,11 @@ export class ConsultaAlbaranesComponent {
     this.estadoTipo = 'sin_factura';
     this.fetchAlbaranes();
     this.fetchItemsAmount();
+  }
+
+  numberOnly(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '');
   }
 
   //details functions

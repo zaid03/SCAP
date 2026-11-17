@@ -3,11 +3,15 @@ package com.example.backend.sqlserver2.repository;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.EntityGraph;
 
 import com.example.backend.dto.albFacturaDto;
 import com.example.backend.dto.albarnesByProveedorProjection;
@@ -15,7 +19,7 @@ import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
 
 @Repository
-public interface AlbRepository extends JpaRepository<Alb, AlbId> {
+public interface AlbRepository extends JpaRepository<Alb, AlbId>, JpaSpecificationExecutor<Alb> {
     //fetch albaranes for facturas
     List<Alb> findByENTAndEJEAndFACNUM(Integer ent, String eje, Integer facnum);
 
@@ -178,6 +182,10 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId> {
 
     //fetch for consulta albaranes
     List<albarnesByProveedorProjection> findByENT(Integer ent, Pageable pageable);
+
+    @Override
+    @EntityGraph(attributePaths = "ter")
+    Page<Alb> findAll(Specification<Alb> spec, Pageable pageable);
 
     //fetching amount of rows for C.albaranes
     Integer countByENT(Integer ent);

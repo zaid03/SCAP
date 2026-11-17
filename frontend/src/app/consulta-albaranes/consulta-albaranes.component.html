@@ -19,25 +19,24 @@
                             class="search-bar" 
                             placeholder="Albàran" 
                             name="search"
-                            
+                            [(ngModel)]="main_search"
                         >
                         <input 
                             type="text" 
                             name="factura" 
                             class="search-bar smallWidth sizeAdj"
                             placeholder="Centro gestor"
-                           
+                            [(ngModel)]="centroDep"
                             maxlength="4"
                             inputmode="numeric"
                             pattern="[0-9]*"
-                            
                         />
                         <input 
                             type="text" 
                             name="Gestor" 
                             class="search-bar smallWidth sizeAdj"
                             placeholder="Comprador"
-                           
+                            [(ngModel)]="comprador"
                             maxlength="4"
                         />
                         <input 
@@ -45,7 +44,8 @@
                             name="Gestor" 
                             class="search-bar smallWidth sizeAdj"
                             placeholder="Eje. factura"
-                           
+                            (input)="numberOnly($event)"
+                            [(ngModel)]="ejeSearch"
                             maxlength="4"
                         />  
                         <div class="more-search-options">
