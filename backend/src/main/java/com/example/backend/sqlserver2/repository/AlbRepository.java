@@ -182,7 +182,6 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId>, JpaSpecificati
     //fetch for consulta albaranes
     @EntityGraph(attributePaths = "ter")
     List<Alb> findByENT(Integer ent, Pageable pageable);
-
     @Override
     @EntityGraph(attributePaths = "ter")
     Page<Alb> findAll(Specification<Alb> spec, Pageable pageable);

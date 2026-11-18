@@ -115,4 +115,45 @@ public class AlbaranConsultaSearch {
     private boolean isBlank(String value) {
         return value == null || value.trim().isEmpty();
     }
+
+    public long countAlbaranConsulta(
+        Integer ent,
+        String mainSearch,
+        String centroDep,
+        String comprador,
+        String ejeSearch,
+        String fechaTipo,
+        LocalDateTime fromDate,
+        LocalDateTime toDate,
+        String estadoTipo
+    ) {
+        boolean noFilters =
+            isBlank(mainSearch)
+                && isBlank(centroDep)
+                && isBlank(comprador)
+                && isBlank(ejeSearch)
+                && isBlank(fechaTipo)
+                && fromDate == null
+                && toDate == null
+                && isBlank(estadoTipo);
+
+        if (noFilters) {
+            return albRepository.countByENT(ent);
+        }
+
+        Specification<Alb> specification =
+            AlbaranConsultaSpecification.search(
+                ent,
+                mainSearch,
+                centroDep,
+                comprador,
+                ejeSearch,
+                fechaTipo,
+                fromDate,
+                toDate,
+                estadoTipo
+            );
+
+        return albRepository.count(specification);
+    }
 }

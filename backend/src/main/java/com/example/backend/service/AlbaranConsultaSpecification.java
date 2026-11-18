@@ -77,7 +77,7 @@ public class AlbaranConsultaSpecification {
             if (!isBlank(comprador)) {
                 String value = comprador.trim();
                 predicates.add(
-                    cb.equal(cb.upper(root.get("DEPCOD")), value.toUpperCase())
+                    cb.equal(cb.upper(root.get("ALBCOM")), value.toUpperCase())
                 );
             }
 

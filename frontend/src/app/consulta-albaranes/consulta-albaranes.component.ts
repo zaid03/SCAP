@@ -67,15 +67,42 @@ export class ConsultaAlbaranesComponent {
   albaranesSuccess: string = '';
   albaranesError: string = '';
   page = 0;
+  main_search: string = '';
+  centroDep: string = '';
+  comprador: string = '';
+  ejeSearch: string = '';
+  fechaTipo: 'registro' | 'albaran' | '' = '';
+  fromDate: string = '';
+  toDate: string = '';
+  estadoTipo: 'facturado' | 'sin_factura' | 'no_facturable' | '' = 'sin_factura';
+  isSearching: boolean = false;
+  numberOnly(event: Event) {
+    const input = event.target as HTMLInputElement;
+    input.value = input.value.replace(/\D/g, '');
+  }
+
   fetchAlbaranes() {
-    let url =
-    `${environment.backendUrl}/api/alb/fetch-C-albaranes/${this.entcod}` +
-    `?page=${this.page}`;
+    this.limpiarMEssages();
+
+    let params = `ent=${this.entcod}&page=${this.page}`;
+
+    if (this.isSearching) {
+      if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;
+      if (this.centroDep) params += `&centroDep=${encodeURIComponent(this.centroDep)}`;
+      if (this.comprador) params += `&comprador=${encodeURIComponent(this.comprador)}`;
+      if (this.ejeSearch) params += `&ejeSearch=${encodeURIComponent(this.ejeSearch)}`;
+      if (this.fechaTipo) params += `&fechaTipo=${encodeURIComponent(this.fechaTipo)}`;
+      if (this.fromDate) params += `&fromDate=${encodeURIComponent(this.fromDate + 'T00:00:00')}`;
+      if (this.toDate) params += `&toDate=${encodeURIComponent(this.toDate + 'T23:59:59')}`;
+      if (this.estadoTipo) params += `&estadoTipo=${encodeURIComponent(this.estadoTipo)}`;
+    }
 
     if (this.sortColumn) {
-      url += `&sort=${encodeURIComponent(this.sortColumn)}`;
-      url += `&direction=${this.sortDirection}`;
+      params += `&sort=${encodeURIComponent(this.sortColumn)}`;
+      params += `&direction=${this.sortDirection}`;
     }
+    
+    let url = `${environment.backendUrl}/api/alb/consulta-albaranes?${params}`;
 
     this.isLoading = true;
     this.http.get<any>(url).subscribe({
@@ -90,9 +117,50 @@ export class ConsultaAlbaranesComponent {
       }
     })
   }
+
+  search(): void {
+    const hasFilters = this.main_search.trim() !== '' || this.centroDep.trim() !== '' || this.comprador.trim() !== '' || this.ejeSearch.trim() !== '' || this.fechaTipo !== '' || this.fromDate !== '' || this.toDate !== '' || this.estadoTipo !== '';
+
+    this.isSearching = hasFilters;
+    this.page = 0;
+    this.sortColumn = '';
+    this.fetchAlbaranes();
+    this.fetchItemsAmount();
+  }
+
+  limpiarSearch() {
+    this.isSearching = false;
+    this.page = 0;
+    this.sortColumn = '';
+    this.main_search = '';
+    this.centroDep = this.centroGestor;
+    this.comprador = '';
+    this.ejeSearch = '';
+    this.fechaTipo = '';
+    this.fromDate = '';
+    this.toDate = '';
+    this.estadoTipo = 'sin_factura';
+    this.sortDirection = 'asc';
+    this.fetchAlbaranes();
+    this.fetchItemsAmount();
+  }
+
   totalPages: number = 0;
   fetchItemsAmount() {
-    this.http.get<any>(`${environment.backendUrl}/api/alb/fetch-rows-albaranes/${this.entcod}`).subscribe({
+    let params = `ent=${this.entcod}`;
+
+    if (this.isSearching) {
+      if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;
+      if (this.centroDep) params += `&centroDep=${encodeURIComponent(this.centroDep)}`;
+      if (this.comprador) params += `&comprador=${encodeURIComponent(this.comprador)}`;
+      if (this.ejeSearch) params += `&ejeSearch=${encodeURIComponent(this.ejeSearch)}`;
+      if (this.fechaTipo) params += `&fechaTipo=${encodeURIComponent(this.fechaTipo)}`;
+      if (this.fromDate) params += `&fromDate=${encodeURIComponent(this.fromDate + 'T00:00:00')}`;
+      if (this.toDate) params += `&toDate=${encodeURIComponent(this.toDate + 'T23:59:59')}`;
+      if (this.estadoTipo) params += `&estadoTipo=${encodeURIComponent(this.estadoTipo)}`;
+    }
+
+    this.http.get<any>(`${environment.backendUrl}/api/alb/count-albaranes?${params}`).subscribe({
       next: (res) => {
         this.totalPages = Math.ceil(res / 20);
       },
@@ -114,10 +182,15 @@ export class ConsultaAlbaranesComponent {
     }
   }
   goToPage(event: any): void {
-    this.page = Number(event.target.value) - 1;
-    if (this.page > 0 && this.page < this.totalPages - 1) {
+    const requestedPage = Number(event.target.value) - 1;
+
+    if (
+      requestedPage >= 0 &&
+      requestedPage < this.totalPages
+    ) {
+      this.page = requestedPage;
       this.fetchAlbaranes();
-    }
+  }
   }
 
   //main table functions
@@ -125,13 +198,15 @@ export class ConsultaAlbaranesComponent {
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   toggleSort(column: string): void {
-    if (this.sortColumn === column) {
-      this.sortDirection =
-        this.sortDirection === 'asc' ? 'desc' : 'asc';
-    } else {
-      this.sortColumn = column;
-      this.sortDirection = 'asc';
-    }
+    this.sortColumn =
+      this.sortColumn === column
+        ? this.sortColumn
+        : column;
+
+    this.sortDirection =
+      this.sortColumn === column
+        ? (this.sortDirection === 'asc' ? 'desc' : 'asc')
+        : 'asc';
 
     this.page = 0;
     this.fetchAlbaranes();
@@ -165,38 +240,6 @@ export class ConsultaAlbaranesComponent {
     document.removeEventListener('mouseup', this.stopResize);
     this.resizingColIndex = null;
   };
-
-  main_search: string = '';
-  centroDep: string = '';
-  comprador: string = '';
-  ejeSearch: string = '';
-  fechaTipo: 'registro' | 'albaran' | '' = '';
-  fromDate: string = '';
-  toDate: string = '';
-  estadoTipo: 'facturado' | 'sin_factura' | 'no_facturable' | 'sin_factura' = 'sin_factura';
-  search() {
-    
-  }
-
-  limpiarSearch() {
-    this.page = 0;
-    this.sortColumn = '';
-    this.main_search = '';
-    this.centroDep = this.centroGestor;
-    this.comprador = '';
-    this.ejeSearch = '';
-    this.fechaTipo = '';
-    this.fromDate = '';
-    this.toDate = '';
-    this.estadoTipo = 'sin_factura';
-    this.fetchAlbaranes();
-    this.fetchItemsAmount();
-  }
-
-  numberOnly(event: Event) {
-    const input = event.target as HTMLInputElement;
-    input.value = input.value.replace(/\D/g, '');
-  }
 
   //details functions
   selectedAlbaran: any = null;

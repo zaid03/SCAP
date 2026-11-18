@@ -37,7 +37,6 @@
                             class="search-bar smallWidth sizeAdj"
                             placeholder="Comprador"
                             [(ngModel)]="comprador"
-                            maxlength="4"
                         />
                         <input 
                             type="text" 
@@ -153,7 +152,7 @@
                             <div class="resizer" (mousedown)="startResize($event, 9)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facnum')">
-                            Concatenar
+                            Factura
                             <span class="sort-indicator" *ngIf="sortColumn === 'facnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 10)"></div>
                         </th>
@@ -343,7 +342,6 @@
                                     <th>Unidades</th>
                                     <th>Referencia</th>
                                     <th>Observaciones</th>
-                                    <th>Acción</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -355,7 +353,6 @@
                                     <td>{{s.adeuni}}</td>
                                     <td>{{s.aderef}}</td>
                                     <td>{{s.adeobs}}</td>
-                                    <td><button class="red-btn">-</button></td>
                                 </tr>
                             </tbody>
                         </table>

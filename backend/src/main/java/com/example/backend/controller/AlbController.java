@@ -328,14 +328,26 @@ public class AlbController {
     }
 
     //fetching amount of rows for C.albaranes
-    @GetMapping("/fetch-rows-albaranes/{ent}")
+    @GetMapping("/count-albaranes")
     public ResponseEntity<?> fetchRowsAlbaranes(
-        @PathVariable Integer ent
+        @RequestParam Integer ent,
+        @RequestParam(required = false) String main_search,
+        @RequestParam(required = false) String centroDep,
+        @RequestParam(required = false) String comprador,
+        @RequestParam(required = false) String ejeSearch,
+        @RequestParam(required = false) String fechaTipo,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        LocalDateTime fromDate,
+        @RequestParam(required = false)
+        @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
+        LocalDateTime toDate,
+        @RequestParam(required = false) String estadoTipo
     ) {
         try {
-            Integer albranesAmount = albRepository.countByENT(ent);
+            long count = albaranConsultaSearch.countAlbaranConsulta(ent, main_search, centroDep, comprador, ejeSearch, fechaTipo, fromDate, toDate, estadoTipo);
 
-            return ResponseEntity.ok(albranesAmount);
+            return ResponseEntity.ok(count);
         } catch (DataAccessException ex) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
