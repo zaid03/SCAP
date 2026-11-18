@@ -3,20 +3,19 @@ package com.example.backend.service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.jpa.domain.Specification;
 
-import com.example.backend.dto.albarnesByProveedorProjection;
+import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.repository.AlbRepository;
+import com.example.backend.dto.AlbaranConsultaDto;
+import com.example.backend.dto.AlbaranConsultaDto.TerDto;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.time.LocalDateTime;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class AlbaranConsultaSearch {
@@ -39,7 +38,30 @@ public class AlbaranConsultaSearch {
         Map.entry("facnum", "FACNUM")
     );
 
-    public List<albarnesByProveedorProjection> searchAlbaranConsulta(
+    private AlbaranConsultaDto toDto(Alb alb) {
+        return new AlbaranConsultaDto(
+            alb.getALBNUM(),
+            alb.getALBREF(),
+            alb.getALBDAT(),
+            alb.getALBBIM(),
+            alb.getALBFRE(),
+            alb.getDEPCOD(),
+            alb.getALBCOM(),
+            alb.getSOLNUM(),
+            alb.getSOLSUB(),
+            alb.getFACNUM(),
+            alb.getALBOBS(),
+            alb.getCONCTP(),
+            alb.getCONCPR(),
+            alb.getCONCCR(),
+            alb.getTer() == null ? null : new TerDto(
+                alb.getTer().getTERCOD(),
+                alb.getTer().getTERNOM()
+            )
+        );
+    }
+
+    public List<AlbaranConsultaDto> searchAlbaranConsulta(
         Integer ent,
         String main_search,
         String centroDep,
@@ -54,7 +76,6 @@ public class AlbaranConsultaSearch {
         String direction
     ) {
         int safePage = Math.max(page, 0);
-        List<albarnesByProveedorProjection> albaranes = new ArrayList<>();
 
         Pageable pageable = PageRequest.of(
             safePage,
@@ -82,11 +103,13 @@ public class AlbaranConsultaSearch {
         boolean noFilters = isBlank(main_search) && isBlank(centroDep) && isBlank(comprador) && isBlank(ejeSearch) && isBlank(fechaTipo) && fromDate == null && toDate == null && isBlank(estadoTipo);
 
         if (noFilters) {
-            albaranes = albRepository.findByENT(ent, pageable);
+            return albRepository.findByENT(ent, pageable).stream().map(this::toDto).toList();
         }
 
-        
-        return albaranes;
+        Specification<Alb> specification = AlbaranConsultaSpecification.search(ent, main_search, centroDep, comprador, ejeSearch, fechaTipo, fromDate, toDate, estadoTipo);
+
+        Page<Alb> pageAlbaran = albRepository.findAll(specification, pageable);
+        return pageAlbaran.getContent().stream().map(this::toDto).toList();
     }
 
     private boolean isBlank(String value) {

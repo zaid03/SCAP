@@ -14,7 +14,6 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.EntityGraph;
 
 import com.example.backend.dto.albFacturaDto;
-import com.example.backend.dto.albarnesByProveedorProjection;
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
 
@@ -181,7 +180,8 @@ public interface AlbRepository extends JpaRepository<Alb, AlbId>, JpaSpecificati
     );
 
     //fetch for consulta albaranes
-    List<albarnesByProveedorProjection> findByENT(Integer ent, Pageable pageable);
+    @EntityGraph(attributePaths = "ter")
+    List<Alb> findByENT(Integer ent, Pageable pageable);
 
     @Override
     @EntityGraph(attributePaths = "ter")
