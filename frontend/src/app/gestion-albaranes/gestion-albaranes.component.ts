@@ -659,8 +659,26 @@ export class GestionAlbaranesComponent {
   detailError: string = '';
   updateAlbaran() {
     this.limpiarMEssages();
+    const albnum = this.selectedAlbaran.albnum;
 
     Object.assign(this.selectedAlbaran, this.tempFactura);
+
+    const payload = {
+      "ALBOBS": this.tempFactura.albobs
+    }
+
+    this.isUpdatingAlbaran = true;
+    this.http.patch(`${environment.backendUrl}/api/alb/update-albaran/${this.entcod}/${albnum}`, payload).subscribe({
+      next: (res) => {
+        this.isUpdatingAlbaran = false;
+        this.detailSuccess = "Albàran actualizado correctamente";
+        this.updateSuccess();
+      },
+      error: (err) => {
+        this.isUpdatingAlbaran = false;
+        this.detailError = err.error.error ?? err.error;
+      }
+    })
   }
 
   //misc

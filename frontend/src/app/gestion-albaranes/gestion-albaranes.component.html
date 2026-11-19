@@ -202,6 +202,10 @@
                             [class.disabled-btn]="isUpdate"
                         >✖</button>
                     </div>
+                    <div *ngIf="isUpdatingAlbaran" class="loading-message">
+                        <div class="spinner"></div>
+                        <span>actualizando</span>
+                    </div>
                     <h1 class="successBtn" *ngIf="detailSuccess">{{detailSuccess}}</h1>
                     <h1 class="errorBtn" *ngIf="detailError">{{detailError}}</h1>
                     <div class="detail-container">
@@ -315,11 +319,11 @@
                                     <td colspan="3">
                                         <textarea 
                                             class="textArea-style adjustArea"
-                                            [value]="selectedAlbaran.albobs"
+                                            [(ngModel)]="tempFactura.albobs"
                                             [disabled]="!isUpdate" 
+                                            (input)="allowToUpdate = true"
                                         >
                                         </textarea>
-                                        <h1 class="h1-style">{{selectedAlbaran.albobs}}</h1>
                                     </td>
                                     
                                 </tr>

@@ -353,4 +353,32 @@ public class AlbController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
+
+    //update albaranes from its gestion
+    public record updateAlbaran(String ALBOBS) {}
+    @PatchMapping("/update-albaran/{ent}/{albnum}")
+    public ResponseEntity<?> albaranUpdate(
+        @PathVariable Integer ent,
+        @PathVariable Integer albnum,
+        @RequestBody updateAlbaran payload
+    ) {
+        try {
+            if (payload == null || payload.ALBOBS() == null) {
+                return ResponseEntity.badRequest().body("Faltan datos obligatorios.");
+            }
+            AlbId id = new AlbId(ent, albnum);
+            Optional<Alb> albaran = albRepository.findById(id);
+            if (albaran.isEmpty()) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
+            } 
+
+            Alb albaranUpdate = albaran.get();
+            albaranUpdate.setALBOBS(payload.ALBOBS());
+            albRepository.save(albaranUpdate);
+
+            return ResponseEntity.noContent().build();
+        } catch (DataAccessException ex) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
+        }
+    }
 }
