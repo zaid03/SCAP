@@ -617,7 +617,74 @@ export class GestionAlbaranesComponent {
     })
   }
 
-  
+  isDisabled(facnum: number): boolean {
+    if (facnum > 0) {
+      return true;
+    }
+    return false;
+  }
+
+  facturacionMessage: string = '';
+  facturacionDescision: 'noFacturable' | 'facturable' | '' = '';
+  factorizacion(facnum: number) {
+    console.log(facnum)
+
+    console.log("hree1")
+    if (facnum === 0) {
+      this.facturacionMessage = '¿Quiere marcar el albarán como NO FACTURABLE?';
+      this.facturacionDescision = 'noFacturable';
+    } else if (facnum < 0) {
+      this.facturacionMessage = '¿Quiere devolver el albarán al estado FACTURABLE?';
+      this.facturacionDescision = 'facturable';
+    }
+
+    console.log("hree")
+    this.openFacturacionGrid();
+  }
+
+  facturacionGrid: boolean = false;
+  openFacturacionGrid() {
+    this.facturacionGrid = true;
+  }
+
+  closeFacturacionGrid() {
+    this.limpiarMEssages();
+    this.facturacionGrid = false;
+    this.facturacionDescision = '';
+  }
+
+  isFacturacion: boolean = false;
+  facturacionError: string = '';
+  marcarFacturacion() {
+    let facnum = '';
+    const albnum = this.selectedAlbaran.albnum;
+
+    if (this.facturacionDescision === 'noFacturable') {
+      facnum = '-1';
+    } else if (this.facturacionDescision === 'facturable') {
+      facnum = '0';
+    }
+
+    if (facnum === '') {return;}
+
+    const payload = {
+      "FACNUM": facnum
+    }
+    this.isFacturacion = true;
+    this.http.patch(`${environment.backendUrl}/api/alb/facturacion/${this.entcod}/${albnum}`, payload).subscribe({
+      next: (res) => {
+        this.isFacturacion = false;
+        this.detailSuccess = 'Facturacíon actualizada correctamente';
+        this.closeFacturacionGrid();
+        const updatedFacnum = Number(facnum);
+        this.selectedAlbaran.facnum = updatedFacnum;
+      },
+      error: (err) => {
+        this.isFacturacion = false;
+        this.facturacionError = err.error.error ?? err.error;
+      }
+    })
+  }
 
   //subDetails functions
   detailView: 'Albaranes' | 'Contabilización' = 'Albaranes';
@@ -718,5 +785,7 @@ export class GestionAlbaranesComponent {
   this.articulosError = '';
   this.updateArticuloError = '';
   this.updateArticulosSuccess = '';
+  this.facturacionMessage = '';
+  this.facturacionError = '';
   }
 }

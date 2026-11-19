@@ -20,6 +20,9 @@
 .satTextArea {width: 180px; max-width: 200px !important;}
 .sAT td:last-child {text-align: center;}
 /* main table and details*/
+/* facturacion grid */
+.btn-space {margin-right: 10px; margin-top: 10px;}
+/* facturacion grid */
 /* media */
 @media (max-width: 1500px) {.sizeAdj {width: 50px;}}
 /* media */

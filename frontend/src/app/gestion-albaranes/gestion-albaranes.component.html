@@ -332,9 +332,9 @@
                     <div class="btns">
                         <button 
                             class="purple-btn" 
-                            [disabled]="isUpdate" 
-	                        [class.disabled-btn]="isUpdate"
-                            
+                            [disabled]="isUpdate || isDisabled(selectedAlbaran.facnum)" 
+	                        [class.disabled-btn]="isUpdate || isDisabled(selectedAlbaran.facnum)"
+                            (click)="factorizacion(selectedAlbaran.facnum)"
                         >Facturacíon</button>
                         <button 
                             class="red-btn"
@@ -433,4 +433,16 @@
             </div>
         </div>
     </div>
+</div>
+
+<div class="modal-backdrop force" *ngIf="facturacionGrid"></div>
+<div class="delete-confirm-modal adj update-D" *ngIf="facturacionGrid">
+    <p class="errorBtn" *ngIf="facturacionError">{{facturacionError}}</p>
+    <p class="p-style">{{facturacionMessage}}</p>
+    <div *ngIf="isFacturacion" class="loading-message">
+        <div class="spinner"></div>
+        <span>Actualizando</span>
+    </div>
+    <button class="purple-btn btn-space" (click)="marcarFacturacion()">Sí</button>
+    <button class="red-btn" (click)="closeFacturacionGrid()">No</button>
 </div>
