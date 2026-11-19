@@ -28,8 +28,6 @@ public class AdeController {
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
 
-    //not tested
-
     @GetMapping("/fetch-articulos/{ent}/{albnum}")
     public ResponseEntity<?> fetchArticulos(
         @PathVariable Integer ent,
