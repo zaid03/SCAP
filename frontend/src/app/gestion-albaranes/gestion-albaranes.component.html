@@ -195,9 +195,15 @@
                         <div class="title-detail">
                             <h3>Detalles del Albarán</h3>
                         </div>
-                        <button class="red-btn" (click)="closeDetails()">✖</button>
+                        <button 
+                            class="red-btn" 
+                            (click)="closeDetails()"
+                            [disabled]="isUpdate"
+                            [class.disabled-btn]="isUpdate"
+                        >✖</button>
                     </div>
                     <h1 class="successBtn" *ngIf="detailSuccess">{{detailSuccess}}</h1>
+                    <h1 class="errorBtn" *ngIf="detailError">{{detailError}}</h1>
                     <div class="detail-container">
                         <table class="details-table">
                             <table class="details-table dT">
@@ -309,7 +315,9 @@
                                     <td colspan="3">
                                         <textarea 
                                             class="textArea-style adjustArea"
-                                            [value]="selectedAlbaran.albobs">
+                                            [value]="selectedAlbaran.albobs"
+                                            [disabled]="!isUpdate" 
+                                        >
                                         </textarea>
                                         <h1 class="h1-style">{{selectedAlbaran.albobs}}</h1>
                                     </td>
@@ -317,6 +325,32 @@
                                 </tr>
                             </table>
                         </table>
+                    </div>
+                    <div class="btns">
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="isUpdate" 
+	                        [class.disabled-btn]="isUpdate"
+                            
+                        >Facturacíon</button>
+                        <button 
+                            class="red-btn"
+                            *ngIf="isUpdate" 
+                            (click)="cancelar()"
+                        >Cancelar</button>
+                        <button 
+                            class="purple-btn"
+                            [disabled]="isUpdate" 
+                            [class.disabled-btn]="isUpdate"
+                            *ngIf="!isUpdate" 
+                            (click)="modificar()"
+                        >Modificar</button>
+                        <button 
+                            class="purple-btn" 
+                            [disabled]="!isUpdate" 
+	                        *ngIf="isUpdate"
+                            (click)="isUpdateAllowed()"
+                        >Guardar</button>
                     </div>
                     <div class="more-detail-container">
                         <div class="tabs" role="tablist" aria-label="Detalle tabs">
@@ -342,6 +376,7 @@
                                     <th>Unidades</th>
                                     <th>Referencia</th>
                                     <th>Observaciones</th>
+                                    <th>Accíon</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -351,8 +386,24 @@
                                     <td>{{s.artcod}}</td>
                                     <td>{{s.adepre | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{s.adeuni}}</td>
-                                    <td>{{s.aderef}}</td>
-                                    <td>{{s.adeobs}}</td>
+                                    <td>
+                                        <textarea 
+                                            class="textArea-style satTextArea"
+                                            [value]="s.aderef"
+                                        >
+                                        </textarea>
+                                    </td>
+                                    <td>
+                                        <textarea 
+                                            class="textArea-style satTextArea"
+                                            [value]="s.adeobs"
+                                        >
+                                        </textarea>
+                                    <td>
+                                        <button 
+                                            class="purple-btn" 
+                                        >✔</button>
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

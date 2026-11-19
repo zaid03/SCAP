@@ -536,11 +536,12 @@ export class GestionAlbaranesComponent {
 
   //details functions
   selectedAlbaran: any = null;
-  detailSuccess: String = '';
   showDetails(albaran: any) {
     this.limpiarMEssages();
     this.selectedAlbaran = albaran;
     this.showArticulos(albaran);
+
+    this.tempFactura = { ...albaran };
   }
 
   closeDetails() {
@@ -626,12 +627,48 @@ export class GestionAlbaranesComponent {
     }
   }
 
+  tempFactura: any = {};
+  isUpdate: boolean = false;
+  backupData: any = [];
+  modificar() {
+    this.isUpdate = true;
+    this.backupData = this.selectedAlbaran ? { ...this.selectedAlbaran } : {};
+  }
+
+  cancelar() {
+    this.isUpdate = false;
+    this.tempFactura = { ...this.backupData };
+  }
+
+  updateSuccess() {
+    this.isUpdate = false;
+    this.allowToUpdate = false;
+  }
+
+  allowToUpdate: boolean = false;
+  isUpdateAllowed() {
+    if (this.allowToUpdate) {
+      this.updateAlbaran();
+    } else {
+      return;
+    }
+  }
+
+  isUpdatingAlbaran: boolean = false;
+  detailSuccess: String = '';
+  detailError: string = '';
+  updateAlbaran() {
+    this.limpiarMEssages();
+
+    Object.assign(this.selectedAlbaran, this.tempFactura);
+  }
 
   //misc
   limpiarMEssages() {
   this.albaranesSuccess = '';
   this.albaranesError = '';
   this.detailSuccess = '';
+  this.detailError = '';
   this.articulosError = '';
   }
 }

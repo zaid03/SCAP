@@ -1,0 +1,25 @@
+/* search container and inputs */
+.title-area{justify-content: end; width: 18%;}
+.search-container { gap: 20px; }
+.search-form { gap: 12px; }
+.more-search-options { display: flex; align-items: center; gap: 10px; }
+.more-search-options select,
+.more-search-options input[type="date"] { padding: 4px 6px; border-radius: 20px; border: 1px solid #bbb; color: #25176b; font-size: 15px; transition: border 0.2s, box-shadow 0.2s; outline: none; box-shadow: 0 1px 4px rgba(56,36,155,0.04); }
+.more-search-options select:focus,
+.more-search-options input[type="date"]:focus { outline: none; }
+.successBtn { margin-top: 5px; }
+.sizeAdj {width: 70px;}
+/* search container and inputs */
+/* main table and details*/
+.ca td:nth-child(6),
+.align,
+.sAT td:nth-child(4) {text-align: right;}
+.adjustArea {width: 220px; max-width: 280px !important; height: 40px;}
+.sAT th:nth-child(6),
+.sAT th:nth-child(7) {width: 18%;}
+.satTextArea {width: 180px; max-width: 200px !important;}
+.sAT td:last-child {text-align: center;}
+/* main table and details*/
+/* media */
+@media (max-width: 1500px) {.sizeAdj {width: 50px;}}
+/* media */
