@@ -20,34 +20,42 @@
           <a class="choice">Organigrama</a>
           <div class="menu-content" [class.open]="organigrama">
             <div class="menu-item">
-              <a class="acEje" 
+              <button class="acEje" 
                 [class.disabled]="isDisabled('acEje')"
+                [disabled]="isDisabled('acEje')"
                 (click)="navigateTo('ejercicios')"
-              >Consulta de ejercicios</a>
-              <a class="acCGe" 
+              >Consulta de ejercicios</button>
+              <button class="acCGe" 
                 [class.disabled]="isDisabled('acCGe')"
+                [disabled]="isDisabled('acCGe')"
                 (click)="navigateTo('centroGestor')"
               >Centros gestores
-              </a>
-              <a class="AcCCo" 
+              </button>
+              <button class="AcCCo" 
                 [class.disabled]="isDisabled('AcCCo')"
+                [disabled]="isDisabled('AcCCo')"
                 (click)="navigateTo('coste')"
-              >Centros de coste</a>
-              <a class="acDep" 
+              >Centros de coste</button>
+              <button class="acDep" 
                 [class.disabled]="isDisabled('acDep')"
+                [disabled]="isDisabled('acDep')"
                 (click)="navigateTo('servicios')"
-              >Servicios</a>
-              <a class="acPer" 
+              >Servicios</button>
+              <button class="acPer" 
                 [class.disabled]="isDisabled('acPer')"
+                [disabled]="isDisabled('acPer')"
                 (click)="navigateTo('personas')"
-              >Personas</a>
-              <a class="#" 
+              >Personas</button>
+              <button class="acPerSer" 
+                [class.disabled]="isDisabled('acPerSer')"
+                [disabled]="isDisabled('acPerSer')"
                 (click)="navigateTo('personas-por-servicios')"
-              >Consulta de personas por servicios</a>
-              <a class="acLEn" 
+              >Consulta de personas por servicios</button>
+              <button class="acLEn" 
                 [class.disabled]="isDisabled('acLEn')"
+                [disabled]="isDisabled('acLEn')"
                 (click)="navigateTo('entrega')"
-              >Lugares de entrega</a>
+              >Lugares de entrega</button>
             </div>
           </div>
         </div>
@@ -56,64 +64,31 @@
           <a class="choice">Proveedores</a>
           <div class="menu-content" [class.open]="proveedores">
             <div class="menu-item">
-              <a class="acCoTer" 
+              <button class="acCoTer" 
                 [class.disabled]="isDisabled('acCoTer')"
+                [disabled]="isDisabled('acCoTer')"
                 (click)="navigateTo('Cproveedores')"
-              >Consulta de proveedores</a>
-              <a class="acTer" 
+              >Consulta de proveedores</button>
+              <button class="acTer" 
                 [class.disabled]="isDisabled('acTer')"
+                [disabled]="isDisabled('acTer')"
                 (click)="navigateTo('proveedorees')"
-              >Gestión de proveedores</a>
-              <a class="acCon" 
+              >Gestión de proveedores</button>
+              <button class="acCon" 
                 [class.disabled]="isDisabled('acCon')"
+                [disabled]="isDisabled('acCon')"
                 (click)="navigateTo('contratos')"
-              >Gestión de contratos</a>
-              <a class="acCon" 
-              [class.disabled]="isDisabled('acCon')"
-              (click)="navigateTo('CSaldoCon')"
-            >Consulta de saldos de contratos</a>
-            <a class="acCon" 
-              [class.disabled]="isDisabled('acCon')"
-              (click)="navigateTo('CHistoriaADCon')"
-            >Consulta histórica de AD de contratos</a>
-            </div>
-          </div>
-        </div>
-
-        <div class="menu" (click)="contabilidad = !contabilidad" tabindex="0">
-          <a class="choice">Contabilidad</a>
-          <div class="menu-content" [class.open]="contabilidad">
-            <div class="menu-item">
-              <a class="acFacC" 
-                [class.disabled]="isDisabled('acFacC')"
-                (click)="navigateTo('Cfactura')"
-              >Consulta de facturas</a>
-              <a class="acFac" 
-                [class.disabled]="isDisabled('acFac')"
-                (click)="navigateTo('facturas')"
-              >Gestión de facturas
-              </a> 
-              <a class="acMCon" 
-                [class.disabled]="isDisabled('acMCon')"
-                (click)="navigateTo('contabilizacion')"
-              >Monitor de contabilización
-              </a>
-              <a class="acRCon" 
-                [class.disabled]="isDisabled('acRCon')"
-                (click)="navigateTo('Fcontabilizadas')"
-              >Gestión de facturas contabilizadas</a>
-              <a class="acCoGBSM"
-                [class.disabled]="isDisabled('acCoGBSM')"
-                (click)="navigateTo('Ccredito')"
-              >Consulta bolsa de crédito</a>
-              <a class="acGBS" 
-                [class.disabled]="isDisabled('acGBS')"
-                (click)="navigateTo('credito')"
-              >Gestión bolsa de crédito</a>
-              <a class="acGBSM" 
-                [class.disabled]="isDisabled('acGBSM')"
-                (click)="navigateTo('credito-Cge')"
-              >Gestión bolsa de crédito por centro gestor</a>
+              >Gestión de contratos</button>
+              <button class="acCon" 
+                [class.disabled]="isDisabled('acCon')"
+                [disabled]="isDisabled('acCon')"
+                (click)="navigateTo('CSaldoCon')"
+              >Consulta de saldos de contratos</button>
+              <button class="acCon" 
+                [class.disabled]="isDisabled('acCon')"
+                [disabled]="isDisabled('acCon')"
+                (click)="navigateTo('CHistoriaADCon')"
+              >Consulta histórica de AD de contratos</button>
             </div>
           </div>
         </div>
@@ -122,57 +97,191 @@
           <a class="choice">Artículos</a>
           <div class="menu-content" [class.open]="articulos">
             <div class="menu-item">
-              <a class="acAFA" 
-                [class.disabled]="isDisabled('acAFA')"
-                (click)="navigateTo('familia')"
-              >Familias y subfamilias</a>
+              <button class="acAlbC"
+                [class.disabled]="isDisabled('acAlbC')"
+                [disabled]="isDisabled('acAlbC')"
+                (click)="navigateTo('MGArticulos')"
+              >Mantenimiento general de artículos</button>
+              <button class="acAlb"
+                [class.disabled]="isDisabled('acAlb')"
+                [disabled]="isDisabled('acAlb')"
+                (click)="navigateTo('MAlmacen')"
+              >Mantenimiento de artículos por almacén</button>
+              <button class="acArt"
+                [class.disabled]="isDisabled('acArt')"
+                [disabled]="isDisabled('acArt')"
+                (click)="navigateTo('CGArticulos')"
+              >Consulta General de artículos</button>
+              <button class="acArtM"
+                [class.disabled]="isDisabled('acArtM')"
+                [disabled]="isDisabled('acArtM')"
+                (click)="navigateTo('CAlmacen')"
+              >Consulta de artículos por almacén</button>
+              <div class="submenu">
+                <a
+                  class="submenu-title"
+                  (click)="articulosTipos = !articulosTipos; $event.stopPropagation()"
+                >Tablas</a>
+                <div class="submenu-content" [class.open]="articulosTipos">
+                  <button
+                    class="acArtC"
+                    [class.disabled]="isDisabled('acArtC')"
+                    [disabled]="isDisabled('acArtC')"
+                    (click)="navigateTo('almacenaje'); $event.stopPropagation()"
+                  >Tipos de almacenaje</button>
+                  <button
+                    class="acArtMC"
+                    [class.disabled]="isDisabled('acArtMC')"
+                    [disabled]="isDisabled('acArtMC')"
+                    (click)="navigateTo('unidades'); $event.stopPropagation()"
+                  >Tipos de unidades</button>
+                  <button
+                    class="acAFA"
+                    [class.disabled]="isDisabled('acAFA')"
+                    [disabled]="isDisabled('acAFA')"
+                    (click)="navigateTo('familia'); $event.stopPropagation()"
+                  >Familias y subfamilias</button>
+                </div>
+              </div>
+              <div class="submenu">
+                <a
+                  class="submenu-title"
+                  (click)="articulosConsultas = !articulosConsultas; $event.stopPropagation()"
+                >Consultas</a>
+                <div class="submenu-content" [class.open]="articulosConsultas">
+                  <button class="acLInVM" 
+                    (click)="navigateTo('Cexistencias')"
+                    [class.disabled]="isDisabled('acLInVM')"
+                    [disabled]="isDisabled('acLInVM')"
+                  >Consulta General de Existencias</button>
+                  <button class="acLInV" 
+                    [class.disabled]="isDisabled('acLInV')"
+                    [disabled]="isDisabled('acLInV')"
+                    (click)="navigateTo('CExictenciasAlmacen')"
+                  >Consulta de Existencias por almacén</button>
+                  <button class="acMEAC" 
+                    [class.disabled]="isDisabled('acMEAC')"
+                    [disabled]="isDisabled('acMEAC')"
+                    (click)="navigateTo('')"
+                  >Consulta de Faltas de existencias por almacén</button>
+                  <button class="acAUN" 
+                    [class.disabled]="isDisabled('acAUN')"
+                    [disabled]="isDisabled('acAUN')"
+                    (click)="navigateTo('')"
+                  >Consulta General de Inventario valorado</button>
+                  <button class="acMTA" 
+                    [class.disabled]="isDisabled('acMTA')"
+                    [disabled]="isDisabled('acMTA')"
+                    (click)="navigateTo('')"
+                  >Consulta de Inventario valorado por Almacén</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>
 
-        <div class="menu" (click)="temp = !temp" tabindex="0" *ngIf="isPre">
-          <a class="choice">componentes no clasificados</a>
-          <div class="menu-content" [class.open]="temp">
+        <div class="menu" (click)="facturacion = !facturacion" tabindex="0">
+          <a class="choice">Facturación</a>
+          <div class="menu-content" [class.open]="facturacion">
             <div class="menu-item">
-              <a class="#" 
-                (click)="navigateTo('almacenaje')"
-              >Tipos de almacenaje</a>
-              <a class="#" 
-                (click)="navigateTo('unidades')"
-              >tipos de unidades</a>
-              <a class="#" 
-                (click)="navigateTo('Ccontabilizado')"
-              >Consulta del contabilizado</a>
-              <a class="#" 
-                (click)="navigateTo('Ccontabilizar')"
-              >Consulta del pendiente de contabilizar</a>
-              <a class="#" 
-                (click)="navigateTo('almacenes')"
-              >Consulta analitica de almacenes</a>
-              <a class="#" 
-                (click)="navigateTo('Cfamilia')"
-              >Consulta analitica de familias</a>
-              <a class="#" 
-                (click)="navigateTo('Carticulos')"
-              >Consulta analitica de articulos</a>
-              <a class="#"
-                (click)="navigateTo('CGArticulos')"
-              >Consulta General de artículos</a>
-              <a class=""
-                (click)="navigateTo('CAlmacen')"
-              >Consulta de artículos por almacén</a>
-              <a class=""
-                (click)="navigateTo('MGArticulos')"
-              >Mantenimiento general de artículos</a>
-              <a class=""
-                (click)="navigateTo('MAlmacen')"
-              >Mantenimiento de artículos por almacén</a>
-              <a class=""
+              <button class="acMEA"
+                [class.disabled]="isDisabled('acMEA')"
+                [disabled]="isDisabled('acMEA')"
                 (click)="navigateTo('CAlbaranes')"
-              >Consulta de albaranes</a>
-              <a class="margin"
-              (click)="navigateTo('Albaranes')"
-            >Gestion de albaranes</a>
+                *ngIf="isPre"
+              >Consulta de albaranes</button>
+              <button class="acArtSto"
+                [class.disabled]="isDisabled('acArtSto')"
+                [disabled]="isDisabled('acArtSto')"
+                (click)="navigateTo('Albaranes')"
+                *ngIf="isPre"
+              >Gestion de albaranes</button>
+              <button class="acFacC" 
+                [class.disabled]="isDisabled('acFacC')"
+                [disabled]="isDisabled('acFacC')"
+                (click)="navigateTo('Cfactura')"
+              >Consulta de facturas</button>
+              <button class="acFac" 
+                [class.disabled]="isDisabled('acFac')"
+                [disabled]="isDisabled('acFac')"
+                (click)="navigateTo('facturas')"
+              >Gestión de facturas
+              </button> 
+              <button class="acMCon" 
+                [class.disabled]="isDisabled('acMCon')"
+                [disabled]="isDisabled('acMCon')"
+                (click)="navigateTo('contabilizacion')"
+              >Monitor de contabilización
+              </button>
+              <button class="acRCon" 
+                [class.disabled]="isDisabled('acRCon')"
+                [disabled]="isDisabled('acRCon')"
+                (click)="navigateTo('')"
+                *ngIf="isPre"
+              >Gestión de Facturas Contabilizadas
+              </button> 
+            </div>
+          </div>
+        </div>
+
+        <div class="menu" (click)="contabilidad = !contabilidad" tabindex="0">
+          <a class="choice">Contabilidad</a>
+          <div class="menu-content" [class.open]="contabilidad">
+            <div class="menu-item">
+              <button class="acCoGBSM"
+                [class.disabled]="isDisabled('acCoGBSM')"
+                [disabled]="isDisabled('acCoGBSM')"
+                (click)="navigateTo('Ccredito')"
+              >Consulta bolsa de crédito</button>
+              <button class="acGBS" 
+                [class.disabled]="isDisabled('acGBS')"
+                [disabled]="isDisabled('acGBS')"
+                (click)="navigateTo('credito')"
+              >Gestión bolsa de crédito</button>
+              <button class="acGBSM" 
+                [class.disabled]="isDisabled('acGBSM')"
+                [disabled]="isDisabled('acGBSM')"
+                (click)="navigateTo('credito-Cge')"
+              >Gestión bolsa de crédito por centro gestor</button>
+              <div class="submenu">
+                <a
+                  class="submenu-title"
+                  (click)="contabilidadConsultas = !contabilidadConsultas; $event.stopPropagation()"
+                  *ngIf="isPre"
+                >Consultas</a>
+                <div class="submenu-content" [class.open]="contabilidadConsultas">
+                  <button class="acFDE" 
+                    [class.disabled]="isDisabled('acFDE')"
+                    [disabled]="isDisabled('acFDE')"
+                    (click)="navigateTo('Ccontabilizado')"
+                  >Consulta del contabilizado</button>
+                  <button class="acFDEP" 
+                    [class.disabled]="isDisabled('acFDEP')"
+                    [disabled]="isDisabled('acFDEP')"
+                    (click)="navigateTo('Ccontabilizar')"
+                  >Consulta del pendiente de contabilizar</button>
+                  <button class="acAnaAlm" 
+                    [class.disabled]="isDisabled('acAnaAlm')"
+                    [disabled]="isDisabled('acAnaAlm')"
+                    (click)="navigateTo('almacenes')"
+                  >Consulta analitica de almacenes</button>
+                  <button class="acAnaFam"
+                    [class.disabled]="isDisabled('acAnaFam')"
+                    [disabled]="isDisabled('acAnaFam')" 
+                    (click)="navigateTo('Cfamilia')"
+                  >Consulta analitica de familias</button>
+                  <button class="acAnaArt" 
+                    [class.disabled]="isDisabled('acAnaArt')"
+                    [disabled]="isDisabled('acAnaArt')" 
+                    (click)="navigateTo('Carticulos')"
+                  >Consulta analitica de articulos</button>
+                  <button class="acAnaSol" 
+                    [class.disabled]="isDisabled('acAnaSol')"
+                    [disabled]="isDisabled('acAnaSol')" 
+                    (click)="navigateTo('')"
+                  >Consulta Analítica Solicitudes</button>
+                </div>
+              </div>
             </div>
           </div>
         </div>

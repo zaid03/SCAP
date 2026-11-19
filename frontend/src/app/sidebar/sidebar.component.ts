@@ -30,8 +30,11 @@ export class SidebarComponent implements OnInit {
   organigrama = false;
   proveedores = false;
   contabilidad = false;
+  facturacion = false;
   articulos = false;
-  temp = false;
+  articulosTipos = false;
+  articulosConsultas = false;
+  contabilidadConsultas = false;
   constructor(private http: HttpClient, private router: Router) {}
 
   ngOnInit(): void {
@@ -189,6 +192,12 @@ export class SidebarComponent implements OnInit {
         break;
       case 'Albaranes':
         this.router.navigate(['/Albaranes']);
+        break;
+      case 'Cexistencias':
+        this.router.navigate(['/Cexistencias']);
+        break;
+      case 'CExictenciasAlmacen':
+        this.router.navigate(['/CExictenciasAlmacen']);
         break;
       default:
         break;

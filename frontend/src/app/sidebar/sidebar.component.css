@@ -15,9 +15,6 @@
 .right-add { width: 50%; display: flex; flex-direction: column; text-align: left;}
 .left-user p,
 .right-add p {color: #38249b; font-weight: bold; font-size: 20px;}
-.menu button { width: 100%; }
-.choice:hover,
-.menu-item a:hover {background-color: #38249b; color: #e6edf3;}
 .drop-down-menu { display: block; }
 .menu { position: relative; margin-bottom: 6px; width: 100%; display: block; }
 .choice {display: block; padding: 12px 10px; color: #666666; background: #f7f7f7; border-radius: 4px; text-decoration: none; font-size: 15px; font-weight: bold; cursor: pointer; transition: background 0.2s; width: 100%; box-sizing: border-box; }
@@ -30,3 +27,22 @@
 .margin{margin-bottom: 50px; }
 .disabled { pointer-events: none; opacity: 0.5; cursor: not-allowed; }
 .sidebar.collapsed .sidebar-inner { overflow: hidden; }
+.menu-content { display: none; position: static; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,0.08); border-radius: 0 0 8px 8px; z-index: 1; padding: 0; margin: 0; }
+.menu:focus {outline: none;}
+.menu-content {display: none}
+.menu-content.open {display: block;}
+.menu-item { display: flex; flex-direction: column; width: 100%  }
+.menu-item a,
+.menu-item button {display: block; width: 100%; padding: 14px 22px; box-sizing: border-box; color: #666; background: #fff; border: none; border-bottom: 1px solid #f0f0f0; border-radius: 8px; font: inherit; font-size: 16px; font-weight: bold; text-align: left; text-decoration: none; cursor: pointer; transition: background 0.2s;}
+.menu button { width: 100%; padding: 8px 14px; }
+.choice:hover, 
+.menu-item a:hover,
+.menu-item button:hover {background-color: #38249b; color: #e6edf3;}
+.menu-item button:disabled {pointer-events: none; opacity: 0.5; cursor: not-allowed;}
+.menu-item button:focus,
+.menu-item button:active {outline: none; box-shadow: none;}
+.menu-item a:last-child { border-bottom: none; }
+.submenu-title {display: block; padding: 14px 22px; color: #666; cursor: pointer; font-weight: bold; background: #f7f7f7;}
+.submenu-content {display: none; flex-direction: column; padding-left: 12px;}
+.submenu-content.open {display: flex;}
+.submenu-content a {padding: 12px 22px; font-size: 14px;}
