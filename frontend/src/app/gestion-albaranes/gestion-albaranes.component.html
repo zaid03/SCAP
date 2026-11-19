@@ -1,1 +1,379 @@
-<p>gestion-albaranes works!</p>
+<div class="main-page">
+    <div 
+        class="sidebar-backdrop" 
+        *ngIf="!sidebar.collapsed" 
+        (click)="sidebar.collapsed = true"
+    >
+    </div>
+    <app-sidebar #sidebar></app-sidebar>
+    <div class="main-container" [class.blurred]="!sidebar.collapsed">
+        <div class="title-menu">
+            <div class="title-area">
+                <h2 class="margin-title">Gestion de albàranes</h2>  
+            </div>
+            <div class="search-holder">
+                <div class="search-container">
+                    <div class="search-form">
+                        <input 
+                            type="text" 
+                            class="search-bar" 
+                            placeholder="Albàran" 
+                            name="search"
+                            [(ngModel)]="main_search"
+                        >
+                        <input 
+                            type="text" 
+                            name="factura" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Centro gestor"
+                            [(ngModel)]="centroDep"
+                            maxlength="4"
+                            inputmode="numeric"
+                            pattern="[0-9]*"
+                        />
+                        <input 
+                            type="text" 
+                            name="Gestor" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Comprador"
+                            [(ngModel)]="comprador"
+                        />
+                        <input 
+                            type="text" 
+                            name="Gestor" 
+                            class="search-bar smallWidth sizeAdj"
+                            placeholder="Eje. factura"
+                            (input)="numberOnly($event)"
+                            [(ngModel)]="ejeSearch"
+                            maxlength="4"
+                        />  
+                        <div class="more-search-options">
+                            <select [(ngModel)]="fechaTipo">
+                                <option value="" disabled selected>Fecha</option>
+                                <option value="registro">Registro</option>
+                                <option value="albaran">Albàran</option>
+                            </select>
+                            Desde
+                            <input 
+                                type="date" 
+                                name="desde" 
+                                class="fecha-dato" 
+                                [(ngModel)] = "fromDate"
+                            >   
+                            Hasta
+                            <input 
+                                type="date" 
+                                name="hasta" 
+                                class="fecha-dato" 
+                                [(ngModel)] = "toDate"
+                            > 
+                            <select [(ngModel)]="estadoTipo">
+                                <option value="facturado">Facturado</option>
+                                <option value="sin_factura">Sin factura</option>
+                                <option value="no_facturable">No facturable</option>
+                                <option value="">Todas</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="btns">
+                        <button type="button" class="purple-btn" (click)="search()">Buscar</button>
+                        <button type="button" class="purple-btn" (click)="limpiarSearch()">Limpiar</button>
+                    </div>
+                </div>
+            </div>
+            <div class="group-menu" (click)="toggleMenu($event)">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="menu-panel" *ngIf="showMenu">
+                    <button class="purple-btn" (click)="downloadExcel()">Exportar a Excel</button>
+                    <button class="purple-btn" (click)="downloadPdf()">Exportar a PDF</button>
+                </div>
+            </div>
+        </div>
+        <h1 class="successBtn">{{albaranesSuccess}}</h1>
+        <h1 class="errorBtn">{{albaranesError}}</h1>
+        <div class="main-list">
+            <div *ngIf="isLoading" class="loading-message">
+                <div class="spinner"></div>
+                <span>Cargando</span>
+            </div>
+            <table class="main-table ca">
+                <thead>
+                    <tr>
+                        <th class="sortable resizable" (click)="toggleSort('albnum')">
+                            Albarán 
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 0)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ter.tercod')">
+                            Proveedor
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ter.tercod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 1)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('ter.ternom')">
+                            Nombre
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ter.ternom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 2)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('albref')">
+                            Ref. Proveedor
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albref'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('albdat')">
+                            Fecha Alb.
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albdat'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('albbim')">
+                            Importe
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albbim'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('albfre')">
+                            Fecha Reg.
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albfre'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('depcod')">
+                            Centro Destino
+                            <span class="sort-indicator" *ngIf="sortColumn === 'depcod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('albcom')">
+                            Comprador
+                            <span class="sort-indicator" *ngIf="sortColumn === 'albcom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('solnum')">
+                            Pedido
+                            <span class="sort-indicator" *ngIf="sortColumn === 'solnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
+                        </th>
+                        <th class="sortable resizable" (click)="toggleSort('facnum')">
+                            Factura
+                            <span class="sort-indicator" *ngIf="sortColumn === 'facnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr *ngFor="let a of albaranes">
+                        <td (click)="showDetails(a)" style="cursor: pointer;">{{ a.albnum }}</td>
+                        <td>{{ a.ter?.tercod }}</td>
+                        <td>{{ a.ter?.ternom }}</td>
+                        <td>{{ a.albref }}</td>
+                        <td>{{ a.albdat | date:'dd-MM-yyyy'}}</td>
+                        <td>{{ a.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
+                        <td>{{ a.albfre | date:'dd-MM-yyyy'}}</td>
+                        <td>{{ a.depcod }}</td>
+                        <td>{{ a.albcom }}</td>
+                        <td>{{ a.solnum +"-" + a.solsub }}</td>
+                        <td>{{ eje +"-" + a.facnum }}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <div class="pagination-controls">
+                <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPages"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPages }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPages">Siguiente</button>
+            </div>
+            <div class="modal-backdrop" *ngIf="selectedAlbaran"></div>
+            <div class="display">
+                <div class="modal" *ngIf="selectedAlbaran">
+                    <div class="btns">
+                        <div class="title-detail">
+                            <h3>Detalles del Albarán</h3>
+                        </div>
+                        <button class="red-btn" (click)="closeDetails()">✖</button>
+                    </div>
+                    <h1 class="successBtn" *ngIf="detailSuccess">{{detailSuccess}}</h1>
+                    <div class="detail-container">
+                        <table class="details-table">
+                            <table class="details-table dT">
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Albarán:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.albnum}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Proveedor:</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <h1 class="h1-style">{{selectedAlbaran.ter.tercod}}</h1>
+                                            <h1 class="h1-style">{{selectedAlbaran.ter.ternom}}</h1>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Referencia Prov:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.albref}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Importe:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style align">{{selectedAlbaran.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Tipo de contrato:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.conctp}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Procedimiento de contrato:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.concpr}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Criterio de puntuación:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.conccr}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Pedido:</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <h1 class="h1-style">{{selectedAlbaran.solnum}}</h1>
+                                            <h1 class="h1-style">-</h1>
+                                            <h1 class="h1-style">{{selectedAlbaran.solsub}}</h1>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Comprador:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.albcom}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Fecha Reg.:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.albfre | date:'dd-MM-yyyy'}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Fecha Alb:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.albdat | date:'dd-MM-yyyy'}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Factura:</p>
+                                    </td>
+                                    <td>
+                                        <div class="cell-content">
+                                            <h1 class="h1-style">{{eje}}</h1>
+                                            <h1 class="h1-style">-</h1>
+                                            <h1 class="h1-style">{{selectedAlbaran.facnum}}</h1>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>
+                                        <p class="p-style">Destino:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{selectedAlbaran.depcod}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Estado:</p>
+                                    </td>
+                                    <td>
+                                        <h1 class="h1-style">{{facturaEstado(selectedAlbaran.facnum)}}</h1>
+                                    </td>
+                                    <td>
+                                        <p class="p-style">Observaciones:</p>
+                                    </td>
+                                    <td colspan="3">
+                                        <textarea 
+                                            class="textArea-style adjustArea"
+                                            [value]="selectedAlbaran.albobs">
+                                        </textarea>
+                                        <h1 class="h1-style">{{selectedAlbaran.albobs}}</h1>
+                                    </td>
+                                    
+                                </tr>
+                            </table>
+                        </table>
+                    </div>
+                    <div class="more-detail-container">
+                        <div class="tabs" role="tablist" aria-label="Detalle tabs">
+                            <button
+                                class="tab-like-btn p-style"
+                                (click)="showArticulos(selectedAlbaran)"
+                            > Servicios
+                            </button>
+                        </div>
+                    </div>
+                    <div class="custom-grid-modal" *ngIf="AlbaranesGrid">
+                        <div *ngIf="isLoadingDetails" class="loading-message">
+                            <div class="spinner"></div>
+                            <span>Cargando</span>
+                        </div>
+                        <table class="main-table sAT">
+                            <thead>
+                                <tr>
+                                    <th>Familia</th>
+                                    <th>Subfamilia</th>
+                                    <th>Artículo</th>
+                                    <th>Precio</th>
+                                    <th>Unidades</th>
+                                    <th>Referencia</th>
+                                    <th>Observaciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr *ngFor="let s of paginatedArticulos">
+                                    <td>{{s.afacod}}</td>
+                                    <td>{{s.asucod}}</td>
+                                    <td>{{s.artcod}}</td>
+                                    <td>{{s.adepre | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
+                                    <td>{{s.adeuni}}</td>
+                                    <td>{{s.aderef}}</td>
+                                    <td>{{s.adeobs}}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        <h1 class="errorBtn">{{articulosError}}</h1>
+                        <div class="pagination-controls">
+                            <button (click)="prevPageService()" [disabled]="pageServices === 0">Anterior</button>
+                            <span>Página</span>
+                            <input
+                                type="number"
+                                min="1"
+                                [max]="totalPagesServices"
+                                [value]="pageServices + 1"
+                                (change)="goToPageService($event)"
+                                class="pagination-input"
+                            />
+                            <span>de {{ totalPagesServices }}</span>
+                            <button (click)="nextPageService()" [disabled]="pageServices + 1 >= totalPagesServices">Siguiente</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
