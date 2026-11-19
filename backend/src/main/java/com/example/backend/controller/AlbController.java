@@ -295,8 +295,6 @@ public class AlbController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(ERROR + ex.getMostSpecificCause().getMessage());
         }
     }
-
-    //new and untested
     
     //fetch for consulta albaranes
     @GetMapping("/consulta-albaranes")

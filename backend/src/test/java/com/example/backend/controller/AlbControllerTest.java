@@ -33,6 +33,7 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 import com.example.backend.config.TestExceptionHandler;
 import com.example.backend.config.TestSecurityConfig;
 import com.example.backend.dto.albFacturaDto;
+import com.example.backend.service.AlbaranConsultaSearch;
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.Fac;
 import com.example.backend.sqlserver2.model.Fde;
@@ -40,6 +41,7 @@ import com.example.backend.sqlserver2.repository.AdeRepository;
 import com.example.backend.sqlserver2.repository.AlbRepository;
 import com.example.backend.sqlserver2.repository.FacRepository;
 import com.example.backend.sqlserver2.repository.FdeRepository;
+import com.example.backend.service.AlbaranConsultaSearch;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 @WebMvcTest(controllers = AlbController.class)
@@ -64,6 +66,9 @@ public class AlbControllerTest {
 
     @Autowired
     private ObjectMapper objectMapper;
+
+    @MockitoBean
+    private AlbaranConsultaSearch albaranConsultaSearch;
 
     albFacturaDto dto = new albFacturaDto() {
         @Override
@@ -567,5 +572,103 @@ public class AlbControllerTest {
             .andDo(print())
             .andExpect(status().isBadRequest())
             .andExpect(content().string(containsString("Error :")));
+    }
+
+    @Test
+    void facturacion_returns204AndUpdatesFacnumToZero() throws Exception {
+        Alb alb = new Alb();
+        alb.setFACNUM(-1);
+
+        when(albRepository.findById(any())).thenReturn(Optional.of(alb));
+
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"FACNUM": 0}
+                    """))
+            .andDo(print())
+            .andExpect(status().isNoContent());
+
+        verify(albRepository).save(alb);
+        org.junit.jupiter.api.Assertions.assertEquals(0, alb.getFACNUM());
+    }
+
+    @Test
+    void facturacion_returns204AndUpdatesFacnumToNegativeOne() throws Exception {
+        Alb alb = new Alb();
+        alb.setFACNUM(0);
+
+        when(albRepository.findById(any())).thenReturn(Optional.of(alb));
+
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"FACNUM": -1}
+                    """))
+            .andExpect(status().isNoContent());
+
+        verify(albRepository).save(alb);
+        org.junit.jupiter.api.Assertions.assertEquals(-1, alb.getFACNUM());
+    }
+
+    @Test
+    void facturacion_returns400WhenFacnumIsMissing() throws Exception {
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("{}"))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string("Faltan datos obligatorios."));
+    }
+
+    @Test
+    void facturacion_returns404WhenAlbaranDoesNotExist() throws Exception {
+        when(albRepository.findById(any())).thenReturn(Optional.empty());
+
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"FACNUM": 0}
+                    """))
+            .andDo(print())
+            .andExpect(status().isNotFound())
+            .andExpect(content().string("Sin resultado"));
+    }
+
+    @Test
+    void facturacion_returns400WhenFindingAlbaranFails() throws Exception {
+        when(albRepository.findById(any()))
+            .thenThrow(new DataAccessResourceFailureException("Database unavailable"));
+
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"FACNUM": 0}
+                    """))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+
+        verify(albRepository).findById(any());
+    }
+
+    @Test
+    void facturacion_returns400WhenSavingAlbaranFails() throws Exception {
+        Alb alb = new Alb();
+
+        when(albRepository.findById(any())).thenReturn(Optional.of(alb));
+        when(albRepository.save(any(Alb.class)))
+            .thenThrow(new DataAccessResourceFailureException("Database unavailable"));
+
+        mockMvc.perform(patch("/api/alb/facturacion/1/-65987")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                    {"FACNUM": -1}
+                    """))
+            .andDo(print())
+            .andExpect(status().isBadRequest())
+            .andExpect(content().string(containsString("Error :")));
+
+        org.junit.jupiter.api.Assertions.assertEquals(-1, alb.getFACNUM());
     }
 }
