@@ -72,14 +72,16 @@ public class AlbaranConsultaSearch {
         LocalDateTime toDate,
         String estadoTipo,
         int page,
+        int size,
         String sort,
         String direction
     ) {
+        int safeSize = size > 0 ? Math.min(size, 2000) : PAGE_SIZE;
         int safePage = Math.max(page, 0);
 
         Pageable pageable = PageRequest.of(
             safePage,
-            PAGE_SIZE,
+            safeSize,
             Sort.unsorted()
         );
 
@@ -94,7 +96,7 @@ public class AlbaranConsultaSearch {
 
                 pageable = PageRequest.of(
                     safePage,
-                    PAGE_SIZE,
+                    safeSize,
                     Sort.by(sortDirection, property)
                 );
             }

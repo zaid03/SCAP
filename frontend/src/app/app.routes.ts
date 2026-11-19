@@ -38,6 +38,7 @@ import { ConsultaBolsasComponent } from './consulta-bolsas/consulta-bolsas.compo
 import { ContratosComponent } from './contratos/contratos.component';
 import { MonitorContabilizacionComponent } from './monitor-contabilizacion/monitor-contabilizacion.component';
 import { ConsultaAlbaranesComponent } from './consulta-albaranes/consulta-albaranes.component';
+import { GestionAlbaranesComponent } from './gestion-albaranes/gestion-albaranes.component';
 
 export const routes: Routes = [
     { path: 'login', component: LoginComponent },
@@ -79,6 +80,7 @@ export const routes: Routes = [
     { path: 'contratos', component: ContratosComponent},
     { path: 'contabilizacion', component: MonitorContabilizacionComponent},
     { path: 'CAlbaranes', component: ConsultaAlbaranesComponent},
+    { path: 'Albaranes', component: GestionAlbaranesComponent},
     { path: '', redirectTo: '/login', pathMatch: 'full' },
 ];
 

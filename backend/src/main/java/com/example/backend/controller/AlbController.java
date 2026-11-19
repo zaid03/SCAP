@@ -312,11 +312,12 @@ public class AlbController {
         @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) @RequestParam(required = false) LocalDateTime toDate,
         @RequestParam(required = false) String estadoTipo,
         @RequestParam(defaultValue = "0") int page,
+        @RequestParam(defaultValue = "20") int size,
         @RequestParam(required = false) String sort,
         @RequestParam(defaultValue = "asc") String direction
     ) {
         try {
-            List<AlbaranConsultaDto> albaranes = albaranConsultaSearch.searchAlbaranConsulta(ent,main_search, centroDep, comprador, ejeSearch, fechaTipo, fromDate, toDate, estadoTipo, page, sort, direction);
+            List<AlbaranConsultaDto> albaranes = albaranConsultaSearch.searchAlbaranConsulta(ent,main_search, centroDep, comprador, ejeSearch, fechaTipo, fromDate, toDate, estadoTipo, page, size, sort, direction);
             if (albaranes.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }

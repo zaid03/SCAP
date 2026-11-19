@@ -205,6 +205,9 @@ export class DashboardComponent implements OnInit {
       case 'CAlbaranes':
         this.router.navigate(['/CAlbaranes']);
         break;
+      case 'Albaranes':
+        this.router.navigate(['/Albaranes']);
+        break;
       default:
         break;
     }
