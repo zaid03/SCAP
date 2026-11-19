@@ -546,6 +546,7 @@ export class GestionAlbaranesComponent {
 
   closeDetails() {
     this.selectedAlbaran = null;
+    this.articulos = [];
     this.limpiarMEssages();
   }
 
@@ -561,6 +562,62 @@ export class GestionAlbaranesComponent {
     }
     return '';
   }
+
+  tempFactura: any = {};
+  isUpdate: boolean = false;
+  backupData: any = [];
+  modificar() {
+    this.isUpdate = true;
+    this.backupData = this.selectedAlbaran ? { ...this.selectedAlbaran } : {};
+  }
+
+  cancelar() {
+    this.isUpdate = false;
+    this.tempFactura = { ...this.backupData };
+  }
+
+  updateSuccess() {
+    this.isUpdate = false;
+    this.allowToUpdate = false;
+  }
+
+  allowToUpdate: boolean = false;
+  isUpdateAllowed() {
+    if (this.allowToUpdate) {
+      this.updateAlbaran();
+    } else {
+      return;
+    }
+  }
+
+  isUpdatingAlbaran: boolean = false;
+  detailSuccess: String = '';
+  detailError: string = '';
+  updateAlbaran() {
+    this.limpiarMEssages();
+    const albnum = this.selectedAlbaran.albnum;
+
+    Object.assign(this.selectedAlbaran, this.tempFactura);
+
+    const payload = {
+      "ALBOBS": this.tempFactura.albobs
+    }
+
+    this.isUpdatingAlbaran = true;
+    this.http.patch(`${environment.backendUrl}/api/alb/update-albaran/${this.entcod}/${albnum}`, payload).subscribe({
+      next: (res) => {
+        this.isUpdatingAlbaran = false;
+        this.detailSuccess = "Albàran actualizado correctamente";
+        this.updateSuccess();
+      },
+      error: (err) => {
+        this.isUpdatingAlbaran = false;
+        this.detailError = err.error.error ?? err.error;
+      }
+    })
+  }
+
+  
 
   //subDetails functions
   detailView: 'Albaranes' | 'Contabilización' = 'Albaranes';
@@ -627,56 +684,27 @@ export class GestionAlbaranesComponent {
     }
   }
 
-  tempFactura: any = {};
-  isUpdate: boolean = false;
-  backupData: any = [];
-  modificar() {
-    this.isUpdate = true;
-    this.backupData = this.selectedAlbaran ? { ...this.selectedAlbaran } : {};
-  }
-
-  cancelar() {
-    this.isUpdate = false;
-    this.tempFactura = { ...this.backupData };
-  }
-
-  updateSuccess() {
-    this.isUpdate = false;
-    this.allowToUpdate = false;
-  }
-
-  allowToUpdate: boolean = false;
-  isUpdateAllowed() {
-    if (this.allowToUpdate) {
-      this.updateAlbaran();
-    } else {
-      return;
-    }
-  }
-
-  isUpdatingAlbaran: boolean = false;
-  detailSuccess: String = '';
-  detailError: string = '';
-  updateAlbaran() {
+  updateArticuloError: string = '';
+  updateArticulosSuccess: string = '';
+  updateArticulo(adenum: number, albref: string, albobs: string) {
     this.limpiarMEssages();
+    if (!adenum || (!albref && !albobs)) {return;}
     const albnum = this.selectedAlbaran.albnum;
 
-    Object.assign(this.selectedAlbaran, this.tempFactura);
-
     const payload = {
-      "ALBOBS": this.tempFactura.albobs
+      "ADEREF": albref,
+      "ADEOBS": albobs
     }
 
     this.isUpdatingAlbaran = true;
-    this.http.patch(`${environment.backendUrl}/api/alb/update-albaran/${this.entcod}/${albnum}`, payload).subscribe({
+    this.http.patch(`${environment.backendUrl}/api/ade/update-articulo/${this.entcod}/${albnum}/${adenum}`, payload).subscribe({
       next: (res) => {
         this.isUpdatingAlbaran = false;
-        this.detailSuccess = "Albàran actualizado correctamente";
-        this.updateSuccess();
+        this.updateArticulosSuccess = 'Artículo actualizado correctamente';
       },
       error: (err) => {
         this.isUpdatingAlbaran = false;
-        this.detailError = err.error.error ?? err.error;
+        this.updateArticuloError = err.error.error ?? err.error;
       }
     })
   }
@@ -688,5 +716,7 @@ export class GestionAlbaranesComponent {
   this.detailSuccess = '';
   this.detailError = '';
   this.articulosError = '';
+  this.updateArticuloError = '';
+  this.updateArticulosSuccess = '';
   }
 }

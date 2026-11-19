@@ -1,6 +1,7 @@
 package com.example.backend.dto;
 
 public interface articulosPorAlbaran {
+    String getADENUM();
     String getAFACOD(); 
     String getASUCOD(); 
     String getARTCOD();

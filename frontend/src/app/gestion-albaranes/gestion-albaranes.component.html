@@ -360,7 +360,7 @@
                             <button
                                 class="tab-like-btn p-style"
                                 (click)="showArticulos(selectedAlbaran)"
-                            > Servicios
+                            > Artículos
                             </button>
                         </div>
                     </div>
@@ -369,6 +369,8 @@
                             <div class="spinner"></div>
                             <span>Cargando</span>
                         </div>
+                        <h1 class="errorBtn" *ngIf="updateArticuloError">{{updateArticuloError}}</h1>
+                        <h1 class="successBtn" *ngIf="updateArticulosSuccess">{{updateArticulosSuccess}}</h1>
                         <table class="main-table sAT">
                             <thead>
                                 <tr>
@@ -392,19 +394,20 @@
                                     <td>
                                         <textarea 
                                             class="textArea-style satTextArea"
-                                            [value]="s.aderef"
+                                            [(ngModel)]="s.aderef"
                                         >
                                         </textarea>
                                     </td>
                                     <td>
                                         <textarea 
                                             class="textArea-style satTextArea"
-                                            [value]="s.adeobs"
+                                            [(ngModel)]="s.adeobs"
                                         >
                                         </textarea>
                                     <td>
                                         <button 
-                                            class="purple-btn" 
+                                            class="purple-btn"
+                                            (click)="updateArticulo(s.adenum, s.aderef, s.adeobs)" 
                                         >✔</button>
                                     </td>
                                 </tr>
