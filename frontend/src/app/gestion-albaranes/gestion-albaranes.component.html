@@ -9,7 +9,7 @@
     <div class="main-container" [class.blurred]="!sidebar.collapsed">
         <div class="title-menu">
             <div class="title-area">
-                <h2 class="margin-title">Gestion de albàranes</h2>  
+                <h2 class="margin-title">Gestión de albaranes</h2>  
             </div>
             <div class="search-holder">
                 <div class="search-container">
@@ -17,7 +17,7 @@
                         <input 
                             type="text" 
                             class="search-bar" 
-                            placeholder="Albàran" 
+                            placeholder="Albarán" 
                             name="search"
                             [(ngModel)]="main_search"
                         >
@@ -48,30 +48,30 @@
                             maxlength="4"
                         />  
                         <div class="more-search-options">
-                            <select [(ngModel)]="fechaTipo">
+                            <select [(ngModel)]="fechaTipo" class="select-style">
                                 <option value="" disabled selected>Fecha</option>
                                 <option value="registro">Registro</option>
-                                <option value="albaran">Albàran</option>
+                                <option value="albaran">Albarán</option>
                             </select>
                             Desde
                             <input 
                                 type="date" 
                                 name="desde" 
-                                class="fecha-dato" 
+                                class="input-style" 
                                 [(ngModel)] = "fromDate"
                             >   
                             Hasta
                             <input 
                                 type="date" 
                                 name="hasta" 
-                                class="fecha-dato" 
+                                class="input-style" 
                                 [(ngModel)] = "toDate"
                             > 
-                            <select [(ngModel)]="estadoTipo">
+                            <select [(ngModel)]="estadoTipo" class="select-style">
                                 <option value="facturado">Facturado</option>
                                 <option value="sin_factura">Sin factura</option>
                                 <option value="no_facturable">No facturable</option>
-                                <option value="">Todas</option>
+                                <option value="">Todos</option>
                             </select>
                         </div>
                     </div>
@@ -209,124 +209,122 @@
                     <h1 class="successBtn" *ngIf="detailSuccess">{{detailSuccess}}</h1>
                     <h1 class="errorBtn" *ngIf="detailError">{{detailError}}</h1>
                     <div class="detail-container">
-                        <table class="details-table">
-                            <table class="details-table dT">
-                                <tr>
-                                    <td>
-                                        <p class="p-style">Albarán:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.albnum}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Proveedor:</p>
-                                    </td>
-                                    <td>
-                                        <div class="cell-content">
-                                            <h1 class="h1-style">{{selectedAlbaran.ter.tercod}}</h1>
-                                            <h1 class="h1-style">{{selectedAlbaran.ter.ternom}}</h1>
-                                        </div>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Referencia Prov:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.albref}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Importe:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style align">{{selectedAlbaran.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p class="p-style">Tipo de contrato:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.conctp}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Procedimiento de contrato:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.concpr}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Criterio de puntuación:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.conccr}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Pedido:</p>
-                                    </td>
-                                    <td>
-                                        <div class="cell-content">
-                                            <h1 class="h1-style">{{selectedAlbaran.solnum}}</h1>
-                                            <h1 class="h1-style">-</h1>
-                                            <h1 class="h1-style">{{selectedAlbaran.solsub}}</h1>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p class="p-style">Comprador:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.albcom}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Fecha Reg.:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.albfre | date:'dd-MM-yyyy'}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Fecha Alb:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.albdat | date:'dd-MM-yyyy'}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Factura:</p>
-                                    </td>
-                                    <td>
-                                        <div class="cell-content">
-                                            <h1 class="h1-style">{{eje}}</h1>
-                                            <h1 class="h1-style">-</h1>
-                                            <h1 class="h1-style">{{selectedAlbaran.facnum}}</h1>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>
-                                        <p class="p-style">Destino:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{selectedAlbaran.depcod}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Estado:</p>
-                                    </td>
-                                    <td>
-                                        <h1 class="h1-style">{{facturaEstado(selectedAlbaran.facnum)}}</h1>
-                                    </td>
-                                    <td>
-                                        <p class="p-style">Observaciones:</p>
-                                    </td>
-                                    <td colspan="3">
-                                        <textarea 
-                                            class="textArea-style adjustArea"
-                                            [(ngModel)]="tempFactura.albobs"
-                                            [disabled]="!isUpdate" 
-                                            (input)="allowToUpdate = true"
-                                        >
-                                        </textarea>
-                                    </td>
-                                </tr>
-                            </table>
+                        <table class="details-table dT">
+                            <tr>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Albarán:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.albnum}}</h1>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Proveedor:</p>
+                                </td>
+                                <td class="sizeWidthSec">
+                                    <div class="cell-content">
+                                        <h1 class="h1-style">{{selectedAlbaran.ter.tercod}}</h1>
+                                        <h1 class="h1-style">{{selectedAlbaran.ter.ternom}}</h1>
+                                    </div>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Referencia Prov:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.albref}}</h1>
+                                </td>
+                                <td class="sizeWidth secClass">
+                                    <p class="p-style">Importe:</p>
+                                </td>
+                                <td class="alignContent">
+                                    <h1 class="h1-style">{{selectedAlbaran.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</h1>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Tipo de contrato:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.conctp}}</h1>
+                                </td>
+                                <td class="sizeWidthSpec">
+                                    <p class="p-style">Procedimiento de contrato:</p>
+                                </td>
+                                <td class="sizeWidthSec">
+                                    <h1 class="h1-style">{{selectedAlbaran.concpr}}</h1>
+                                </td>
+                                <td class="sizeWidthSpec">
+                                    <p class="p-style">Criterio de puntuación:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.conccr}}</h1>
+                                </td>
+                                <td class="sizeWidth secClass">
+                                    <p class="p-style">Pedido:</p>
+                                </td>
+                                <td class="alignContent">
+                                    <div class="cell-content">
+                                        <h1 class="h1-style">{{selectedAlbaran.solnum}}</h1>
+                                        <h1 class="h1-style">-</h1>
+                                        <h1 class="h1-style">{{selectedAlbaran.solsub}}</h1>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Comprador:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.albcom}}</h1>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Fecha Reg.:</p>
+                                </td>
+                                <td class="sizeWidthSec">
+                                    <h1 class="h1-style">{{selectedAlbaran.albfre | date:'dd-MM-yyyy'}}</h1>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Fecha Alb:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.albdat | date:'dd-MM-yyyy'}}</h1>
+                                </td>
+                                <td class="sizeWidth secClass">
+                                    <p class="p-style">Factura:</p>
+                                </td>
+                                <td class="alignContent">
+                                    <div class="cell-content">
+                                        <h1 class="h1-style">{{eje}}</h1>
+                                        <h1 class="h1-style">-</h1>
+                                        <h1 class="h1-style">{{selectedAlbaran.facnum}}</h1>
+                                    </div>
+                                </td>
+                            </tr>
+                            <tr>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Destino:</p>
+                                </td>
+                                <td>
+                                    <h1 class="h1-style">{{selectedAlbaran.depcod}}</h1>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Estado:</p>
+                                </td>
+                                <td class="sizeWidthSec">
+                                    <h1 class="h1-style">{{facturaEstado(selectedAlbaran.facnum)}}</h1>
+                                </td>
+                                <td class="sizeWidth">
+                                    <p class="p-style">Observaciones:</p>
+                                </td>
+                                <td colspan="3" class="test">
+                                    <textarea 
+                                        class="textArea-style adjustArea"
+                                        [(ngModel)]="tempFactura.albobs"
+                                        [disabled]="!isUpdate" 
+                                        (input)="allowToUpdate = true"
+                                    >
+                                    </textarea>
+                                </td>
+                            </tr>
                         </table>
                     </div>
                     <div class="btns">
