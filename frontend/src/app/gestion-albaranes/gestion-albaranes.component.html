@@ -199,8 +199,8 @@
                         <button 
                             class="red-btn" 
                             (click)="closeDetails()"
-                            [disabled]="isUpdate"
-                            [class.disabled-btn]="isUpdate"
+                            [disabled]="isUpdate "
+                            [class.disabled-btn]="isUpdate "
                         >✖</button>
                     </div>
                     <div *ngIf="isUpdatingAlbaran" class="loading-message">
@@ -312,7 +312,15 @@
                                     <p class="p-style">Estado:</p>
                                 </td>
                                 <td class="sizeWidthSec">
-                                    <h1 class="h1-style">{{facturaEstado(selectedAlbaran.facnum)}}</h1>
+                                    <div class="cell-content conSpec">
+                                        <h1 class="h1-style">{{facturaEstado(selectedAlbaran.facnum)}}</h1>
+                                        <button 
+                                            class="purple-btn" 
+                                            [disabled]="isUpdate || isDisabled(selectedAlbaran.facnum)" 
+                                            [class.disabled-btn]="isUpdate || isDisabled(selectedAlbaran.facnum)"
+                                            (click)="factorizacion(selectedAlbaran.facnum)"
+                                        >Cambiar ESTADO</button>
+                                    </div>
                                 </td>
                                 <td class="sizeWidth">
                                     <p class="p-style">Observaciones:</p>
@@ -330,12 +338,6 @@
                         </table>
                     </div>
                     <div class="btns">
-                        <button 
-                            class="purple-btn" 
-                            [disabled]="isUpdate || isDisabled(selectedAlbaran.facnum)" 
-	                        [class.disabled-btn]="isUpdate || isDisabled(selectedAlbaran.facnum)"
-                            (click)="factorizacion(selectedAlbaran.facnum)"
-                        >Facturacíon</button>
                         <button 
                             class="red-btn"
                             *ngIf="isUpdate" 
@@ -385,30 +387,43 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr *ngFor="let s of paginatedArticulos">
+                                <tr *ngFor="let s of paginatedArticulos" (click)="changeArticuloRow(s)">
                                     <td>{{s.afacod}}</td>
                                     <td>{{s.asucod}}</td>
                                     <td>{{s.artcod}}</td>
                                     <td>{{s.adepre | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{s.adeuni}}</td>
                                     <td>
-                                        <textarea 
+                                        <textarea
                                             class="textArea-style satTextArea"
                                             [(ngModel)]="s.aderef"
-                                        >
-                                        </textarea>
+                                            (focus)="activeArticulo = s"
+                                            (ngModelChange)="markArticuloChanged(s)"
+                                            (blur)="saveArticuloIfChanged(s)"
+                                        ></textarea>
                                     </td>
                                     <td>
-                                        <textarea 
+                                        <textarea
                                             class="textArea-style satTextArea"
                                             [(ngModel)]="s.adeobs"
-                                        >
-                                        </textarea>
-                                    <td>
-                                        <button 
+                                            (focus)="activeArticulo = s"
+                                            (ngModelChange)="markArticuloChanged(s)"
+                                            (blur)="saveArticuloIfChanged(s)"
+                                        ></textarea>
+                                    </td>
+                                    <td class="space">
+                                        <button
                                             class="purple-btn"
-                                            (click)="updateArticulo(s.adenum, s.aderef, s.adeobs)" 
+                                            (click)="updateArticulo(s.adenum, s.aderef, s.adeobs)"
+                                            title="Guardar"
                                         >✔</button>
+                                        <button
+                                            class="red-btn"
+                                            [disabled]="!s.hasChanges"
+                                            [ngClass]="{'disabled-btn': !s.hasChanges}"
+                                            (click)="cancelarArticulo(s)"
+                                            title="Cancelar"
+                                        >✖</button>
                                     </td>
                                 </tr>
                             </tbody>

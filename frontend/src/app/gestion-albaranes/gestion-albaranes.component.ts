@@ -707,7 +707,12 @@ export class GestionAlbaranesComponent {
     this.http.get<any>(`${environment.backendUrl}/api/ade/fetch-articulos/${this.entcod}/${albnum}`).subscribe({
       next: (res) => {
         this.isLoadingDetails = false;
-        this.articulos = res;
+        this.articulos = res.map((article: any) => ({
+          ...article,
+          aderefBackup: article.aderef ?? '',
+          adeobsBackup: article.adeobs ?? '',
+          hasChanges: false
+        }));
       },
       error: (err) => {
         this.isLoadingDetails = false;
@@ -763,17 +768,52 @@ export class GestionAlbaranesComponent {
       "ADEOBS": albobs
     }
 
+
+    this.savingArticuloAdenum = adenum;
     this.isUpdatingAlbaran = true;
     this.http.patch(`${environment.backendUrl}/api/ade/update-articulo/${this.entcod}/${albnum}/${adenum}`, payload).subscribe({
       next: (res) => {
         this.isUpdatingAlbaran = false;
+        this.isUpdatingAlbaran = false;
+
         this.updateArticulosSuccess = 'Artículo actualizado correctamente';
+
+        const article = this.articulos.find((item: any) => item.adenum === adenum);
+
+        if (article) {
+          article.aderefBackup = albref;
+          article.adeobsBackup = albobs;
+          article.hasChanges = false;
+        }
       },
       error: (err) => {
         this.isUpdatingAlbaran = false;
         this.updateArticuloError = err.error.error ?? err.error;
       }
     })
+  }
+
+  aderefBackup: string = '';
+  adeobsBackup: string = '';
+  activeArticulo: any = null;
+  savingArticuloAdenum: number | null = null;
+  markArticuloChanged(article: any): void {
+    article.hasChanges = article.aderef !== article.aderefBackup || article.adeobs !== article.adeobsBackup;
+  }
+
+  changeArticuloRow(article: any): void {
+    if (this.activeArticulo && this.activeArticulo !== article) {this.saveArticuloIfChanged(this.activeArticulo);}
+  }
+
+  saveArticuloIfChanged(article: any): void {
+    if (!article.hasChanges || this.savingArticuloAdenum === article.adenum) {return;}
+    this.updateArticulo(article.adenum, article.aderef, article.adeobs);  
+  }
+
+  cancelarArticulo(article: any): void {
+    article.aderef = article.aderefBackup;
+    article.adeobs = article.adeobsBackup;
+    article.hasChanges = false;
   }
 
   //misc

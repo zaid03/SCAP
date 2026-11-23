@@ -22,6 +22,9 @@
 .satTextArea {width: 180px; max-width: 200px !important;}
 .sAT td:last-child {text-align: center;}
 .alignContent {display: flex; flex-direction: column; align-items: flex-end; width: 60%;}
+.space {display: flex; justify-content: center; gap: 10px;}
+.conSpec {display: flex; align-items: center; 
+gap: 20px;}
 /* main table and details*/
 /* facturacion grid */
 .btn-space {margin-right: 10px; margin-top: 10px;}
