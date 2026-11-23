@@ -54,9 +54,11 @@ public class AlbaranConsultaSearch {
             alb.getCONCTP(),
             alb.getCONCPR(),
             alb.getCONCCR(),
+            alb.getEJE(),
             alb.getTer() == null ? null : new TerDto(
                 alb.getTer().getTERCOD(),
-                alb.getTer().getTERNOM()
+                alb.getTer().getTERNOM(),
+                alb.getTer().getTERNIF()
             )
         );
     }

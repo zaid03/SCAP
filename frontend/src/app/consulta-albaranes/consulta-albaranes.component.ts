@@ -84,7 +84,7 @@ export class ConsultaAlbaranesComponent {
   fetchAlbaranes() {
     this.limpiarMEssages();
 
-    let params = `ent=${this.entcod}&page=${this.page}`;
+    let params = `ent=${this.entcod}&page=${this.page}&centroDep=${this.centroDep}&estadoTipo=${this.estadoTipo}`;
 
     if (this.isSearching) {
       if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;
@@ -147,7 +147,7 @@ export class ConsultaAlbaranesComponent {
 
   totalPages: number = 0;
   fetchItemsAmount() {
-    let params = `ent=${this.entcod}`;
+     let params = `ent=${this.entcod}&centroDep=${this.centroDep}&estadoTipo=${this.estadoTipo}`;
 
     if (this.isSearching) {
       if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;

@@ -170,7 +170,7 @@
                         <td>{{ a.depcod }}</td>
                         <td>{{ a.albcom }}</td>
                         <td>{{ a.solnum +"-" + a.solsub }}</td>
-                        <td>{{ eje +"-" + a.facnum }}</td>
+                        <td>{{ a.EJE == null ? a.facnum : a.EJE + '-' + a.facnum }}</td>
                     </tr>
                 </tbody>
             </table>
@@ -214,6 +214,7 @@
                                     <div class="cell-content">
                                         <h1 class="h1-style">{{selectedAlbaran.ter.tercod}}</h1>
                                         <h1 class="h1-style">{{selectedAlbaran.ter.ternom}}</h1>
+                                        <h1 class="h1-style">{{selectedAlbaran.ter.ternif}}</h1>
                                     </div>
                                 </td>
                                 <td class="sizeWidth">

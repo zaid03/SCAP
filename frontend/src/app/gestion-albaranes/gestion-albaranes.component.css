@@ -31,7 +31,7 @@
 @media (min-width: 1601px) {
     .sizeWidth {width: 10%;}
     .sizeWidthSpec {width: 14% !important;}
-    .sizeWidthSec {width: 15%;}
+    .sizeWidthSec {min-width: 22%; width: 25% !important;}
     .secClass {width: 5% !important;}
     .adjustArea {width: 87% !important;}
 }

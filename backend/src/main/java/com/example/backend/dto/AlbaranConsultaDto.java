@@ -17,11 +17,13 @@ public record AlbaranConsultaDto (
     String conctp,
     String concpr,
     String conccr,
+    String EJE,
     TerDto ter
 ) {
 
     public record TerDto(
         Integer tercod,
-        String ternom
+        String ternom,
+        String ternif
     ) {}
 }
