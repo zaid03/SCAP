@@ -703,16 +703,24 @@ export class GestionAlbaranesComponent {
   articulos: any = [];
   pageServices: number = 0;
   fetchArticulos(albnum: number) {
+    const artcod = '';
+    const afacod = '';
+    const asucod = '';
     this.isLoadingDetails = true;
     this.http.get<any>(`${environment.backendUrl}/api/ade/fetch-articulos/${this.entcod}/${albnum}`).subscribe({
       next: (res) => {
         this.isLoadingDetails = false;
-        this.articulos = res.map((article: any) => ({
+        this.articulos = res.map((article: any, index: number) => ({
           ...article,
           aderefBackup: article.aderef ?? '',
           adeobsBackup: article.adeobs ?? '',
-          hasChanges: false
+          hasChanges: false,
+          description: ''
         }));
+
+        this.articulos.forEach((article: any) => {
+          this.getDescription(article);
+        });
       },
       error: (err) => {
         this.isLoadingDetails = false;
@@ -721,39 +729,27 @@ export class GestionAlbaranesComponent {
       }
     })
   }
-  get paginatedArticulos(): any[] {
-    const start = this.pageServices * this.pageSize;
+  get paginatedArticulos(): any[] {const start = this.pageServices * this.pageSize;
     return this.articulos.slice(start, start + this.pageSize);
   }
-  get totalPagesServices(): number {
-    return Math.max(
-      1,
-      Math.ceil((this.articulos?.length ?? 0) / this.pageSize)
-    );
-  }
-
-  prevPageService(): void {
-    if (this.pageServices > 0) {
-      this.pageServices--;
-    }
-  }
-
-  nextPageService(): void {
-    if (this.pageServices < this.totalPagesServices - 1) {
-      this.pageServices++;
-    }
-  }
-
+  get totalPagesServices(): number {return Math.max(1, Math.ceil((this.articulos?.length ?? 0) / this.pageSize));}
+  prevPageService(): void {if (this.pageServices > 0) {this.pageServices--;}}
+  nextPageService(): void {if (this.pageServices < this.totalPagesServices - 1) {this.pageServices++;}}
   goToPageService(event: any): void {
     const inputPage = Number(event.target.value);
+    if (Number.isInteger(inputPage) && inputPage >= 1 && inputPage <= this.totalPagesServices) {this.pageServices = inputPage - 1;}
+  }
 
-    if (
-      Number.isInteger(inputPage) &&
-      inputPage >= 1 &&
-      inputPage <= this.totalPagesServices
-    ) {
-      this.pageServices = inputPage - 1;
-    }
+  getDescription(article: any) {
+    const afacod = String(article.afacod ?? '').trim();
+    const asucod = String(article.asucod ?? '').trim();
+    const artcod = String(article.artcod ?? '').trim();
+
+    this.http.get<any[]>(`${environment.backendUrl}/api/art/art-name/${this.entcod}/${afacod}/${asucod}/${artcod}`).subscribe({
+      next: (response) => {
+        article.description = String(response[0]?.artdes ?? '').trim();
+      }
+    });
   }
 
   updateArticuloError: string = '';
@@ -767,7 +763,6 @@ export class GestionAlbaranesComponent {
       "ADEREF": albref,
       "ADEOBS": albobs
     }
-
 
     this.savingArticuloAdenum = adenum;
     this.isUpdatingAlbaran = true;
@@ -802,12 +797,16 @@ export class GestionAlbaranesComponent {
   }
 
   changeArticuloRow(article: any): void {
-    if (this.activeArticulo && this.activeArticulo !== article) {this.saveArticuloIfChanged(this.activeArticulo);}
+    if (this.activeArticulo === article) {return;}
+    const previousArticulo = this.activeArticulo;
+    this.activeArticulo = article;
+    if (previousArticulo) {this.saveArticuloIfChanged(previousArticulo);}
   }
 
   saveArticuloIfChanged(article: any): void {
-    if (!article.hasChanges || this.savingArticuloAdenum === article.adenum) {return;}
+    if (!article.hasChanges || this.savingArticuloAdenum === article.adenum) {this.savingArticuloAdenum = null; return;}
     this.updateArticulo(article.adenum, article.aderef, article.adeobs);  
+    this.savingArticuloAdenum = null;
   }
 
   cancelarArticulo(article: any): void {

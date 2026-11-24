@@ -14,10 +14,10 @@
 /* main table and details*/
 .ca td:nth-child(6),
 .align,
-.sAT td:nth-child(4),
-.sAT td:nth-child(5) {text-align: right;}
+.sAT td:nth-child(5),
+.sAT td:nth-child(6) {text-align: right;}
 .adjustArea {width: 85%; max-width: 100%; height: 40px; box-sizing: border-box;}
-.sAT th:nth-child(6),
+.sAT th:nth-child(8),
 .sAT th:nth-child(7) {width: 18%;}
 .satTextArea {width: 180px; max-width: 200px !important;}
 .sAT td:last-child {text-align: center;}

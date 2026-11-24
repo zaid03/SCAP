@@ -379,6 +379,7 @@
                                     <th>Familia</th>
                                     <th>Subfamilia</th>
                                     <th>Artículo</th>
+                                    <th>Descripción</th>
                                     <th>Precio</th>
                                     <th>Unidades</th>
                                     <th>Referencia</th>
@@ -391,24 +392,21 @@
                                     <td>{{s.afacod}}</td>
                                     <td>{{s.asucod}}</td>
                                     <td>{{s.artcod}}</td>
+                                    <td>{{s.description}}</td>
                                     <td>{{s.adepre | currency:'EUR':'symbol':'1.2-2':'es-ES'}}</td>
                                     <td>{{s.adeuni}}</td>
                                     <td>
                                         <textarea
                                             class="textArea-style satTextArea"
                                             [(ngModel)]="s.aderef"
-                                            (focus)="activeArticulo = s"
                                             (ngModelChange)="markArticuloChanged(s)"
-                                            (blur)="saveArticuloIfChanged(s)"
                                         ></textarea>
                                     </td>
                                     <td>
                                         <textarea
                                             class="textArea-style satTextArea"
                                             [(ngModel)]="s.adeobs"
-                                            (focus)="activeArticulo = s"
                                             (ngModelChange)="markArticuloChanged(s)"
-                                            (blur)="saveArticuloIfChanged(s)"
                                         ></textarea>
                                     </td>
                                     <td class="space">
