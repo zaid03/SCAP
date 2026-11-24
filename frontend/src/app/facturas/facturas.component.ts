@@ -1135,6 +1135,7 @@ export class FacturasComponent {
     }
   }
 
+  addAlabaranError: string = '';
   addAlbaranes(payload: any) {
     const facnum = this.selectedFacturas.facnum;
     this.isAddingAlbaranes = true;
@@ -1149,7 +1150,7 @@ export class FacturasComponent {
       },
       error: (err) => {
         this.isAddingAlbaranes = false;
-        this.albaranesError = err.error.error ?? err.error;
+        this.addAlabaranError = err.error.error ?? err.error;
       }
     })
   }
@@ -1646,5 +1647,6 @@ export class FacturasComponent {
     this.ADGridMessageError = '';
     this.ADMessageSuccess = '';
     this.ADMessageError = '';
+    this.addAlabaranError = '';
   }
 }

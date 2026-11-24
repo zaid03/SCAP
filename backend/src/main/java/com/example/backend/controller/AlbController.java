@@ -5,12 +5,9 @@ import com.example.backend.dto.albFacturaDto;
 import com.example.backend.dto.AsuEcoImpProjection;
 
 import org.springframework.dao.DataAccessException;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 
 import com.example.backend.sqlserver2.model.Alb;
 import com.example.backend.sqlserver2.model.AlbId;
@@ -31,7 +28,6 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.Optional;
-import java.util.Map;
 
 import jakarta.transaction.Transactional;
 
@@ -51,7 +47,6 @@ public class AlbController {
 
     private static final String SIN_RESULTADO = "Sin resultado";
     private static final String ERROR = "Error :";
-    private static final int PAGE_SIZE = 20;
 
     //fetch albaranes for facturas
     @GetMapping("/albaranes/{ent}/{eje}/{facnum}")
@@ -211,28 +206,20 @@ public class AlbController {
                     facRepository.save(factura);
                 }
 
-                Optional<AsuEcoImpProjection> resultOpt = adeRepository.findSumByEntAndAlbnum(albData.ENT() , albData.ALBNUM());
+                List<AsuEcoImpProjection> results = adeRepository.findSumByEntAndAlbnum(albData.ENT(), albData.ALBNUM());
 
-                if (resultOpt.isPresent()) {
-                    AsuEcoImpProjection result = resultOpt.get();
-                    Optional<Fde> applicacionOptio = fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(
-                        albData.ENT(), 
-                        albData.EJE(), 
-                        albData.FACNUM(),
-                        result.getASUECO()
-                    );
+                for (AsuEcoImpProjection result : results) {
+                    Optional<Fde> aplicacionOpt = fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(albData.ENT(), albData.EJE(), albData.FACNUM(), result.getASUECO());
 
-                    if (applicacionOptio.isPresent()) {
-                        Fde applicacion = applicacionOptio.get();
-                        Double currentFDEIMP = applicacion.getFDEIMP() != null
-                            ? applicacion.getFDEIMP()
-                            : 0.0;
-                        Double albaranIMP = result.getIMP() != null
-                            ? result.getIMP()
-                            : 0.0;
-                        Double newFDEIMP = currentFDEIMP + albaranIMP;
-                        applicacion.setFDEIMP(newFDEIMP);
-                        fdeRepository.save(applicacion);
+                    if (aplicacionOpt.isPresent()) {
+                        Fde aplicacion = aplicacionOpt.get();
+
+                        Double current = aplicacion.getFDEIMP() != null ? aplicacion.getFDEIMP() : 0.0;
+
+                        Double amount = result.getIMP() != null ? result.getIMP() : 0.0;
+
+                        aplicacion.setFDEIMP(current + amount);
+                        fdeRepository.save(aplicacion);
                     }
                 }
             }
@@ -272,21 +259,21 @@ public class AlbController {
                 facRepository.save(factura);
             }
 
-            Optional<AsuEcoImpProjection> resultOpt = adeRepository.findSumByEntAndAlbnum(payload.ENT() , payload.ALBNUM());
-            if (resultOpt.isPresent()) {
-                AsuEcoImpProjection result = resultOpt.get();
-                Optional<Fde> applicacionOptio = fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(
-                    payload.ENT(), 
-                    payload.EJE(), 
-                    payload.FACNUM(),
-                    result.getASUECO()
-                );
+            List<AsuEcoImpProjection> results = adeRepository.findSumByEntAndAlbnum(payload.ENT(), payload.ALBNUM());
 
-                if (applicacionOptio.isPresent()) {
-                    Fde applicacion = applicacionOptio.get();
-                    Double newFDEIMP = applicacion.getFDEIMP() - result.getIMP();
-                    applicacion.setFDEIMP(newFDEIMP);
-                    fdeRepository.save(applicacion);
+            for (AsuEcoImpProjection result : results) {
+                Optional<Fde> aplicacionOpt =
+                    fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(payload.ENT(), payload.EJE(), payload.FACNUM(), result.getASUECO());
+
+                if (aplicacionOpt.isPresent()) {
+                    Fde aplicacion = aplicacionOpt.get();
+
+                    Double current = aplicacion.getFDEIMP() != null ? aplicacion.getFDEIMP() : 0.0;
+
+                    Double amount = result.getIMP() != null ? result.getIMP() : 0.0;
+
+                    aplicacion.setFDEIMP(current - amount);
+                    fdeRepository.save(aplicacion);
                 }
             }
 

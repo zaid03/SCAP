@@ -22,7 +22,7 @@ public interface AdeRepository extends JpaRepository<Ade, AdeId>{
         WHERE a.ENT = :ent AND a.ALBNUM = :albnum
         GROUP BY s.ASUECO
         """, nativeQuery = true)
-    Optional<AsuEcoImpProjection> findSumByEntAndAlbnum(@Param("ent") Integer ent, @Param("albnum") Integer albnum);
+    List<AsuEcoImpProjection> findSumByEntAndAlbnum(@Param("ent") Integer ent, @Param("albnum") Integer albnum);
 
     //selecting articulos for an albaran
     List<articulosPorAlbaran> findByENTAndALBNUM(Integer ent, Integer albnum);
