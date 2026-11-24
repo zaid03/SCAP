@@ -288,7 +288,7 @@ public class AlbControllerTest {
         com.example.backend.dto.AsuEcoImpProjection projection = mock(com.example.backend.dto.AsuEcoImpProjection.class);
         when(projection.getASUECO()).thenReturn("ECO1");
         when(projection.getIMP()).thenReturn(50.0);
-        when(adeRepository.findSumByEntAndAlbnum(1, 100)).thenReturn(Optional.of(projection));
+        when(adeRepository.findSumByEntAndAlbnum(1, 100)).thenReturn(List.of(projection));
         when(fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(1, "E1", 200, "ECO1")).thenReturn(Optional.of(fde));
 
         Map<String, Object> payload = Map.of(
@@ -324,7 +324,7 @@ public class AlbControllerTest {
         com.example.backend.dto.AsuEcoImpProjection projection = mock(com.example.backend.dto.AsuEcoImpProjection.class);
         when(projection.getASUECO()).thenReturn("ECO1");
         when(projection.getIMP()).thenReturn(50.0);
-        when(adeRepository.findSumByEntAndAlbnum(1, 100)).thenReturn(Optional.of(projection));
+        when(adeRepository.findSumByEntAndAlbnum(1, 100)).thenReturn(List.of(projection));
         when(fdeRepository.findByENTAndEJEAndFACNUMAndFDEECO(1, "E1", 200, "ECO1")).thenReturn(Optional.of(fde));
 
         Map<String, Object> payload = Map.of(
@@ -351,7 +351,6 @@ public class AlbControllerTest {
 
         when(albRepository.findById(any())).thenReturn(Optional.of(alb));
         when(facRepository.findById(any())).thenReturn(Optional.of(fac));
-        when(adeRepository.findSumByEntAndAlbnum(1, 100)).thenReturn(Optional.empty());
 
         Map<String, Object> payload = Map.of(
             "ENT", 1,
