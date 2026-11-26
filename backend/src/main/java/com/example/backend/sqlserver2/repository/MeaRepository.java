@@ -16,7 +16,7 @@ import com.example.backend.sqlserver2.model.MeaId;
 @Repository
 public interface MeaRepository extends JpaRepository<Mea, MeaId> {
     //selecting articulos por almacen and exporting
-    List<ArticulosPorAlmcenProjection> findByENT(Integer ent, Pageable pageable);
+    List<ArticulosPorAlmcenProjection> findByENTAndArt_ARTBLO(Integer ent, Integer artblo, Pageable pageable);
     List<ArticulosPorAlmcenProjection> findAllByENT(Integer ent);
 
     //getting pagination number
@@ -62,20 +62,19 @@ public interface MeaRepository extends JpaRepository<Mea, MeaId> {
                 OR art.ARTREF = ?2
             ))
             AND (?3 IS NULL OR afa.AFACOD = ?3)
-            AND (?4 IS NULL OR asu.ASUCOD = ?4)
             AND (
-                ?5 = 'Todos'
-                OR (?5 = 'No bloqueados' AND art.ARTBLO <> 0)
-                OR (?5 = 'Bloqueados' AND art.ARTBLO = 0)
+                ?4 = 'Todos'
+                OR (?4 = 'No bloqueados' AND art.ARTBLO <> 0)
+                OR (?4 = 'Bloqueados' AND art.ARTBLO = 0)
             )
-            AND (?6 IS NULL OR EXISTS (
+            AND (?5 IS NULL OR EXISTS (
                 SELECT NULL FROM dbo.MEA ST1
                 INNER JOIN dbo.MAG ST2 ON ST2.ENT = ST1.ENT AND ST2.MAGCOD = ST1.MAGCOD
                 WHERE art.ENT = ST1.ENT
                   AND art.AFACOD = ST1.AFACOD
                   AND art.ASUCOD = ST1.ASUCOD
                   AND art.ARTCOD = ST1.ARTCOD
-                  AND ST2.DEPCOD = ?6
+                  AND ST2.DEPCOD = ?5
             ))
         """, 
         nativeQuery = true)
@@ -83,7 +82,6 @@ public interface MeaRepository extends JpaRepository<Mea, MeaId> {
         Integer ent,
         String mainSearch,
         String afaCod,
-        String asuCod,
         String bloqueado,
         String almacen
     );

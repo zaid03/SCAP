@@ -46,7 +46,7 @@ public class MeaController {
         @RequestParam(defaultValue = "0") int page
     ) {
         try {
-            List<ArticulosPorAlmcenProjection> Almacenes = meaRepository.findByENT(ent, PageRequest.of(page, PAGE_SIZE));
+            List<ArticulosPorAlmcenProjection> Almacenes = meaRepository.findByENTAndArt_ARTBLO(ent, 0, PageRequest.of(page, PAGE_SIZE));
             if (Almacenes.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
@@ -95,7 +95,6 @@ public class MeaController {
         @PathVariable Integer ent,
         @RequestParam(required = false) String mainSearch,
         @RequestParam(required = false) String afaCod,
-        @RequestParam(required = false) String asuCod,
         @RequestParam(defaultValue = "Todos") String bloqueado,
         @RequestParam(required = false) String almacen
     ) {
@@ -104,7 +103,6 @@ public class MeaController {
                 ent,
                 mainSearch,
                 afaCod,
-                asuCod,
                 bloqueado,
                 almacen
             );

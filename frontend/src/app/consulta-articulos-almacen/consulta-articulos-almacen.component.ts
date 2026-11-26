@@ -362,7 +362,6 @@ export class ConsultaArticulosAlmacenComponent {
   selectedAlmacenNombre: string = '';
   mainSearch: string = '';
   familia: string = '';
-  subfamilia: string = '';
   bloqueado:  'No bloqueados' | 'Bloqueados' | 'Todos' = 'No bloqueados';
   search() {
     this.isLoading = true;
@@ -378,9 +377,6 @@ export class ConsultaArticulosAlmacenComponent {
     }
     if (this.familia?.trim()) {
       params = params.set('afaCod', this.familia.trim());
-    }
-    if (this.subfamilia?.trim()) {
-      params = params.set('asuCod', this.subfamilia.trim());
     }
     if (this.bloqueado) {
       params = params.set('bloqueado', this.bloqueado);
@@ -408,7 +404,6 @@ export class ConsultaArticulosAlmacenComponent {
     this.limpiarMessages();
     this.mainSearch = '';
     this.familia = '';
-    this.subfamilia = '';
     this.bloqueado = 'No bloqueados';
     this.is_main_fetch = true;
     this.is_search = false;
