@@ -76,7 +76,7 @@ public class ArtController {
         @RequestParam(defaultValue = "0") int page
     ) {
         try {
-            List<ArticleProjection> articles = artRepository.findByENT(ent, PageRequest.of(page, PAGE_SIZE));
+            List<ArticleProjection> articles = artRepository.findByENTAndARTBLO(ent, 0, PageRequest.of(page, PAGE_SIZE));
             if (articles.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }
@@ -124,11 +124,10 @@ public class ArtController {
         @PathVariable Integer ent,
         @RequestParam(required = false) String search,
         @RequestParam(required = false) String afacod,
-        @RequestParam(required = false) String asucod,
         @RequestParam(defaultValue = "todos") String bloqueado
     ) {
         try {
-            List<ArticleProjection> articles = artRepository.searchArticles(ent, search, afacod, asucod, bloqueado);
+            List<ArticleProjection> articles = artRepository.searchArticles(ent, search, afacod, bloqueado);
             if (articles.isEmpty()) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(SIN_RESULTADO);
             }

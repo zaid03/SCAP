@@ -80,6 +80,7 @@ export class MantinimientoArticulosAlmacenComponent {
         this.updatePagination();
       },
       error: (err) => {
+        this.almacenes = [];
         this.isLoading = false;
         this.almacenError = err.error.error || err.error;
       }
@@ -334,6 +335,7 @@ export class MantinimientoArticulosAlmacenComponent {
         this.updatePagination();
       },
       error: (err) => {
+        this.almacenes = [];
         this.isLoading = false;
         this.almacenError = err.error.error || err.error;
       }
@@ -346,6 +348,9 @@ export class MantinimientoArticulosAlmacenComponent {
     this.subfamilia = '';
     this.bloqueado = 'No bloqueados';
     this.isSearching = false;
+    this.page = 0;
+    this.fetchAlmacenes();
+    this.getPagination();
   }
 
   //detail grid functions

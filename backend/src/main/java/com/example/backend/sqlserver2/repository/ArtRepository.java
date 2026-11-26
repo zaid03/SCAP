@@ -88,11 +88,10 @@ public interface ArtRepository extends JpaRepository<Art, ArtId> {
             "OR (LEN(:search) < 31 AND R.ARTREF = :search) " +
         ") " +
         "AND (:afacod IS NULL OR :afacod = '' OR R.AFACOD = :afacod) " +
-        "AND (:asucod IS NULL OR :asucod = '' OR R.ASUCOD = :asucod) " +
         "AND (" +
             ":bloqueado = 'todos' " +
-            "OR (:bloqueado = 'bloqueado' AND R.ARTBLO = 0) " +
-            "OR (:bloqueado = 'nobloqueado' AND R.ARTBLO <> 0) " +
+            "OR (:bloqueado = 'bloqueado' AND R.ARTBLO <> 0) " +
+            "OR (:bloqueado = 'nobloqueado' AND R.ARTBLO = 0) " +
         ")", 
         nativeQuery = true
     )
@@ -100,7 +99,6 @@ public interface ArtRepository extends JpaRepository<Art, ArtId> {
         @Param("ent") Integer ent,
         @Param("search") String search,
         @Param("afacod") String afacod,
-        @Param("asucod") String asucod,
         @Param("bloqueado") String bloqueado
     );
 
@@ -111,6 +109,6 @@ public interface ArtRepository extends JpaRepository<Art, ArtId> {
     List<AnaliticaArticulosProjectin> findByENT(Integer ent);
 
     //main fetch for consulta general de articulos and exporting data
-    List<ArticleProjection> findByENT(Integer ent, Pageable pageable);
+    List<ArticleProjection> findByENTAndARTBLO(Integer ent, Integer artblo, Pageable pageable);
     List<ArticleProjection> findAllByENT(Integer ent);
 }

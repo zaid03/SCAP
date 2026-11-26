@@ -344,7 +344,6 @@ export class ConsultaGeneralArticulosComponent {
 
   search: string = '';
   afacod: string ='';
-  asucod: string = '';
   bloqueado: 'bloqueado' | 'nobloqueado' | 'todos' = 'nobloqueado';
   searchArticulo () {
     this.limpiarMessages();
@@ -357,7 +356,6 @@ export class ConsultaGeneralArticulosComponent {
     params.append('page', this.page.toString());
     if (this.search) params.append('search', this.search);
     if (this.afacod) params.append('afacod', this.afacod);
-    if (this.asucod) params.append('asucod', this.asucod);
     params.append('bloqueado', this.bloqueado);
 
     this.http.get<any>(
@@ -381,7 +379,6 @@ export class ConsultaGeneralArticulosComponent {
     this.limpiarMessages();
     this.search = '';
     this.afacod ='';
-    this.asucod = '';
     this.bloqueado = 'nobloqueado';
     this.is_main_fetch = true;
     this.is_search = false;
