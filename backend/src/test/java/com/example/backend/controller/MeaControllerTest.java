@@ -75,7 +75,7 @@ public class MeaControllerTest {
     @Test
     void fetchArticulosPorAlmacen_returns200WithResults() throws Exception {
 
-        when(meaRepository.findByENT(eq(1), any()))
+        when(meaRepository.findByENTAndArt_ARTBLO(eq(1), eq(0), any()))
             .thenReturn(List.of(projection));
 
         mockMvc.perform(get("/api/mea/fetch-articulos-por-almacen/1")
@@ -88,7 +88,7 @@ public class MeaControllerTest {
 
     @Test
     void fetchArticulosPorAlmacen_returns404WhenEmpty() throws Exception {
-        when(meaRepository.findByENT(eq(1), any()))
+        when(meaRepository.findByENTAndArt_ARTBLO(eq(1), eq(0), any()))
             .thenReturn(List.of());
 
         mockMvc.perform(get("/api/mea/fetch-articulos-por-almacen/1")
@@ -100,7 +100,7 @@ public class MeaControllerTest {
 
     @Test
     void fetchArticulosPorAlmacen_returns500OnException() throws Exception {
-        when(meaRepository.findByENT(eq(1), any()))
+        when(meaRepository.findByENTAndArt_ARTBLO(eq(1), eq(0), any()))
             .thenThrow(new RuntimeException("DB error"));
 
         mockMvc.perform(get("/api/mea/fetch-articulos-por-almacen/1")
@@ -182,13 +182,12 @@ public class MeaControllerTest {
     void searchArticulos_returns200WithResults() throws Exception {
 
         when(meaRepository.searchArticulos(
-                1, "test", "A1", "S1", "Todos", "10"))
+                1, "test", "A1", "Todos", "10"))
             .thenReturn(List.of(projection));
 
         mockMvc.perform(get("/api/mea/search-articulos/1")
                 .param("mainSearch", "test")
                 .param("afaCod", "A1")
-                .param("asuCod", "S1")
                 .param("bloqueado", "Todos")
                 .param("almacen", "10")
                 .accept(MediaType.APPLICATION_JSON))
@@ -200,7 +199,7 @@ public class MeaControllerTest {
     @Test
     void searchArticulos_returns404WhenEmpty() throws Exception {
         when(meaRepository.searchArticulos(
-                1, null, null, null, "Todos", null))
+                1, null, null, "Todos", null))
             .thenReturn(List.of());
 
         mockMvc.perform(get("/api/mea/search-articulos/1"))
@@ -212,7 +211,7 @@ public class MeaControllerTest {
     @Test
     void searchArticulos_returns500OnException() throws Exception {
         when(meaRepository.searchArticulos(
-                1, null, null, null, "Todos", null))
+                1, null, null, "Todos", null))
             .thenThrow(new RuntimeException("Search error"));
 
         mockMvc.perform(get("/api/mea/search-articulos/1"))

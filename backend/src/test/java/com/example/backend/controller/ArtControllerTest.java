@@ -399,7 +399,7 @@ public class ArtControllerTest {
             @Override public Double getARTOPT() { return 15.0; }
         };
 
-        when(artRepository.findByENT(eq(1), any()))
+        when(artRepository.findByENTAndARTBLO(eq(1), eq(0), any()))
             .thenReturn(List.of(projection));
 
         mockMvc.perform(get("/api/art/fetch-consulta-general/1")
@@ -411,14 +411,14 @@ public class ArtControllerTest {
             .andExpect(jsonPath("$[0].artcod").value("ART"))
             .andExpect(jsonPath("$[0].artdes").value("Test article"));
 
-        verify(artRepository).findByENT(eq(1), argThat(page ->
+        verify(artRepository).findByENTAndARTBLO(eq(1), eq(0), argThat(page ->
             page.getPageNumber() == 2 && page.getPageSize() == 20
         ));
     }
 
     @Test
     void fetchConsultaGeneral_returns404WhenEmpty() throws Exception {
-        when(artRepository.findByENT(eq(1), any()))
+        when(artRepository.findByENTAndARTBLO(eq(1), eq(0), any()))
             .thenReturn(List.of());
 
         mockMvc.perform(get("/api/art/fetch-consulta-general/1"))
@@ -429,7 +429,7 @@ public class ArtControllerTest {
 
     @Test
     void fetchConsultaGeneral_returns500OnException() throws Exception {
-        when(artRepository.findByENT(eq(1), any()))
+        when(artRepository.findByENTAndARTBLO(eq(1), eq(0), any()))
             .thenThrow(new RuntimeException("DB error"));
 
         mockMvc.perform(get("/api/art/fetch-consulta-general/1"))
@@ -551,13 +551,12 @@ public class ArtControllerTest {
             @Override public Double getARTOPT() { return 15.0; }
         };
 
-        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+        when(artRepository.searchArticles(1, "bolt", "AF", "todos"))
             .thenReturn(List.of(projection));
 
         mockMvc.perform(get("/api/art/search/1")
                 .param("search", "bolt")
                 .param("afacod", "AF")
-                .param("asucod", "ASU")
                 .param("bloqueado", "todos")
                 .accept(MediaType.APPLICATION_JSON))
             .andDo(print())
@@ -569,13 +568,12 @@ public class ArtControllerTest {
 
     @Test
     void searchArticles_returns404WhenEmpty() throws Exception {
-        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+        when(artRepository.searchArticles(1, "bolt", "AF", "todos"))
             .thenReturn(List.of());
 
         mockMvc.perform(get("/api/art/search/1")
                 .param("search", "bolt")
                 .param("afacod", "AF")
-                .param("asucod", "ASU")
                 .param("bloqueado", "todos"))
             .andDo(print())
             .andExpect(status().isNotFound())
@@ -584,13 +582,12 @@ public class ArtControllerTest {
 
     @Test
     void searchArticles_returns500OnException() throws Exception {
-        when(artRepository.searchArticles(1, "bolt", "AF", "ASU", "todos"))
+        when(artRepository.searchArticles(1, "bolt", "AF", "todos"))
             .thenThrow(new RuntimeException("DB error"));
 
         mockMvc.perform(get("/api/art/search/1")
                 .param("search", "bolt")
                 .param("afacod", "AF")
-                .param("asucod", "ASU")
                 .param("bloqueado", "todos"))
             .andDo(print())
             .andExpect(status().isInternalServerError())
