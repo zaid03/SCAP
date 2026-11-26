@@ -2,7 +2,7 @@
 .title-area {width: 24%; justify-content: flex-end;}
 .search-holder {width: 75%;}
 .search-container {width: 100%;}
-.search-form {width: 89%; gap: 10px;}
+.search-form {width: 75%; gap: 10px; display: flex; justify-content: center;}
 .search-container .btns {width: 11%;}
 .group-menu {width: 2%;}
 .search-options label {display: flex; font-size: 15px; gap: 16px; color: #444; padding: 8px 14px; }

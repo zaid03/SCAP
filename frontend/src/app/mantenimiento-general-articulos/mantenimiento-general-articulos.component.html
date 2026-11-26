@@ -31,16 +31,6 @@
                             (input)="afacod = checkUpperFour(afacod)"
                             maxlength="4"
                         >
-                        <span>Subfamilia</span>
-                        <input 
-                            type="text" 
-                            name="subfamilia" 
-                            class="search-bar smallWidth"
-                            placeholder="Subfamilia"
-                            [(ngModel)]="asucod"
-                            (input)="asucod = checkUpperFour(asucod)"
-                            maxlength="4"
-                        />
                         <div class="search-options">
                             <label>
                                 <input 
@@ -147,8 +137,17 @@
             </table>
             <div class="pagination-controls">
                 <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
-                <span>Página {{page + 1}} de {{pagination}}</span>
-                <button (click)="nextPage()">Siguiente</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPagesMain"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPagesMain }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPagesMain">Siguiente</button>
             </div>
             <div class="modal-backdrop" *ngIf="selectedArticulo" (click)="closeDetailsSure()"></div>
             <div class="display">
