@@ -9,7 +9,7 @@
     <div class="main-container" [class.blurred]="!sidebar.collapsed">
         <div class="title-menu">
             <div class="title-area">
-                <h2 class="margin-title">Mantinimiento de artículos por almacen</h2>  
+                <h2 class="margin-title">Mantenimiento de artículos por almacén</h2>  
             </div>
             <div class="search-holder">
                 <div class="search-container">
@@ -42,14 +42,6 @@
                                 placeholder="familia"
                                 [(ngModel)]="familia"
                             >
-                            <span>Subfamilia</span>
-                            <input 
-                                type="text" 
-                                name="subfamilia" 
-                                placeholder="subfamilia"
-                                class="search-bar smallWidth"
-                                [(ngModel)]="subfamilia"
-                            />
                             <div class="search-options">
                                 <label>
                                     <input 
@@ -156,8 +148,17 @@
             </table>
             <div class="pagination-controls">
                 <button (click)="prevPage()" [disabled]="page === 0">Anterior</button>
-                <span>Página {{page + 1}} de {{pagination}}</span>	
-                <button (click)="nextPage()">Siguiente</button>
+                <span>Página</span>
+                <input
+                    type="number"
+                    min="1"
+                    [max]="totalPagesMain"
+                    [value]="page + 1"
+                    (change)="goToPage($event)"
+                    class="pagination-input"
+                />
+                <span>de {{ totalPagesMain }}</span>
+                <button (click)="nextPage()" [disabled]="page + 1 >= totalPagesMain">Siguiente</button>
             </div>
             <div class="modal-backdrop" *ngIf="selectedAlmacen" (click)="closeDetailsSure()">
                 <div class="display">

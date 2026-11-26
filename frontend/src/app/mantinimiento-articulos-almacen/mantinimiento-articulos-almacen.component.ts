@@ -77,43 +77,75 @@ export class MantinimientoArticulosAlmacenComponent {
       next: (res) => {
         this.isLoading = false;
         this.almacenes = res;
-        this.updatePagination();
+        this.getPagination();
       },
       error: (err) => {
-        this.almacenes = [];
         this.isLoading = false;
         this.almacenError = err.error.error || err.error;
       }
     })
   }
 
-  pagination: number = 0;
+  totalPagesMain: number = 0;
   getPagination() {
     this.http.get<any>(`${environment.backendUrl}/api/mea/get-pag/${this.entcod}`).subscribe({
       next: (res) => {
-        this.pagination = Math.ceil(res/ 20);
+        this.totalPagesMain = Math.ceil(res/20);
       },
       error: (err) => {
         console.warn(err.error.error || err.error);
       }
     })
   }
+  is_main_fetch: boolean = true;
+  is_search: boolean = false;
+  get paginatedAlmacen(): any[] {
+    if (this.is_main_fetch) {
+      return this.almacenes ?? [];
+    }
+    if (this.is_search) {
+      if (this.almacenes.length > 20) {
+        const start = this.page * this.pageSize;
 
-  private updatePagination(): void {const total = this.totalPages;
-    if (total === 0) {this.page = 0; return;}
+        return this.almacenes.slice(start, start + this.pageSize);
+      } else {
+        return this.almacenes ?? [];
+      }
+    }
+    return [];
   }
-  get paginatedAlmacen(): any[] {return this.almacenes || [];}
-  get totalPages(): number {return Math.max(1, Math.ceil((this.almacenes?.length ?? 0) / this.pageSize));}
-  prevPage() {
-    if (this.page == 0) return;
-    this.page = this.page - 1;
-    this.isSearching ? this.search() : this.fetchAlmacenes();
-    return;
+  prevPage(): void {
+    if (this.is_main_fetch) {
+      this.page--;
+      this.fetchAlmacenes();
+    }
+    if (this.is_search) {
+      if (this.page > 0) this.page--;
+    }
   }
-  nextPage() {
-    this.page = this.page + 1;
-    this.isSearching ? this.search() : this.fetchAlmacenes();
-    return;
+  nextPage(): void {
+    if (this.is_main_fetch) {
+      this.page++;
+      this.fetchAlmacenes();
+    }
+    if (this.is_search) {
+      if (this.page < this.totalPagesMain - 1) this.page++;
+    }
+  }
+  goToPage(event: any): void {
+    if (this.is_main_fetch) {
+      const inputPage = Number(event.target.value);
+      if (inputPage >= 1 && inputPage <= this.totalPagesMain) {
+        this.page = inputPage - 1;
+        this.fetchAlmacenes();
+      }
+    }
+    if (this.is_search) {
+      const inputPage = Number(event.target.value);
+      if (inputPage >= 1 && inputPage <= this.totalPagesMain) {
+        this.page = inputPage - 1;
+      }
+    }
   }
 
   isBloqueado(artblo: number): string {
@@ -134,7 +166,6 @@ export class MantinimientoArticulosAlmacenComponent {
     }
     this.applySort();
     this.page = 0;
-    this.updatePagination();
   }
 
   private applySort(): void {
@@ -299,15 +330,15 @@ export class MantinimientoArticulosAlmacenComponent {
   selectedAlmacenNombreSearch: string = '';
   mainSearch: string = '';
   familia: string = '';
-  subfamilia: string = '';
   bloqueado:  'No bloqueados' | 'Bloqueados' | 'Todos' = 'No bloqueados';
   isSearching: boolean = false;
   search() {
     this.isLoading = true;
-    this.isSearching = true;
     this.limpiarMessages();
     this.page = 0;
 
+    this.is_main_fetch = false;
+    this.is_search = true;
     let params = new HttpParams();
     
     if (this.mainSearch?.trim()) {
@@ -316,23 +347,19 @@ export class MantinimientoArticulosAlmacenComponent {
     if (this.familia?.trim()) {
       params = params.set('afaCod', this.familia.trim());
     }
-    if (this.subfamilia?.trim()) {
-      params = params.set('asuCod', this.subfamilia.trim());
-    }
     if (this.bloqueado) {
       params = params.set('bloqueado', this.bloqueado);
     }
     if (this.selectedAlmacenNombre?.trim()) {
       params = params.set('almacen', this.selectedAlmacenNombre.trim());
     }
-    
-    params = params.set('page', this.page.toString());
 
     this.http.get<any>(`${environment.backendUrl}/api/mea/search-articulos/${this.entcod}`, { params }).subscribe({
       next: (res) => {
         this.isLoading = false;
         this.almacenes = res;
-        this.updatePagination();
+        this.page = 0;
+        this.totalPagesMain = Math.ceil(this.almacenes.length / this.pageSize);
       },
       error: (err) => {
         this.almacenes = [];
@@ -343,14 +370,14 @@ export class MantinimientoArticulosAlmacenComponent {
   }
 
   limpiarSearch() {
+    this.limpiarMessages();
     this.mainSearch = '';
     this.familia = '';
-    this.subfamilia = '';
     this.bloqueado = 'No bloqueados';
-    this.isSearching = false;
+    this.is_main_fetch = true;
+    this.is_search = false;
     this.page = 0;
     this.fetchAlmacenes();
-    this.getPagination();
   }
 
   //detail grid functions
@@ -443,7 +470,7 @@ export class MantinimientoArticulosAlmacenComponent {
   prevPageProv(): void {if (this.pageProv > 0) this.pageProv--;}
   nextPageProv(): void {if (this.pageProv < this.totalPagesProveedores - 1) this.pageProv++;}
   goToPageProv(event: any): void {const inputPage = Number(event.target.value);
-    if (inputPage >= 1 && inputPage <= this.totalPages) {this.pageProv = inputPage - 1;}
+    if (inputPage >= 1 && inputPage <= this.totalPagesProveedores) {this.pageProv = inputPage - 1;}
   }
 
   //misc
