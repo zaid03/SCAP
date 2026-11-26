@@ -84,7 +84,7 @@ export class ConsultaAlbaranesComponent {
   fetchAlbaranes() {
     this.limpiarMEssages();
 
-    let params = `ent=${this.entcod}&page=${this.page}&centroDep=${this.centroDep}&estadoTipo=${this.estadoTipo}`;
+    let params = `ent=${this.entcod}&page=${this.page}&estadoTipo=${this.estadoTipo}`;
 
     if (this.isSearching) {
       if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;
@@ -95,6 +95,8 @@ export class ConsultaAlbaranesComponent {
       if (this.fromDate) params += `&fromDate=${encodeURIComponent(this.fromDate + 'T00:00:00')}`;
       if (this.toDate) params += `&toDate=${encodeURIComponent(this.toDate + 'T23:59:59')}`;
       if (this.estadoTipo) params += `&estadoTipo=${encodeURIComponent(this.estadoTipo)}`;
+    } else {
+      if (this.centroDep) params += `&centroDep=${encodeURIComponent(this.centroDep)}`;
     }
 
     if (this.sortColumn) {
@@ -195,7 +197,7 @@ export class ConsultaAlbaranesComponent {
   }
 
   //main table functions
-  sortField: 'albnum' | 'ter.tercod' | 'ter.ternom' | 'albref' | 'albdat' | 'albbim' | 'albfre' | 'depcod' | 'albcom' | 'solnum' | 'facnum' | null = null;
+  sortField: 'albnum' | 'ter.tercod' | 'ter.ternom' | 'ter.ternom' |  'albref' | 'albdat' | 'albbim' | 'albfre' | 'depcod' | 'albcom' | 'solnum' | 'facnum' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   toggleSort(column: string): void {
@@ -315,6 +317,7 @@ export class ConsultaAlbaranesComponent {
       albnum: row.albnum ?? '',
       tercod: row.ter?.tercod ?? '',
       ternom: row.ter?.ternom ?? '',
+      ternif: row.ter?.ternif ?? '',
       albref: row.albref ?? '',
       albdat: this.formatDate(row.albdat),
       albbim: this.formatCurrency(row.albbim),
@@ -387,6 +390,7 @@ export class ConsultaAlbaranesComponent {
       { header: 'Albarán', dataKey: 'albnum' },
       { header: 'Proveedor', dataKey: 'tercod' },
       { header: 'Nombre', dataKey: 'ternom' },
+      { header: 'NIF', datakey: 'ternif'},
       { header: 'Ref. Proveedor', dataKey: 'albref' },
       { header: 'Fecha Alb.', dataKey: 'albdat' },
       { header: 'Importe', dataKey: 'albbim' },
@@ -454,6 +458,7 @@ export class ConsultaAlbaranesComponent {
       'Albarán',
       'Proveedor',
       'Nombre',
+      'NIF',
       'Ref. Proveedor',
       'Fecha Alb.',
       'Importe',
@@ -474,6 +479,7 @@ export class ConsultaAlbaranesComponent {
           row.albnum ?? '',
           row.ter?.tercod ?? '',
           row.ter?.ternom ?? '',
+          row.ter?.ternif ?? '',
           row.albref ?? '',
           this.formatDate(row.albdat),
           this.parseMoney(row.albbim),
@@ -578,11 +584,24 @@ export class ConsultaAlbaranesComponent {
   articulos: any = [];
   pageServices: number = 0;
   fetchArticulos(albnum: number) {
+    const artcod = '';
+    const afacod = '';
+    const asucod = '';
     this.isLoadingDetails = true;
     this.http.get<any>(`${environment.backendUrl}/api/ade/fetch-articulos/${this.entcod}/${albnum}`).subscribe({
       next: (res) => {
         this.isLoadingDetails = false;
-        this.articulos = res;
+        this.articulos = res.map((article: any, index: number) => ({
+          ...article,
+          aderefBackup: article.aderef ?? '',
+          adeobsBackup: article.adeobs ?? '',
+          hasChanges: false,
+          description: ''
+        }));
+
+        this.articulos.forEach((article: any) => {
+          this.getDescription(article);
+        });
       },
       error: (err) => {
         this.isLoadingDetails = false;
@@ -591,39 +610,27 @@ export class ConsultaAlbaranesComponent {
       }
     })
   }
-  get paginatedArticulos(): any[] {
-    const start = this.pageServices * this.pageSize;
+  get paginatedArticulos(): any[] {const start = this.pageServices * this.pageSize;
     return this.articulos.slice(start, start + this.pageSize);
   }
-  get totalPagesServices(): number {
-    return Math.max(
-      1,
-      Math.ceil((this.articulos?.length ?? 0) / this.pageSize)
-    );
-  }
-
-  prevPageService(): void {
-    if (this.pageServices > 0) {
-      this.pageServices--;
-    }
-  }
-
-  nextPageService(): void {
-    if (this.pageServices < this.totalPagesServices - 1) {
-      this.pageServices++;
-    }
-  }
-
+  get totalPagesServices(): number {return Math.max(1, Math.ceil((this.articulos?.length ?? 0) / this.pageSize));}
+  prevPageService(): void {if (this.pageServices > 0) {this.pageServices--;}}
+  nextPageService(): void {if (this.pageServices < this.totalPagesServices - 1) {this.pageServices++;}}
   goToPageService(event: any): void {
     const inputPage = Number(event.target.value);
+    if (Number.isInteger(inputPage) && inputPage >= 1 && inputPage <= this.totalPagesServices) {this.pageServices = inputPage - 1;}
+  }
 
-    if (
-      Number.isInteger(inputPage) &&
-      inputPage >= 1 &&
-      inputPage <= this.totalPagesServices
-    ) {
-      this.pageServices = inputPage - 1;
-    }
+  getDescription(article: any) {
+    const afacod = String(article.afacod ?? '').trim();
+    const asucod = String(article.asucod ?? '').trim();
+    const artcod = String(article.artcod ?? '').trim();
+
+    this.http.get<any[]>(`${environment.backendUrl}/api/art/art-name/${this.entcod}/${afacod}/${asucod}/${artcod}`).subscribe({
+      next: (response) => {
+        article.description = String(response[0]?.artdes ?? '').trim();
+      }
+    });
   }
 
   //misc

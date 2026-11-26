@@ -28,6 +28,7 @@ public class AlbaranConsultaSearch {
         Map.entry("albnum", "ALBNUM"),
         Map.entry("ter.tercod", "ter.TERCOD"),
         Map.entry("ter.ternom", "ter.TERNOM"),
+        Map.entry("ter.ternif", "ter.TERNIF"),
         Map.entry("albref", "ALBREF"),
         Map.entry("albdat", "ALBDAT"),
         Map.entry("albbim", "ALBBIM"),

@@ -21,7 +21,7 @@
 .sAT th:nth-child(7) {width: 18%;}
 .satTextArea {width: 180px; max-width: 200px !important;}
 .sAT td:last-child {text-align: center;}
-.alignContent {display: flex; flex-direction: column; align-items: flex-end; width: 60%;}
+.alignContent {display: flex; flex-direction: column; align-items: flex-end; width: 100%;}
 /* main table and details*/
 /* media */
 @media (max-width: 1500px) {.sizeAdj {width: 50px;}}
@@ -31,5 +31,6 @@
     .sizeWidthSec {min-width: 22%; width: 25% !important;}
     .secClass {width: 5% !important;}
     .adjustArea {width: 87% !important;}
+    .alignContent {width: 65%;}
 }
 /* media */

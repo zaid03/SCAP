@@ -84,7 +84,7 @@ export class GestionAlbaranesComponent {
   fetchAlbaranes() {
     this.limpiarMEssages();
 
-    let params = `ent=${this.entcod}&page=${this.page}&centroDep=${this.centroDep}&estadoTipo=${this.estadoTipo}`;
+    let params = `ent=${this.entcod}&page=${this.page}&estadoTipo=${this.estadoTipo}`;
 
     if (this.isSearching) {
       if (this.main_search) params += `&main_search=${encodeURIComponent(this.main_search)}`;
@@ -95,6 +95,8 @@ export class GestionAlbaranesComponent {
       if (this.fromDate) params += `&fromDate=${encodeURIComponent(this.fromDate + 'T00:00:00')}`;
       if (this.toDate) params += `&toDate=${encodeURIComponent(this.toDate + 'T23:59:59')}`;
       if (this.estadoTipo) params += `&estadoTipo=${encodeURIComponent(this.estadoTipo)}`;
+    } else {
+      if (this.centroDep) params += `&centroDep=${encodeURIComponent(this.centroDep)}`;
     }
 
     if (this.sortColumn) {
@@ -195,7 +197,7 @@ export class GestionAlbaranesComponent {
   }
 
   //main table functions
-  sortField: 'albnum' | 'ter.tercod' | 'ter.ternom' | 'albref' | 'albdat' | 'albbim' | 'albfre' | 'depcod' | 'albcom' | 'solnum' | 'facnum' | null = null;
+  sortField: 'albnum' | 'ter.tercod' | 'ter.ternom' | 'ter.ternif' | 'albref' | 'albdat' | 'albbim' | 'albfre' | 'depcod' | 'albcom' | 'solnum' | 'facnum' | null = null;
   sortColumn: string = '';
   sortDirection: 'asc' | 'desc' = 'asc';
   toggleSort(column: string): void {
@@ -315,6 +317,7 @@ export class GestionAlbaranesComponent {
       albnum: row.albnum ?? '',
       tercod: row.ter?.tercod ?? '',
       ternom: row.ter?.ternom ?? '',
+      ternif: row.ter?.ternif ?? '',
       albref: row.albref ?? '',
       albdat: this.formatDate(row.albdat),
       albbim: this.formatCurrency(row.albbim),
@@ -387,6 +390,7 @@ export class GestionAlbaranesComponent {
       { header: 'Albarán', dataKey: 'albnum' },
       { header: 'Proveedor', dataKey: 'tercod' },
       { header: 'Nombre', dataKey: 'ternom' },
+      { header: 'NIF', datakey: 'ternif'},
       { header: 'Ref. Proveedor', dataKey: 'albref' },
       { header: 'Fecha Alb.', dataKey: 'albdat' },
       { header: 'Importe', dataKey: 'albbim' },
@@ -454,6 +458,7 @@ export class GestionAlbaranesComponent {
       'Albarán',
       'Proveedor',
       'Nombre',
+      'NIF',
       'Ref. Proveedor',
       'Fecha Alb.',
       'Importe',
@@ -474,6 +479,7 @@ export class GestionAlbaranesComponent {
           row.albnum ?? '',
           row.ter?.tercod ?? '',
           row.ter?.ternom ?? '',
+          row.ter?.ternif ?? '',
           row.albref ?? '',
           this.formatDate(row.albdat),
           this.parseMoney(row.albbim),
@@ -753,7 +759,6 @@ export class GestionAlbaranesComponent {
   }
 
   updateArticuloError: string = '';
-  updateArticulosSuccess: string = '';
   updateArticulo(adenum: number, albref: string, albobs: string) {
     this.limpiarMEssages();
     if (!adenum || (!albref && !albobs)) {return;}
@@ -770,8 +775,6 @@ export class GestionAlbaranesComponent {
       next: (res) => {
         this.isUpdatingAlbaran = false;
         this.isUpdatingAlbaran = false;
-
-        this.updateArticulosSuccess = 'Artículo actualizado correctamente';
 
         const article = this.articulos.find((item: any) => item.adenum === adenum);
 
@@ -823,7 +826,6 @@ export class GestionAlbaranesComponent {
   this.detailError = '';
   this.articulosError = '';
   this.updateArticuloError = '';
-  this.updateArticulosSuccess = '';
   this.facturacionMessage = '';
   this.facturacionError = '';
   }

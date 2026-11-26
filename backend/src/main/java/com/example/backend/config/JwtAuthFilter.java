@@ -70,20 +70,18 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = auth.substring(7);
-        try {
-            String user = jwt.validateAndGetSubject(token);
-            if (user == null) {
-                res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
-                return;
-            }
-            UsernamePasswordAuthenticationToken authentication =
-                new UsernamePasswordAuthenticationToken(user, null, java.util.List.of());
-            SecurityContextHolder.getContext().setAuthentication(authentication);
-            chain.doFilter(req, res);
-        } catch (Exception e) {
-            SecurityContextHolder.clearContext();
+        String user = jwt.validateAndGetSubject(token);
+
+        if (user == null) {
             res.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            return;
         }
+
+        UsernamePasswordAuthenticationToken authentication = new UsernamePasswordAuthenticationToken(user, null, List.of());
+
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        chain.doFilter(req, res);
     }
 
     private boolean isStaticResource(String path) {

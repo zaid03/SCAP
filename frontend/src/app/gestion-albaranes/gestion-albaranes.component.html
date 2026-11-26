@@ -117,45 +117,50 @@
                             <span class="sort-indicator" *ngIf="sortColumn === 'ter.ternom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
                             <div class="resizer" (mousedown)="startResize($event, 2)"></div>
                         </th>
+                        <th class="sortable resizable" (click)="toggleSort('ter.ternif')">
+                            NIF
+                            <span class="sort-indicator" *ngIf="sortColumn === 'ter.ternif'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
+                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                        </th>
                         <th class="sortable resizable" (click)="toggleSort('albref')">
                             Ref. Proveedor
                             <span class="sort-indicator" *ngIf="sortColumn === 'albref'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 3)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('albdat')">
                             Fecha Alb.
                             <span class="sort-indicator" *ngIf="sortColumn === 'albdat'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 4)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('albbim')">
                             Importe
                             <span class="sort-indicator" *ngIf="sortColumn === 'albbim'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 5)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('albfre')">
                             Fecha Reg.
                             <span class="sort-indicator" *ngIf="sortColumn === 'albfre'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 6)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('depcod')">
                             Centro Destino
                             <span class="sort-indicator" *ngIf="sortColumn === 'depcod'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 7)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('albcom')">
                             Comprador
                             <span class="sort-indicator" *ngIf="sortColumn === 'albcom'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 8)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('solnum')">
                             Pedido
                             <span class="sort-indicator" *ngIf="sortColumn === 'solnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 9)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
                         </th>
                         <th class="sortable resizable" (click)="toggleSort('facnum')">
                             Factura
                             <span class="sort-indicator" *ngIf="sortColumn === 'facnum'">{{ sortDirection === 'asc' ? '▲' : '▼' }}</span>
-                            <div class="resizer" (mousedown)="startResize($event, 10)"></div>
+                            <div class="resizer" (mousedown)="startResize($event, 11)"></div>
                         </th>
                     </tr>
                 </thead>
@@ -164,6 +169,7 @@
                         <td (click)="showDetails(a)" style="cursor: pointer;">{{ a.albnum }}</td>
                         <td>{{ a.ter?.tercod }}</td>
                         <td>{{ a.ter?.ternom }}</td>
+                        <td>{{ a.ter?.ternif }}</td>
                         <td>{{ a.albref }}</td>
                         <td>{{ a.albdat | date:'dd-MM-yyyy'}}</td>
                         <td>{{ a.albbim | currency:'EUR':'symbol':'1.2-2':'es-ES' }}</td>
@@ -295,9 +301,7 @@
                                 </td>
                                 <td class="alignContent">
                                     <div class="cell-content">
-                                        <h1 class="h1-style">{{eje}}</h1>
-                                        <h1 class="h1-style">-</h1>
-                                        <h1 class="h1-style">{{selectedAlbaran.facnum}}</h1>
+                                        <h1 class="h1-style">{{selectedAlbaran.EJE == null ? selectedAlbaran.facnum : selectedAlbaran.EJE + '-' + selectedAlbaran.facnum}}</h1>
                                     </div>
                                 </td>
                             </tr>
@@ -372,7 +376,6 @@
                             <span>Cargando</span>
                         </div>
                         <h1 class="errorBtn" *ngIf="updateArticuloError">{{updateArticuloError}}</h1>
-                        <h1 class="successBtn" *ngIf="updateArticulosSuccess">{{updateArticulosSuccess}}</h1>
                         <table class="main-table sAT">
                             <thead>
                                 <tr>
